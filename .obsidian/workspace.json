@@ -1,0 +1,276 @@
+{
+  "main": {
+    "id": "25f4cc8f077230c0",
+    "type": "split",
+    "children": [
+      {
+        "id": "6cdc48942bafab5f",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "651d28a0b2c095c1",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "笔记/🎮 游戏/🎮 游戏开发/Unity/用几行代码和 Unity 制作一只带动画的 2D 俯视角移动小猫咪.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "3698b8c616aabcfc",
+    "type": "split",
+    "children": [
+      {
+        "id": "b15e2c7929b2a46a",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "b5dfc4e6c8287ee4",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "d5332c2bfa4468de",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "keyboard",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "f568bf7e439d398b",
+            "type": "leaf",
+            "state": {
+              "type": "starred",
+              "state": {}
+            }
+          },
+          {
+            "id": "955041b03cbffb02",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 388.5
+  },
+  "right": {
+    "id": "246bd0838f8f40a6",
+    "type": "split",
+    "children": [
+      {
+        "id": "166ecf9eee3475b0",
+        "type": "tabs",
+        "dimension": 31.92019950124688,
+        "children": [
+          {
+            "id": "d9c447a5c56d10b5",
+            "type": "leaf",
+            "state": {
+              "type": "localgraph",
+              "state": {
+                "file": "笔记/🎮 游戏/🎮 游戏开发/Unity/用几行代码和 Unity 制作一只带动画的 2D 俯视角移动小猫咪.md",
+                "options": {
+                  "collapse-filter": false,
+                  "search": "",
+                  "localJumps": 1,
+                  "localBacklinks": true,
+                  "localForelinks": true,
+                  "localInterlinks": true,
+                  "showTags": true,
+                  "showAttachments": false,
+                  "hideUnresolved": false,
+                  "collapse-color-groups": false,
+                  "colorGroups": [],
+                  "collapse-display": false,
+                  "showArrow": false,
+                  "textFadeMultiplier": 0,
+                  "nodeSizeMultiplier": 0.9960205078125,
+                  "lineSizeMultiplier": 1,
+                  "collapse-forces": false,
+                  "centerStrength": 0.298746744791667,
+                  "repelStrength": 13.7809244791667,
+                  "linkStrength": 1,
+                  "linkDistance": 30,
+                  "scale": 0.9501813006936926,
+                  "close": true
+                }
+              }
+            }
+          },
+          {
+            "id": "d05b2adb58e8f322",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              }
+            }
+          },
+          {
+            "id": "dedba0695c22f869",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "笔记/🎮 游戏/🎮 游戏开发/Unity/用几行代码和 Unity 制作一只带动画的 2D 俯视角移动小猫咪.md"
+              }
+            }
+          },
+          {
+            "id": "2ac176b8dbb5d7eb",
+            "type": "leaf",
+            "state": {
+              "type": "review-queue-list-view",
+              "state": {}
+            }
+          }
+        ],
+        "currentTab": 2
+      },
+      {
+        "id": "00f8f8ad2cb9f9b0",
+        "type": "tabs",
+        "dimension": 68.07980049875312,
+        "children": [
+          {
+            "id": "ccb7652bb733a848",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "笔记/🎮 游戏/🎮 游戏开发/Unity/用几行代码和 Unity 制作一只带动画的 2D 俯视角移动小猫咪.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "5f488e06357db2c6",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "笔记/🎮 游戏/🎮 游戏开发/Unity/用几行代码和 Unity 制作一只带动画的 2D 俯视角移动小猫咪.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "109c669fb0e4b88f",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          }
+        ],
+        "currentTab": 2
+      }
+    ],
+    "direction": "horizontal",
+    "width": 395.5
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:打开快速切换": false,
+      "graph:查看关系图谱": false,
+      "canvas:新建白板": false,
+      "daily-notes:打开/创建今天的日记": false,
+      "templates:插入模板": false,
+      "command-palette:打开命令面板": false,
+      "markdown-importer:打开 Markdown 格式转换器": false,
+      "random-note:开始漫游笔记": false,
+      "table-editor-obsidian:Advanced Tables Toolbar": false,
+      "obsidian-spaced-repetition:复习卡片": false,
+      "obsidian42-brat:BRAT": false
+    }
+  },
+  "active": "651d28a0b2c095c1",
+  "lastOpenFiles": [
+    "vite.config.ts.timestamp-1706874578090-2d8dea588e4ce.mjs",
+    "vite.config.ts.timestamp-1706874509075-188290b4ab4f7.mjs",
+    "笔记/🎮 游戏/🎮 游戏开发/Unity/assets/reverse-sprites-screenshot-2.png",
+    "笔记/🎮 游戏/🎮 游戏开发/Unity/assets/reverse-sprites-screenshot-3.png",
+    "笔记/🎮 游戏/🎮 游戏开发/Unity/assets/reverse-sprites-screenshot-4.png",
+    "笔记/🎮 游戏/🎮 游戏开发/Unity/assets/reverse-sprites-screenshot-5.png",
+    "笔记/🎮 游戏/🎮 游戏开发/Unity/assets/reverse-sprites-screenshot-6.png",
+    "笔记/🎮 游戏/🎮 游戏开发/Unity/反转精灵图动画帧.md",
+    "笔记/🎮 游戏/🎮 游戏开发/Unity/用几行代码和 Unity 制作一只带动画的 2D 俯视角移动小猫咪.md",
+    "笔记/🎮 游戏/🎮 游戏开发/Unity/assets/reverse-sprites-screenshot-1.png",
+    "笔记/🎮 游戏/🎮 游戏开发/Unity/assets/unity-movement-animation-of-2d-top-down-characters-screenshot-51.png",
+    "笔记/🎮 游戏/🎮 游戏开发/Unity/assets/unity-movement-animation-of-2d-top-down-characters-screenshot-50.png",
+    "笔记/🎮 游戏/🎮 游戏开发/Unity/assets/unity-movement-animation-of-2d-top-down-characters-screenshot-49.png",
+    "笔记/🎮 游戏/🎮 游戏开发/Unity/assets/unity-movement-animation-of-2d-top-down-characters-screenshot-48.png",
+    "笔记/🎮 游戏/🎮 游戏开发/Unity/assets/unity-movement-animation-of-2d-top-down-characters-recording-47.mov",
+    "笔记/🎮 游戏/🎮 游戏开发/Unity/assets/unity-movement-animation-of-2d-top-down-characters-screenshot-42.mov",
+    "笔记/🎮 游戏/🎮 游戏开发/Unity/assets/unity-movement-animation-of-2d-top-down-characters-recoding-10.mov",
+    "笔记/🪄 Vtuber/在 macOS 上作为 Vtuber 进行直播.md",
+    "笔记/🪄 Vtuber/给 OBS 添加 Twitch 聊天框组件并且自定义样式.md",
+    "笔记/🤖 AI 人工智能/快速在本地运行一个 XAgent 尝鲜图形化和智能化的 Agent 智能体.md",
+    "笔记/🛠️ 开发/给 Nest.js 项目集成 Kafka 消息中间件.md",
+    "笔记/🛠️ 开发/按需更新 Vite 加载的虚拟模块（Virtual Module）.md",
+    "笔记/🛠️ 开发/Vue Vapor Discussion.md",
+    "笔记/🤖 AI 人工智能/Megatron-LM 的读取 checkpoint 的错误处理问题.md",
+    "笔记/🛠️ 开发/一个因为系统没有重启应用更新导致的 Docker 无法启动的乌龙.md",
+    "笔记/🛠️ 开发/因为 dayjs 不能轻松导入全部的 i18n 语言而换用了 date-fns.md",
+    "笔记/🛠️ 开发/Vue 中实践神奇的没有 Await 传染的 Async 范式.md",
+    "笔记/🛠️ 开发/Vite 部署.md",
+    "笔记/🛠️ 开发/CLI 的实现.md",
+    "笔记/🛠️ 开发/Microsoft Exchange SMTP 邮件 OAuth 验证流程.md",
+    "笔记/🛠️ 开发/用 TypeScript 写 sh 脚本.md",
+    "笔记/🛠️ 开发/开发一个 Kubernetes Controller.md",
+    "笔记/🎮 游戏/🕹 街机游戏/再觅 1cc 社区的旅程.md",
+    "笔记/🎮 游戏/🕹 街机游戏/O.N.G.E.K.I 音击/O.N.G.E.K.I Bright Memory SDDT 1.35 HDD 配置.md",
+    "笔记/🎮 游戏/🕹 街机游戏/assets",
+    "笔记/🧱 基础设施/🚢 Kubernetes/在 Kubernetes 集群上的 GPU 掉卡和故障排查.md",
+    "笔记/🎮 游戏/🕹 街机游戏/社区",
+    "笔记/🧱 基础设施/🚢 Kubernetes/重置 Kubernetes 集群.md",
+    "笔记/🧱 基础设施/🚢 Kubernetes/在 Kubeadm 部署的 Kubernetes 集群中安装 Cilium.md",
+    "vite.config.ts.timestamp-1706288253112-5e13e31d08f07.mjs",
+    "笔记/🧱 基础设施/💾 TrueNAS/TrueNAS SCALE 发行版本 Bluefin 在更新 TrueCharts 应用时遭遇错误.md",
+    "笔记/🤖 AI 人工智能/监控和串流机器学习的进度，损失和正样本校验数值.md",
+    "笔记/🤖 AI 人工智能/用 Megatron-LM 训练一个 GPT-2.md",
+    "笔记/🤖 AI 人工智能/从零开始的机器学习之旅/assets",
+    "笔记/🛠️ 开发/vue-vapor",
+    "笔记/📦 收集箱/🐙 GitHub 项目/xaboy",
+    "未命名.canvas"
+  ]
+}
