@@ -14,6 +14,7 @@ WebUI:
 https://github.com/AUTOMATIC1111/stable-diffusion-webui
 
 WebUI插件：
+- LoRA: https://github.com/kohya-ss/sd-webui-additional-networks
 - ControlNet: https://github.com/Mikubill/sd-webui-controlnet
 - IP2P(非ControlNet版): https://github.com/Klace/stable-diffusion-webui-instruct-pix2pix
 - AnimateDiff: https://github.com/continue-revolution/sd-webui-animatediff
@@ -72,6 +73,7 @@ https://zhuanlan.zhihu.com/p/627500143
 
 将embedding文件下载，拷贝至根目录下的embedding目录里
 
+使用：直接在prompt里输入embedding的名字即可，不需要写后缀。新版本的WebUI会自动识别embedding，选择可自动填充prompt
 
 ## 平面设计
 [ArchiGAN](https://developer.nvidia.com/blog/archigan-generative-stack-apartment-building-design/?linkId=70968833)

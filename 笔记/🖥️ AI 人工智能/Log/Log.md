@@ -90,6 +90,43 @@ pip install torch==2.0.1 torchaudio==2.0.2 --extra-index-url https://download.py
 TypeError: AsyncConnectionPool.__init__() got an unexpected keyword argument 'socket_options'
 https://qiita.com/bigmon/items/1a6f220df98941c81f94
 
+
+### WebUI安装
+#### Linux
+```shell
+conda create -n drawer python=3.10
+conda activate drawer
+git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git
+
+pip install torch==2.0.1+cu118 --extra-index-url https://download.pytorch.org/whl/cu118
+pip install torchvision==0.15.2+cu118 --extra-index-url https://download.pytorch.org/whl/cu118
+pip install xformers==0.0.20
+
+# Cloning Stable Diffusion into /mnt/yuchen/stable-diffusion-webui_1_8/repositories/stable-diffusion-stability-ai...错误
+# 收到来自GFW的假结束符，CNMD中共，使用代理手动下载仓库
+cd repositories/
+unzip stablediffusion.zip
+mv stablediffusion stable-diffusion-stability-ai
+
+# https://github.com/AUTOMATIC1111/stable-diffusion-webui/issues/11507#issuecomment-1612718791
+# download files from https://huggingface.co/openai/clip-vit-large-patch14/tree/main and put them into the directory stable-diffusion-webui/openai (create it if doesn't exist)
+# 没下载那个tf_model
+mkdir openai
+cd openai/
+mkdir clip-vit-large-patch14
+
+python3 launch.py
+
+# 后续操作
+cd extensions
+git clone https://github.com/kohya-ss/sd-webui-additional-networks.git
+git clone https://github.com/Mikubill/sd-webui-controlnet.git
+cd sd-webui-controlnet/
+pip install -r requirements.txt
+pip install insightface
+
+```
+
 ### TensorRT加速
 
 按照【TensorRT安装】章节安装TensorRT
