@@ -4,7 +4,6 @@ tags:
 ---
 
 # AIGC
-Stable Diffusion最初是由Heidelberg 大学和[Stability AI](https://stability.ai/), [Runway](https://runwayml.com/)合作的开源项目。
 
 ## 项目地址
 Stable Diffusion:
@@ -30,7 +29,42 @@ ComfyUI 插件:
   1. https://huggingface.co/lllyasviel/Annotators/tree/5bc80eec2b4fddbb743c1e9329e3bd94b2cae14d
   2. https://huggingface.co/dhkim2810/MobileSAM/tree/main
 
-## 优化加速
+## Stable Diffusion
+Stable Diffusion最初是由Heidelberg 大学和[Stability AI](https://stability.ai/), [Runway](https://runwayml.com/)合作的开源项目。
+
+### 版本
+
+#### SDXL Turbo
+[HuggingFace](https://huggingface.co/stabilityai/sdxl-turbo) | [Paper](https://stability.ai/research/adversarial-diffusion-distillation) (2023.12)
+SD Turbo的大号版(高质量)
+- 尺寸: 512x512(fix)
+
+#### SD Turbo
+[HuggingFace](https://huggingface.co/stabilityai/sd-turbo) (2023.12)
+由SD2.1微调而来
+- 尺寸: 512x512(fix)
+
+#### SDXL 0.9
+[HuggingFace](https://huggingface.co/stabilityai/stable-diffusion-xl-base-0.9) | [Paper](https://arxiv.org/abs/2307.01952)
+使用不同尺寸的图像训练（最高1024x1024）
+
+#### SD 2.0/2.1
+[SD2.1 HuggingFace](https://huggingface.co/stabilityai/stable-diffusion-2-1) (2.1:2022.12, 2.0: 2022.11)
+
+[SD2.1 Base HuggingFace](https://huggingface.co/stabilityai/stable-diffusion-2-1-base)
+- Hardware: 32 x 8 x A100 GPUs
+- 尺寸: 768x768(SD 2.1-v), 512x512(SD 2.1-base)
+
+#### SD 1.5
+[Code](https://huggingface.co/runwayml/stable-diffusion-v1-5)(2022.10)
+
+这是SD 1最后一个版本（截止到2024.3），如果你看到什么SD1.8，那肯定是那个人没分清WebUI版本和模型版本。
+
+#### SD 1.1-1.4
+[Code](https://github.com/CompVis/stable-diffusion)(2022.8)
+- 尺寸: 512x512
+
+### 优化加速
 Xformers安装： https://post.smzdm.com/p/axzmd56d/
 bash webui.sh --xformers
 or
@@ -41,7 +75,7 @@ OneFlow > [TensorRT](https://docs.nvidia.com/deeplearning/tensorrt/archives/inde
 
 LLM: https://latent-consistency-models.github.io/
 
-### 测试
+#### 测试
 生成图片的大小为`(450,800)`，在使用TensorRT时，生成图片的大小为`(768,450)`
 
 | 环境 | 面部修复 | LoRA | 速度 | +Xformers速度 | +TensorRT速度 |
@@ -52,7 +86,7 @@ LLM: https://latent-consistency-models.github.io/
 | 4090 | &#x2713;  | &#x2713;  | 5.54it/s | 6.25it/s |32.87it/s|
 | 4090 |  |   | 8.14it/s | 10.06it/s |37.25it/s|
 
-## Embeddings
+### Embeddings
 - ConfyUI:
 https://comfyanonymous.github.io/ComfyUI_examples/textual_inversion_embeddings/
 
