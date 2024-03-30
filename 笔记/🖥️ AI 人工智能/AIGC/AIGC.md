@@ -5,6 +5,12 @@ tags:
 
 # AIGC
 
+常用的AI绘图模型：
+1. [Midjourney](https://midjourney.co/generator): 在线AI绘图网站，免费使用15次。
+2. 文心一格: 由百度飞桨、文心大模型的技术创新推出的“AI 作画”产品，在线使用。
+3. Stable Diffusion
+4. [DALL·E 2](https://openai.com/dall-e-2): 付费订阅ChatGPT后可直接使用
+
 ## 项目地址
 Stable Diffusion:
 https://github.com/CompVis/stable-diffusion
