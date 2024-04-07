@@ -14,7 +14,7 @@ sudo apt update && sudo apt install nala -y && sudo nala upgrade -y
 chmod a+x Anaconda3-2022.05-Linux-x86_64.sh
 ./Anaconda3-2022.05-Linux-x86_64.sh
 
-sudo nala install vim
+sudo nala install vim python3-pip
 ```
 
 #### Python音频
@@ -36,9 +36,21 @@ sudo apt remove brltty
 ls /dev/tty*
 ```
 
+```shell
+pip install ultralytics -i https://pypi.tuna.tsinghua.edu.cn/simple
+```
+
 `requirements.txt`
 ```
 pydub
 pyserial
 zmq
+onnx
+onnxruntime
+```
+
+#### PyTorch
+
+```shell
+pip install torch==1.12.0+cu116 torchvision==0.13.0+cu116 torchaudio==0.12.0 --extra-index-url https://download.pytorch.org/whl/cu116
 ```
