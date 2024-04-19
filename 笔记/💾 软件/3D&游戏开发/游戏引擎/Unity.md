@@ -126,6 +126,36 @@ High Definition Render Pipeline (HDRP)
 教程：https://blog.csdn.net/Jeffxu_lib/article/details/95477352
 在2023版本中，选择Windows-Render-Lighting
 
+## UI
+
+### Canvas
+所有的UI都建立在Canvas上，Canvas创建后是一个不可变大小的对象，这个方框相当于屏幕，如果一个UI在Canvas中间，那么这个UI就在屏幕的中间，
+如果一个UI超出了屏幕，那么这个UI就不会显示在画面中。
+![img](assets/UI01.png)
+可以看到在Scene里Text离Plane很远却最终渲染在屏幕中Plane上方。
+
+### Image
+直接导入进来的图像是不能设置为UI的，要在【Inspector】中设置其【Texture Type】为Sprite。
+
+### Text Mesh Pro
+中文支持：先把一个字体文件拖进Assets来，是Aa图标的字体，然后右键-【create】-【text mesh pro】-【第一个选项】创建F图标的字体。
+```cs
+using TMPro;
+
+TMP_Text tmpText;
+
+tmpText.text = content;
+tmpText = GetComponent<TMP_Text>();
+```
+
+### InputField(TMP)
+```cs
+using TMPro;
+
+public TMP_InputField InputField;
+
+// InputField.text
+```
 
 ## 其它
 
