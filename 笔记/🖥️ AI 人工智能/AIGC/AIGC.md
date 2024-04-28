@@ -39,6 +39,10 @@ ComfyUI 插件:
 Stable Diffusion最初是由Heidelberg 大学和[Stability AI](https://stability.ai/), [Runway](https://runwayml.com/)合作的开源项目。
 
 ### 版本
+#### SD 3
+Paper(soon)
+
+combines a [diffusion transformer](https://arxiv.org/abs/2212.09748) architecture and [flow matching](https://arxiv.org/abs/2210.02747).
 
 #### SDXL Turbo
 [HuggingFace](https://huggingface.co/stabilityai/sdxl-turbo) | [Paper](https://stability.ai/research/adversarial-diffusion-distillation) (2023.12)
@@ -145,6 +149,14 @@ Application
 Depth Map
 
 3D-GPT: [Project](https://chuny1.github.io/3DGPT/3dgpt.html) | [Paper](https://arxiv.org/abs/2310.12945) | [Code](https://github.com/Chuny1/3DGPT)
+
+DreamScene: [Project](https://dreamscene-project.github.io/) | [Paper](https://arxiv.org/abs/2404.03575) | [Code](https://github.com/DreamScene-Project/DreamScene)
+
+Text2Room: [Project](https://lukashoel.github.io/text-to-room/) | [Code](https://github.com/lukasHoel/text2room)
+
+Text2NeRF: [Project](https://eckertzhang.github.io/Text2NeRF.github.io/) | [Code](https://github.com/eckertzhang/Text2NeRF)
+
+LGM: [Project](https://me.kiui.moe/lgm/) | [Paper](https://arxiv.org/abs/2402.05054) | [Demo](https://huggingface.co/spaces/ashawkey/LGM)
 
 ## 动物动作的生成
 
@@ -255,6 +267,17 @@ Custom Diffusion
 [Github](https://github.com/adobe-research/custom-diffusion)
 
 https://zhuanlan.zhihu.com/p/620852185
+
+
+数字人：
+
+Wav2lip：https://github.com/Rudrabha/Wav2Lip
+
+EasyWav2lip: https://github.com/anothermartz/Easy-Wav2Lip
+
+facefusion2.3:https://github.com/facefusion/facefusion
+
+SadTalker-Video-Lip-Sync: https://github.com/Zz-ww/SadTalker-Video-Lip-Sync
 
 ## 名词解释
 - **DreamBooth**

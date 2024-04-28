@@ -49,8 +49,22 @@ onnx
 onnxruntime
 ```
 
+
 #### PyTorch
 
 ```shell
 pip install torch==1.12.0+cu116 torchvision==0.13.0+cu116 torchaudio==0.12.0 --extra-index-url https://download.pytorch.org/whl/cu116
+```
+
+### 显卡（N卡）
+#### 驱动
+查看显卡驱动/使用情况
+```shell
+nvidia-smi
+```
+
+#### Cuda
+检查Cuda版本
+```shell
+nvcc -V
 ```

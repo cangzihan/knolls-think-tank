@@ -3,6 +3,7 @@ tags:
   - ChatGLM
   - Baichuan
   - Llama
+  - 通义千问
   - LLM
 ---
 
@@ -11,8 +12,26 @@ tags:
 一些好用的项目：
 - https://github.com/mlc-ai/mlc-llm
 - https://github.com/wangzhaode/mnn-llm
+- https://lmstudio.ai/
+- https://github.com/ollama/ollama
+
+## Baichuan
+Baichuan 2 是百川智能推出的开源LLM，所有版本不仅对学术研究完全开放，开发者也仅需邮件申请并获得官方商用许可后，即可以免费商用。
+
+https://www.baichuan-ai.com/home
+
+网页端免费[ChatBot](https://www.baichuan-ai.com/chat?from=%2Fhome)
+
+7B [Baichuan2-7B](https://huggingface.co/baichuan-inc/Baichuan2-7B-Chat)
+
+13B [Baichuan2-13B-Chat](https://huggingface.co/baichuan-inc/Baichuan2-13B-Chat)
+
+其余Baichuan2模型均不推荐
 
 ## ChatGLM
+ChatGLM 是一个开源的、支持中英双语问答的对话语言模型，基于 [General Language Model (GLM)](https://github.com/THUDM/GLM) 架构。
+
+ChatGLM 3
 https://huggingface.co/THUDM/chatglm3-6b
 
 ### RK3588部署
@@ -21,7 +40,7 @@ https://huggingface.co/THUDM/chatglm3-6b
 
 ## Llama
 
-### 部署
+### Llama2
 #### 1.下载
 需要下载**hf版本**的Llama，如[Llama-2-13b-chat-hf](https://huggingface.co/meta-llama/Llama-2-13b-chat-hf)
 
@@ -325,16 +344,29 @@ if __name__ == '__main__':
             time.sleep(1)
 ```
 
-## Qwen
-[Github](https://github.com/QwenLM/Qwen1.5)
+### Llama3
+[Project](https://huggingface.co/blog/llama3)
 
-Demo [Qwen1.5-72B-Chat](https://huggingface.co/spaces/Qwen/Qwen1.5-72B-Chat)
+[Llama-3-8B-Instruct](https://huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct)
+
+一些模型说明：
+- 训练环境：24000个GPU
+
+
+## Qwen
+**通义千问（Qwen）** 是阿里云研发的基于Transformer的大语言模型, 在超大规模的预训练数据上进行训练得到。预训练数据类型多样，覆盖广泛，包括大量网络文本、专业书籍、代码等。
+
+[Github](https://github.com/QwenLM/Qwen1.5) | [Paper](https://arxiv.org/abs/2309.16609)
+
+Demo [Qwen1.5-72B-Chat](https://huggingface.co/spaces/Qwen/Qwen1.5-72B-Chat) | [Qwen1.5-110B-Chat](https://huggingface.co/spaces/Qwen/Qwen1.5-110B-Chat-demo)
 
 32B [Qwen1.5-32B](https://huggingface.co/Qwen/Qwen1.5-32B) | [Qwen1.5-32B-Chat](https://huggingface.co/Qwen/Qwen1.5-32B-Chat) |
 
 14B [Qwen1.5-14B](https://huggingface.co/Qwen/Qwen1.5-14B) | [Qwen1.5-14B-Chat](https://huggingface.co/Qwen/Qwen1.5-14B-Chat)
 
 7B [Qwen-7B-Chat](https://huggingface.co/Qwen/Qwen-7B-Chat)
+
+[CodeQwen1.5-7b-Chat](https://huggingface.co/spaces/Qwen/CodeQwen1.5-7b-Chat-demo)
 
 ### 部署
 
@@ -576,10 +608,10 @@ if __name__ == '__main__':
 
 ## Qwen-VL
 
-Qwen-VL-Max [Demo](https://huggingface.co/spaces/Qwen/Qwen-VL-Max) | [Qwen-VL-Chat](https://huggingface.co/Qwen/Qwen-VL-Chat) | [Qwen-VL-Chat-Int4](https://huggingface.co/Qwen/Qwen-VL-Chat-Int4)
+Qwen-VL-Max [Demo🤖](https://huggingface.co/spaces/Qwen/Qwen-VL-Max) | [Qwen-VL-Chat](https://huggingface.co/Qwen/Qwen-VL-Chat) | [Qwen-VL-Chat-Int4](https://huggingface.co/Qwen/Qwen-VL-Chat-Int4)
 | [Paper](https://arxiv.org/abs/2308.12966)
 
-- 显存占用：11.8G-28G
+- 显存占用：11.8G-28G (实测约为21G)
 - token: 32768
 
 一个基于Qwen API的ComfyUI节点：https://github.com/ZHO-ZHO-ZHO/ComfyUI-Qwen-VL-API?tab=readme-ov-file
@@ -627,10 +659,209 @@ else:
   print("no box")
 ```
 
-## Baichuan
-https://www.baichuan-ai.com/home
+#### 输入
+注意到原工程的中`tokenization_qwen.py`中
+```python
+    def from_list_format(self, list_format: List[Dict]):
+        text = ''
+        num_images = 0
+        for ele in list_format:
+            if 'image' in ele:
+                num_images += 1
+                text += f'Picture {num_images}: '
+                text += self.image_start_tag + ele['image'] + self.image_end_tag
+                text += '\n'
+            elif 'text' in ele:
+                text += ele['text']
+            elif 'box' in ele:
+                if 'ref' in ele:
+                    text += self.ref_start_tag + ele['ref'] + self.ref_end_tag
+                for box in ele['box']:
+                    text += self.box_start_tag + '(%d,%d),(%d,%d)' % (box[0], box[1], box[2], box[3]) + self.box_end_tag
+            else:
+                raise ValueError("Unsupport element: " + str(ele))
+        return text
+```
+可只除了`'image'`和`'text'`之外，还支持第三种输入方式，那就是`'box'`。对话中的检测框可以表示为`<box>(x1,y1),(x2,y2)</box>`，
+其中 `(x1, y1)` 和`(x2, y2)`分别对应左上角和右下角的坐标，并且被归一化到`[0, 1000)`的范围内. 检测框对应的文本描述也可以通过`<ref>text_caption</ref>`表示。
+
+第三种任务示例
+```python
+# ......可接上一个代码
+
+# bbox输入
+query = tokenizer.from_list_format([
+    {'image': '00260-70362828.png'},
+    {'text': '检测框中的人是站着还是坐着?'},
+    {'box': [(272,271,526,957)]}
+])
+print("query:", query)
+
+response, history = model.chat(tokenizer, query=query, history=None)
+print(response)
+image = tokenizer.draw_bbox_on_latest_picture("<box>(272,271),(526,957)</box>", history)
+if image:
+  image.save('2.jpg')
+else:
+  print("no box")
+```
+
+服务(需要创建一个空文件夹命名为`data`)
+
+::: code-group
+```python [service]
+from flask import Flask, request, jsonify
+import time
+from flask_sock import Sock, Server
+from flask_cors import CORS
+from eventlet import wsgi
+import eventlet
+from PIL import Image
+import torch
+from transformers import AutoTokenizer, AutoModelForCausalLM
+import json
+
+torch.manual_seed(1234)
+
+# Load tokenizer and model
+# QianWen_VL 7B
+tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen-VL-Chat", trust_remote_code=True)
+model = AutoModelForCausalLM.from_pretrained("Qwen/Qwen-VL-Chat", device_map="cuda", trust_remote_code=True).eval()
+
+app = Flask(__name__)
+sock = Sock(app)
+app.config['JSON_AS_ASCII'] = False
+CORS(app)
+img_path = "data/temp.jpg"
+
+@app.route('/qianwen_vl', methods=['POST'])
+def qianwen_vl():
+    image_file = request.files['image']
+    save_jpg(image_file, img_path)
+    #prompt = request.form['prompt']
+    print(json.loads(request.form.to_dict()['content']))
+    query_list = [{'image' :img_path}] + json.loads(request.form.to_dict()['content'])
+    print(query_list)
+    query = tokenizer.from_list_format(query_list)
+    print(query)
+   # query = f'<img>{img_path}</img>{prompt}'
+    start_time = time.time()
+    response, _ = model.chat(tokenizer, query=query, history=None)
+    end_time = time.time()
+
+    return jsonify({'response': response, 'running_time': end_time - start_time})
+
+def save_jpg(image_file, file_name):
+    image = Image.open(image_file.stream)
+    image.save(file_name, "JPEG")
+
+if __name__ == '__main__':
+    wsgi.server(eventlet.listen(('0.0.0.0', 5005)), app)
+```
+
+```python [API]
+import cv2
+import json
+import requests
+
+# 定义 Flask 服务器的地址
+server_url = 'http://192.168.xxx.xxx:5005/qianwen_vl'
 
 
-[Baichuan-7B](https://huggingface.co/baichuan-inc/Baichuan-7B)
+def query_qwen_vl(data):
+    image_path = data[0]["image"]
+    content = data[1:]
+    # 转成字符串再发送给服务端
+    data_send = {'content': json.dumps(content, ensure_ascii=False)}
+    #print(data_send)
+    # 打开并读取图像文件
+    with open(image_path, 'rb') as f:
+        # 构造请求数据
+        files = {'image': f}
 
-[Baichuan2-13B-Chat](https://huggingface.co/baichuan-inc/Baichuan2-13B-Chat)
+        try:
+            # 发送 POST 请求
+            response = requests.post(server_url, files=files, data=data_send)
+
+            # 检查响应状态码
+            if response.status_code == 200:
+                # 解析 JSON 响应
+                response_data = response.json()
+                print("问：", data)
+                print("对话响应:", response_data['response'])
+                print("运行时间:", response_data['running_time'])
+            else:
+                print("请求失败:", response.status_code)
+        except requests.RequestException as e:
+            print("请求错误:", e)
+    return response_data['response']
+
+
+def extract_bbox(text):
+    current_text = text[text.index('<box>'):]
+
+    bboxs = []
+    while '<box>' in current_text:
+        current_text = current_text[current_text.index('<box>')+5:]
+        current_text_list = eval("[%s]" % current_text[:current_text.index('</box>')])
+        bboxs.append([current_text_list[0][0], current_text_list[0][1], current_text_list[1][0], current_text_list[1][1]])
+
+    return bboxs
+
+
+def draw_bbox_cv(img, box, text=None):
+    thickness = 3  # 框的厚度
+    # 画矩形框
+    img1 = cv2.rectangle(img, (box[0], box[1]), (box[2], box[3]), (0, 255, 255), thickness)
+    if text is not None:
+        img1 = cv2.putText(img1, text, (box[0],box[1]), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
+    return img1
+
+
+def test1():
+    # 图像文件路径
+    image_file = '00346-4016997344.png'
+    data = [{"image": image_file}, {"text": "图中是什么家具？"}]
+    query_qwen_vl(data)
+
+
+def test2():
+    # 图像文件路径
+    image_file = '00260-70362828.png'
+    data = [{"image": image_file}, {"text": "输出人的检测框"}]
+    res = query_qwen_vl(data)
+    bboxs = extract_bbox(res)
+
+    # 画图
+    image = cv2.imread(image_file)
+    for i, bbox in enumerate(bboxs):
+        image = draw_bbox_cv(image, bbox, str(i))
+    cv2.imshow("Image", image)
+    cv2.waitKey()
+
+
+def test3():
+    test_bbox = (267,269,526,958)
+    # 图像文件路径
+    image_file = '00260-70362828.png'
+    data = [{"image": image_file}, {"text": "检测框中的人穿的什么衣服？"}, {"box": [test_bbox]}]
+    query_qwen_vl(data)
+
+    # 画图
+    image = cv2.imread(image_file)
+    image = draw_bbox_cv(image, test_bbox)
+    cv2.imshow("Image", image)
+    cv2.waitKey()
+
+
+if __name__ == "__main__":
+    test3()
+```
+:::
+
+```shell
+pip install tiktoken matplotlib
+```
+
+## 其他
+XXXXXXX
