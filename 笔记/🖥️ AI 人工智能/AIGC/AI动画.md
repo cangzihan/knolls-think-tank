@@ -50,7 +50,7 @@ Sora is a diffusion model; given input noisy patches (and conditioning informati
 
 高斯模型转换，将生成的视频分解成29个图片一个文件夹的形式，使用[gaussian-splatting](https://github.com/graphdeco-inria/gaussian-splatting)库训练。
 
-Sora的一个复现项目 [Project](https://pku-yuangroup.github.io/Open-Sora-Plan/blog_cn.html) | [Code](https://github.com/PKU-YuanGroup/Open-Sora-Plan)
+Sora的一个复现项目 [Project(已失效)](https://pku-yuangroup.github.io/Open-Sora-Plan/blog_cn.html) | [Code](https://github.com/PKU-YuanGroup/Open-Sora-Plan) | [Demo](https://huggingface.co/spaces/LanguageBind/Open-Sora-Plan-v1.0.0) | [Report](https://github.com/PKU-YuanGroup/Open-Sora-Plan/blob/main/docs/Report-v1.0.0.md)
 
 ## Image-to-Video
 可以分为两类，一类是给图片(可附加文字)生成视频，另一类是给图片和对应的特征(语义，关节点，normal map等)生成视频，如果每一帧都能提供特征，理论上可以使视频的长度很长，不受限制。

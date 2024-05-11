@@ -23,21 +23,21 @@ Realtime Detection Transformers (RT-DETR): Baidu's PaddlePaddle Realtime Detecti
 
 YOLO-World: Real-time Open Vocabulary Object Detection models from Tencent AI Lab.
 
-YOLO v8
+## YOLO v8
 https://docs.ultralytics.com/models/yolov8/ | https://github.com/ultralytics/ultralytics
 
 原理分C：https://mmyolo.readthedocs.io/zh-cn/latest/recommended_topics/algorithm_descriptions/yolov8_description.html
 
-## Deploy
-### Python
+### Deploy
+#### Python
 ```shell
 pip install ultralytics
 ```
 
-### Docker
+#### Docker
 
-## Pose
-### 关节定义
+### Pose
+#### 关节定义
 ```python
 KEYPOINTS_NAMES = [
     "nose",  # 0
@@ -108,7 +108,7 @@ KEYPOINTS_NAMES = [
 
 可知，当没有对应骨骼时，输出为0
 
-### 动作识别规划
+#### 动作识别规划
 使用normalize数据运算
 
 输入向量：
@@ -122,7 +122,7 @@ batch设为历史中的10个数据，如果能可变任意长度那么训练数�
 动作类别`['打招呼', '过来', '停止', '无']`
 
 
-### Code
+#### Code
 ```python
 from ultralytics import YOLO
 import cv2
@@ -159,3 +159,34 @@ for result in results:
     cv2.waitKey()
     cv2.destroyAllWindows()
 ```
+
+## YOLO-World
+Computer vision projects often involve spending a lot of time annotating data and training **object detection** models.
+But, that might soon be a thing of the past. Tencent’s AI Lab released **YOLO-World**, a real-time, open-vocabulary object detection model, on January 31st, 2024.
+YOLO-World is a zero-shot model, meaning you can run object detection inferences on images without having to train it.
+
+### Install
+```shell
+pip install openai-clip
+```
+
+### Using
+```python
+# Import YOLOWorld class from ultralytics module
+from ultralytics import YOLOWorld
+
+# Initialize the model with pre-trained weights
+model = YOLOWorld('yolov8m-worldv2.pt')
+
+# Set the classes you'd like to find in your image
+model.set_classes(["person"])
+
+# Run object detection for your custom classes on your image
+results = model.predict('00260-70362828.png', max_det=100, iou=0.01, conf=0.01)
+
+# Save the results
+results[0].save(filename='result.jpg')
+
+```
+散了吧，没那么神。都区分不了女人，男人，还是用YOLO v8吧
+

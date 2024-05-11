@@ -2,7 +2,21 @@
 # Linux 环境
 
 如果是远程装环境，则需要先装SSH服务
+
+如果接下来的操作网络不好，在国内，就可以换源
 ```shell
+sudo cp /etc/apt/sources.list /etc/apt/sources.list.bak
+sudo vim /etc/apt/sources.list
+```
+修改为(位置随意)
+```text
+deb http://XXXXXX jammy main restricted
+自己去网上查一个
+```
+
+
+```shell
+sudo apt update
 sudo apt-get install openssh-server
 ```
 
@@ -14,7 +28,21 @@ sudo apt update && sudo apt install nala -y && sudo nala upgrade -y
 chmod a+x Anaconda3-2022.05-Linux-x86_64.sh
 ./Anaconda3-2022.05-Linux-x86_64.sh
 
-sudo nala install vim python3-pip
+sudo nala install vim python3-pip git
+```
+
+如果一开始没有换源，可以用如下方式换中国内源：
+```shell
+sudo nala fetch
+```
+
+```shell
+sudo nala install v4l-utils
+```
+
+#### Python环境创建
+```shell
+conda create -n py310_cv python=3.10
 ```
 
 #### Python音频
@@ -36,9 +64,19 @@ sudo apt remove brltty
 ls /dev/tty*
 ```
 
+#### YOLO
 ```shell
 pip install ultralytics -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
+
+#### Mediapipe
+```shell
+pip install mediapipe
+```
+
+`vision.gesturerecognizer.create_from_options` 卡死:
+关闭SSH的X11转发
+
 
 `requirements.txt`
 ```
@@ -68,3 +106,21 @@ nvidia-smi
 ```shell
 nvcc -V
 ```
+
+## 系统安装
+
+欢迎页面，选择一个语言，然后选择右边的【Install Ubuntu】(如果选择了别的语言请选择相同位置的按钮)。
+
+键盘布局
+
+无线，可以选择不联网
+
+建议正常安装，并选择图形驱动
+
+暂时没碰到需要分区的情况
+
+
+
+
+
+

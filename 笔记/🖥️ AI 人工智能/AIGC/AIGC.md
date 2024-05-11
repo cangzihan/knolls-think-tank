@@ -119,6 +119,57 @@ https://zhuanlan.zhihu.com/p/627500143
 
 使用：直接在prompt里输入embedding的名字即可，不需要写后缀。新版本的WebUI会自动识别embedding，选择可自动填充prompt
 
+### Controlnet
+
+#### Openpose
+这里的Openpose是指借助它提取keypoint特征，而使用[Openpose Editor](https://github.com/fkunn1326/openpose-editor)编辑出来的骨架如果没有输入图像参考，则没有用到Openpose
+
+在 https://huggingface.co/lllyasviel/Annotators/tree/main 中下载3个模型放入`extensions/sd-webui-controlnet/annotator/downloads/openpose`中：
+
+- `body_pose_model.pth`
+- `facenet.pth`
+- `hand_pose_model.pth`
+
+### 训练
+
+#### LoRA
+
+1. 准备数据: 准备至少10张图像，如果是人，那么背景尽量为白色，不然会被AI学习到背景。放入【文件夹A】
+
+2. 打tag: 使用SD WebUI，点【训练】-【预处理】
+
+   - 其中源目录输入【文件夹A】，创建一个新目录【文件夹B】设为目标目录
+
+   - 自动焦点裁切，使用deepbooru生成说明文字(tags)
+
+   - 设置完后点【输出】
+
+   - 手动修改不正确的标签（在【文件夹B】的`.txt`文件中，可使用[GUI工具](https://github.com/cangzihan/sd_lazy_editor/blob/main/webui.py)）
+
+3. 数据集格式：创建一个新文件夹【文件夹C】，然后在里面再创建一个【文件夹D】命名为"数字_名称"，如“10_face”。其中数字代表训练次数。
+然后把【文件夹B】中的所有文件放进去。
+
+4. 训练
+```shell
+git clone https://github.com/Akegarasu/lora-scripts.git
+```
+
+修改`train.ps1`中的内容（代码注释已经很清楚了）
+
+| 变量                  | 说明   |
+|---------------------|------|
+| `pretrained_model`  |      |
+| `train_data_dir`    | 改为【文件夹C】 |
+| `max_train_epoches` | 改为14 |
+| `output_name`       |      |
+
+然后运行它
+```shell
+# chmod a+x train.ps1
+./train.ps1
+```
+
+
 ## 平面设计
 [ArchiGAN](https://developer.nvidia.com/blog/archigan-generative-stack-apartment-building-design/?linkId=70968833)
 
@@ -262,22 +313,35 @@ MoE 的优点之一是其能够处理复杂的、多模态的数据分布，因�
 
 
 ## 其他
-Custom Diffusion
+**Custom Diffusion**
 [Home](https://www.cs.cmu.edu/~custom-diffusion/results.html) |
 [Github](https://github.com/adobe-research/custom-diffusion)
 
 https://zhuanlan.zhihu.com/p/620852185
 
 
-数字人：
+**数字人**
 
 Wav2lip：https://github.com/Rudrabha/Wav2Lip
 
 EasyWav2lip: https://github.com/anothermartz/Easy-Wav2Lip
 
-facefusion2.3:https://github.com/facefusion/facefusion
+facefusion2.5: https://github.com/facefusion/facefusion
 
 SadTalker-Video-Lip-Sync: https://github.com/Zz-ww/SadTalker-Video-Lip-Sync
+
+**换脸**
+
+IPAdapter （通常会伴随其他元素替换）
+
+ReActor
+
+facefusion
+
+DeepFaceLive
+
+
+
 
 ## 名词解释
 - **DreamBooth**
