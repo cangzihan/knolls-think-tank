@@ -13,6 +13,16 @@ tags:
 uname -r
 ```
 
+## 查看内存
+```shell
+free -m
+```
+
+## 查看存储空间
+```shell
+df -h
+```
+
 ## 安Python
 sudo 里的Python安装pip
 ```shell
