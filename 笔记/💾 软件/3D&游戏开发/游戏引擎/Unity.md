@@ -10,6 +10,20 @@ tags:
 Unity 界面
 ![img](assets/View.png)
 
+## 安装
+### Linux
+```shell
+sudo nala install unityhub
+```
+
+## 卸载
+### Linux
+```shell
+sudo nala remove unityhub
+sudo nala purge unityhub
+sudo nala autoremove
+```
+
 ## 视角
 
 ### 旋转

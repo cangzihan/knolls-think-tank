@@ -115,7 +115,20 @@ https://huggingface.co/chat/
 ## ChatGPT
 [Online](https://chat.openai.com/) | [API](https://platform.openai.com/settings/organization/billing/overview)
 
+### API
 API最新价格：https://openai.com/pricing
+
+API说明：https://platform.openai.com/docs/api-reference/chat/create
+
+| 参数        | 类型               | 描述                                                                                                                                                                                   |
+|-----------|------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `messages`  | list             | A list of messages comprising the conversation so far.                                                                                                                               |
+| `model`  | string           | ID of the model to use.                                                                                                                                                              |
+| `frequency_penalty`  | number or null   | Number between -2.0 and 2.0. Positive values penalize new tokens based on whether they appear in the text so far, increasing the model's likelihood to talk about new topics.        |
+| `max_tokens`  | integer or null  | The maximum number of tokens that can be generated in the chat completion.                                                                                                           |
+| `stream`  | boolean or null  |                                                                                                                                                                                      |
+| `temperature`  | number or null     | What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic. |
+
 
 ## 文心一言
 [Online](https://yiyan.baidu.com/)

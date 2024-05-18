@@ -9,11 +9,101 @@ tags:
 
 # 开源LLM
 
+## 实用工具
 一些好用的项目：
 - https://github.com/mlc-ai/mlc-llm
 - https://github.com/wangzhaode/mnn-llm
 - https://lmstudio.ai/
 - https://github.com/ollama/ollama
+
+### FastChat
+[Github](https://github.com/lm-sys/FastChat?tab=readme-ov-file)
+
+FastChat 是一个强大的平台，可以帮助你训练、部署和评估基于大型语言模型的聊天机器人。它提供了训练和评估代码，以及分布式多模型服务系统，使你能够轻松地构建和管理自己的聊天机器人项目。
+
+#### Install
+```shell
+pip3 install "fschat[model_worker,webui]"
+```
+
+解决stream接口问题
+
+- 方法1
+
+不推荐，会和新版本gradio冲突
+```shell
+pip install pydantic==1.10.14
+```
+
+- 方法2
+
+在API的输出中，找到报错的openai路径，如报错为
+```shell
+File "/home/XXX/.conda/envs/py310_really_python_3_10/lib/python3.10/site-packages/fastchat/serve/openai_api_server.py", line 942, in <module>
+2024-05-13 10:52:07 | ERROR | stderr |     uvicorn.run(app, host=args.host, port=args.port, log_level="info")
+```
+就修改文件`/home/XXX/.conda/envs/py310_really_python_3_10/lib/python3.10/site-packages/fastchat/serve/openai_api_server.py`的3个地方
+
+`line 506`:
+```python
+    for i in range(n):
+        # First chunk with role
+        choice_data = ChatCompletionResponseStreamChoice(
+            index=i,
+            delta=DeltaMessage(role="assistant"),
+            finish_reason=None,
+        )
+        chunk = ChatCompletionStreamResponse(
+            id=id, choices=[choice_data], model=model_name
+        )
+        yield f"data: {chunk.json(exclude_unset=True, ensure_ascii=False)}\n\n" # [!code --]
+        yield f"data: {json.dumps(chunk.dict(exclude_unset=True), ensure_ascii=False)}\n\n" # [!code ++]
+
+        previous_text = ""
+```
+
+`line 536`和`line 539`:
+```python
+            if delta_text is None:
+                if content.get("finish_reason", None) is not None:
+                    finish_stream_events.append(chunk)
+                continue
+            yield f"data: {chunk.json(exclude_unset=True, ensure_ascii=False)}\n\n" # [!code --]
+            yield f"data: {json.dumps(chunk.dict(exclude_unset=True), ensure_ascii=False)}\n\n" # [!code ++]
+    # There is not "content" field in the last delta message, so exclude_none to exclude field "content".
+    for finish_chunk in finish_stream_events:
+        yield f"data: {finish_chunk.json(exclude_none=True, ensure_ascii=False)}\n\n" # [!code --]
+        yield f"data: {json.dumps(finish_chunk.dict(exclude_none=True), ensure_ascii=False)}\n\n" # [!code ++]
+    yield "data: [DONE]\n\n"
+
+
+@app.post("/v1/completions", dependencies=[Depends(check_api_key)])
+```
+
+#### 部署LLM
+需要同时开启多个终端
+```shell
+# Controller
+python3 -m fastchat.serve.controller
+# Worker
+# worker 0
+CUDA_VISIBLE_DEVICES=0 python3 -m fastchat.serve.model_worker --model-path lmsys/vicuna-7b-v1.5 --controller http://localhost:21001 --port 31000 --worker http://localhost:31000
+# worker 1
+CUDA_VISIBLE_DEVICES=1 python3 -m fastchat.serve.model_worker --model-path lmsys/fastchat-t5-3b-v1.0 --controller http://localhost:21001 --port 31001 --worker http://localhost:31001
+# Web UI
+python3 -m fastchat.serve.gradio_web_server
+```
+
+https://rudeigerc.dev/posts/llm-inference-with-fastchat/
+
+
+
+## 基本环境搭建
+
+很多LLM需要的环境都是类似的，这里默认在说电脑/服务器端、假设已经装好了GPU驱动、Cuda、Torch。
+```shell
+pip install transformers
+```
 
 ## Baichuan
 Baichuan 2 是百川智能推出的开源LLM，所有版本不仅对学术研究完全开放，开发者也仅需邮件申请并获得官方商用许可后，即可以免费商用。
@@ -368,11 +458,16 @@ Demo [Qwen1.5-72B-Chat](https://huggingface.co/spaces/Qwen/Qwen1.5-72B-Chat) | [
 
 [CodeQwen1.5-7b-Chat](https://huggingface.co/spaces/Qwen/CodeQwen1.5-7b-Chat-demo)
 
-### 部署
 
-32B显存占用65G
+### Quick Start
+#### 1. 命令行
+使用[FastChat](#fastchat)
+```shell
+python3 -m fastchat.serve.cli --model-path Qwen1.5-32B-Chat
+```
 
-测试
+####  2. Python脚本
+
 ```python
 from transformers import AutoModelForCausalLM, AutoTokenizer
 device = "cuda" # the device to load the model onto
@@ -407,6 +502,12 @@ generated_ids = [
 response = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
 ```
 
+
+### 部署
+
+32B显存占用65G
+
+#### 1. Flask版
 ::: code-group
 ```python [chat]
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -605,6 +706,126 @@ if __name__ == '__main__':
     wsgi.server(eventlet.listen(('0.0.0.0', 3100)), app)
 ```
 :::
+
+#### 2. FastChat版
+
+http://felixzhao.cn/Articles/article/71
+
+开三个终端
+```shell
+# 第一个终端
+python3 -m fastchat.serve.controller
+
+# 第二个终端
+CUDA_VISIBLE_DEVICES=0 python3 -m fastchat.serve.model_worker --model-path Qwen1.5-32B-Chat --controller http://localhost:21001 --port 31000 --worker http://localhost:31000
+
+# 第三个终端
+## Gradio Web
+python3 -m fastchat.serve.gradio_web_server
+
+## API
+python3 -m fastchat.serve.openai_api_server --host 0.0.0.0
+```
+
+客户端：
+```python
+from openai import OpenAI
+
+class FastChatAPI:
+    def __init__(self, model, base_url=None, api_key="Empty"):
+        if "gpt" not in model:
+            # 使用Local LLM
+            self.client = OpenAI(base_url=base_url, api_key=api_key)
+        else:
+            # 使用GPT
+            self.client = OpenAI()
+        self.model = model
+
+    def completion(self, query, verbose=True):
+        """Create a completion."""
+        return self.completion_history(query, verbose, None)
+       # response = self.client.completions.create(
+       #     model=["Qwen1.5-32B-Chat"][0],
+       #     prompt=query,
+       #     max_tokens=768
+       # )
+
+       # return response.choices[0].text
+
+    def completion_history(self, query, verbose=True, history=None):
+        """Create a completion."""
+        if history is None:
+            msg = [
+                {'role': 'system', 'content': f'你是一个AI助手，请回答.'},
+                {'role': 'user', 'content': query},
+            ]
+        else:
+            msg = history + [{'role': 'user', 'content': query}]
+            # print(msg)
+
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages=msg,
+        )
+
+        if verbose:
+            print("使用的tokens：", response.usage.total_tokens)
+            print("问：", query)
+            print("回答：", response.choices[0].message.content)
+
+        new_history = msg + [{"role": "assistant", "content": response.choices[0].message.content}]
+        return new_history
+
+    def completion_stream(self, query):
+        return self.completion_stream_history(query, None)
+
+    def completion_stream_history(self, query, history=None):
+        def end_sentence(sent):
+            if sent and (sent.endswith("……") or
+                         sent.endswith("：") and len(sent) > 15 or
+                         sent.endswith("，") and len(sent) > 15 or
+                         sent.endswith("。") or
+                         sent.endswith("！") or
+                         sent.endswith("？")):
+                return True
+            return False
+
+        if history is None:
+            msg = [
+                {'role': 'system', 'content': f'你是一个AI助手，请回答.'},
+                {'role': 'user', 'content': query},
+            ]
+        else:
+            msg = history + [{'role': 'user', 'content': query}]
+
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages=msg,
+            temperature=0,
+            stream=True
+        )
+        collected_messages = ''
+        start_time = time.time()
+        for chunk in response:
+            chunk_time = time.time() - start_time  # calculate the time delay of the chunk
+            chunk_content = chunk.choices[0].delta.content
+            if chunk_content:
+                collected_messages += chunk_content.replace("\n", "")
+                if end_sentence(collected_messages):
+                    print(f"Message received {chunk_time:.2f} seconds after request: {collected_messages}")
+                    collected_messages = ''
+        print(f"Full response received {chunk_time:.2f} seconds after request")
+
+        return collected_messages
+```
+
+【报错】AttributeError: module 'asyncio' has no attribute 'to_thread'：
+
+什么？你还在用`Python 3.9`之前的版本，真的是反清复明，开历史倒车！[解决方案](https://stackoverflow.com/questions/68523752/python-module-asyncio-has-no-attribute-to-thread)
+
+ 【报错】 流式API问题
+
+[参考安装FastChat](#fastchat)
 
 ## Qwen-VL
 

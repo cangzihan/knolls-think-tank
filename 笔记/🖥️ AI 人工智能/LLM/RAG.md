@@ -61,6 +61,8 @@ sudo bash ./run.sh -c local -i 4 -b default
 
 [接口文档](https://github.com/netease-youdao/QAnything/blob/master/docs/API.md)
 
+### 代码分C
+
 查看容器日志
 ```shell
 sudo docker logs qanything-container-local
@@ -74,6 +76,292 @@ sudo docker exec -it qanything-container-local bash
 退出
 ```shell
 exit
+```
+
+对话函数在`QAnything/qanything_kernel/qanything_server/handler.py`中
+
+`QAnything/qanything_kernel/core/local_doc_qa.py`中`LocalDocQA`类的`get_knowledge_based_answer`
+
+进一步可以看到他们chat的prompt模板,位于`QAnything/qanything_kernel/configs/model_config.py`：
+```python
+PROMPT_TEMPLATE = """参考信息：
+{context}
+---
+我的问题或指令：
+{question}
+---
+请根据上述参考信息回答我的问题或回复我的指令。前面的参考信息可能有用，也可能没用，你需要从我给出的参考信息中选出与我的问题最相关的那些，来为你的回答提供依据。回答一定要忠于原文，简洁但不丢信息，不要胡乱编造。我的问题或指令是什么语种，你就用什么语种回复,
+你的回复："""
+```
+
+检索的核心代码为：
+```python
+        source_documents = self.get_source_documents(retrieval_queries, milvus_kb)
+
+        deduplicated_docs = self.deduplicate_documents(source_documents)
+        retrieval_documents = sorted(deduplicated_docs, key=lambda x: x.metadata['score'], reverse=True)
+        if rerank and len(retrieval_documents) > 1:
+            debug_logger.info(f"use rerank, rerank docs num: {len(retrieval_documents)}")
+            retrieval_documents = self.rerank_documents(query, retrieval_documents)
+
+        source_documents = self.reprocess_source_documents(query=query,
+                                                           source_docs=retrieval_documents,
+                                                           history=chat_history,
+                                                           prompt_template=PROMPT_TEMPLATE)
+```
+
+所有的API描述在`qanything_kernel/qanything_server/sanic_api.py`里，在`line 79`中含有问答接口：
+```python
+app.add_route(local_doc_chat, "/api/local_doc_qa/local_doc_chat", methods=['POST'])  # tags=["问答接口"]
+```
+可知，问答接口执行了一个`local_doc_chat()`方法，这个方法在同级目录的`handler.py`中，实际上还是指向了刚刚分析的对话函数`get_knowledge_based_answer()`
+
+一些小知识：
+
+- 在Python中，`__all__`是一个特殊的全局变量，它在模块中定义了一个列表，包含了你希望在`from module import *`语句中导出的所有名称。
+如果一个模块定义了`__all__`，那么`from module import *`语句只会导入这个列表中的名称。
+
+#### RAG API
+QAngthing原始的API没有直接提供调用RAG的接口。In other words，查询就必须伴随内部Chat大模型的调用输出对话，这样会增加时间。
+要想新增一个接口，需要修改三个文件：
+
+修改步骤：
+```shell
+sudo docker exec -it qanything-container-local bash
+cd qanything_local/qanything_kernel/
+vim core/local_doc_qa.py
+vim qanything_server/handler.py
+vim qanything_server/sanic_api.py
+```
+`qanything_kernel/qanything_server/sanic_api.py`的`line 80`:
+```python
+app.add_route(local_doc_chat, "/api/local_doc_qa/local_doc_chat", methods=['POST'])
+app.add_route(local_doc_search, "/api/local_doc_qa/local_doc_search", methods=['POST']) # [!code ++]
+app.add_route(list_kbs, "/api/local_doc_qa/list_knowledge_base", methods=['POST'])
+```
+
+`qanything_kernel/qanything_server/handler.py`的`line 17`
+```python
+__all__ = ["new_knowledge_base", "upload_files", "list_kbs", "list_docs", "delete_knowledge_base", "delete_docs",
+           "rename_knowledge_base", "get_total_status", "clean_files_by_status", "upload_weblink", "local_doc_chat",
+           "document"] # [!code --]
+           "local_doc_search", "document"] # [!code ++]
+```
+`line 423`新增一个函数
+```python
+async def local_doc_search(req: request):
+    local_doc_qa: LocalDocQA = req.app.ctx.local_doc_qa
+    user_id = safe_get(req, 'user_id')
+    if user_id is None:
+        return sanic_json({"code": 2002, "msg": f'�~S�~E��~]~^�~U�~Arequest.json�~Z{req.json}�~L请�~@�~_��~A'})
+    is_valid = validate_user_id(user_id)
+    if not is_valid:
+        return sanic_json({"code": 2005, "msg": get_invalid_user_id_msg(user_id=user_id)})
+    debug_logger.info('local_doc_chat %s', user_id)
+    kb_ids = safe_get(req, 'kb_ids')
+    question = safe_get(req, 'question')
+    rerank = safe_get(req, 'rerank', default=True)
+    debug_logger.info('rerank %s', rerank)
+    streaming = safe_get(req, 'streaming', False)
+    history = safe_get(req, 'history', [])
+    debug_logger.info("history: %s ", history)
+    debug_logger.info("question: %s", question)
+    debug_logger.info("kb_ids: %s", kb_ids)
+    debug_logger.info("user_id: %s", user_id)
+
+    not_exist_kb_ids = local_doc_qa.milvus_summary.check_kb_exist(user_id, kb_ids)
+    if not_exist_kb_ids:
+        return sanic_json({"code": 2003, "msg": "fail, knowledge Base {} not found".format(not_exist_kb_ids)})
+
+    file_infos = []
+    milvus_kb = local_doc_qa.match_milvus_kb(user_id, kb_ids)
+    for kb_id in kb_ids:
+        file_infos.extend(local_doc_qa.milvus_summary.get_files(user_id, kb_id))
+    valid_files = [fi for fi in file_infos if fi[2] == 'green']
+    if len(valid_files) == 0:
+        return sanic_json({"code": 200, "msg": "�~S�~I~M�~_��~F�~S为空�~L请�~J�| �~V~G件�~H~V�~I�~E�~V~G件解�~^~P�~L�~U", "question":
+question,
+                           "response": "All knowledge bases {} are empty or haven't green file, please upload files".format(
+                               kb_ids), "history": history, "source_documents": [{}]})
+    else:
+        debug_logger.info("streaming: %s", streaming)
+        if streaming:
+            debug_logger.info("start generate answer")
+
+            async def generate_answer(response):
+                debug_logger.info("start generate...")
+                for resp, next_history in local_doc_qa.get_knowledge_based_answer(
+                        query=question, milvus_kb=milvus_kb, chat_history=history, streaming=True, rerank=rerank,
+                        search_mode=True
+                ):
+                    chunk_data = resp["result"]
+                    if not chunk_data:
+                        continue
+                    chunk_str = chunk_data[6:]
+                    if chunk_str.startswith("[DONE]"):
+                        source_documents = []
+                        for inum, doc in enumerate(resp["source_documents"]):
+                            source_info = {'file_id': doc.metadata['file_id'],
+                                           'file_name': doc.metadata['file_name'],
+                                           'content': doc.page_content,
+                                           'retrieval_query': doc.metadata['retrieval_query'],
+                                           'score': str(doc.metadata['score'])}
+                            source_documents.append(source_info)
+
+                        retrieval_documents = format_source_documents(resp["retrieval_documents"])
+                        source_documents = format_source_documents(resp["source_documents"])
+                        chat_data = {'user_info': user_id, 'kb_ids': kb_ids, 'query': question, 'history': history,
+                                     'prompt': resp['prompt'], 'result': next_history[-1][1],
+                                     'retrieval_documents': retrieval_documents, 'source_documents': source_documents}
+                        qa_logger.info("chat_data: %s", chat_data)
+                        debug_logger.info("response: %s", chat_data['result'])
+                        stream_res = {
+                            "code": 200,
+                            "msg": "success",
+                            "question": question,
+                            # "response":next_history[-1][1],
+                            "response": "",
+                            "history": next_history,
+                            "source_documents": source_documents,
+                        }
+                    else:
+                        chunk_js = json.loads(chunk_str)
+                        delta_answer = chunk_js["answer"]
+                        stream_res = {
+                            "code": 200,
+                            "msg": "success",
+                            "question": "",
+                            "response": delta_answer,
+                            "history": [],
+                            "source_documents": [],
+                        }
+                    await response.write(f"data: {json.dumps(stream_res, ensure_ascii=False)}\n\n")
+                    if chunk_str.startswith("[DONE]"):
+                        await response.eof()
+                    await asyncio.sleep(0.001)
+
+            response_stream = ResponseStream(generate_answer, content_type='text/event-stream')
+            return response_stream
+
+        else:
+            for resp, history in local_doc_qa.get_knowledge_based_answer(
+                    query=question, milvus_kb=milvus_kb, chat_history=history, streaming=False, rerank=rerank,
+                    search_mode=True
+            ):
+                pass
+            retrieval_documents = format_source_documents(resp["retrieval_documents"])
+            source_documents = format_source_documents(resp["source_documents"])
+            chat_data = {'user_id': user_id, 'kb_ids': kb_ids, 'query': question, 'history': history,
+                         'retrieval_documents': retrieval_documents, 'source_documents': source_documents}
+            qa_logger.info("chat_data: %s", chat_data)
+            return sanic_json({"code": 200, "msg": "success chat", "question": question, "response": "Well Done!",
+                               "history": history, "source_documents": source_documents})
+```
+
+
+`qanything_kernel/core/local_doc_qa.py`的`line 219`
+```python
+    def get_knowledge_based_answer(self, query, milvus_kb, chat_history=None, streaming: bool = STREAMING,
+            rerank: bool = False): # [!code --]
+            rerank: bool = False, search_mode: bool = False): # [!code ++]
+        if chat_history is None:
+            chat_history = []
+        retrieval_queries = [query]
+
+        source_documents = self.get_source_documents(retrieval_queries, milvus_kb)
+
+        deduplicated_docs = self.deduplicate_documents(source_documents)
+        retrieval_documents = sorted(deduplicated_docs, key=lambda x: x.metadata['score'], reverse=True)
+        if rerank and len(retrieval_documents) > 1:
+            debug_logger.info(f"use rerank, rerank docs num: {len(retrieval_documents)}")
+            retrieval_documents = self.rerank_documents(query, retrieval_documents)
+
+        source_documents = self.reprocess_source_documents(query=query,
+                                                           source_docs=retrieval_documents,
+                                                           history=chat_history,
+                                                           prompt_template=PROMPT_TEMPLATE)
+        prompt = self.generate_prompt(query=query, # [!code --]
+                                      source_docs=source_documents, # [!code --]
+                                      prompt_template=PROMPT_TEMPLATE) # [!code --]
+        t1 = time.time()
+        for answer_result in self.llm.generatorAnswer(prompt=prompt, # [!code --]
+                                                      history=chat_history, # [!code --]
+                                                      streaming=streaming): # [!code --]
+            resp = answer_result.llm_output["answer"] # [!code --]
+            prompt = answer_result.prompt # [!code --]
+            history = answer_result.history # [!code --]
+ # [!code --]
+            # logging.info(f"[debug] get_knowledge_based_answer history = {history}") # [!code --]
+            history[-1][0] = query # [!code --]
+            response = {"query": query, # [!code --]
+                        "prompt": prompt, # [!code --]
+                        "result": resp, # [!code --]
+                        "retrieval_documents": retrieval_documents, # [!code --]
+                        "source_documents": source_documents} # [!code --]
+            yield response, history # [!code --]
+        if search_mode: # [!code ++]
+            for _ in [1]: # [!code ++]
+                history = [[None]] # [!code ++]
+                history[-1][0] = query # [!code ++]
+                response = {"query": query, # [!code ++]
+                            "retrieval_documents": retrieval_documents, # [!code ++]
+                            "source_documents": source_documents} # [!code ++]
+                yield response, history # [!code ++]
+        else: # [!code ++]
+            prompt = self.generate_prompt(query=query, # [!code ++]
+                                          source_docs=source_documents, # [!code ++]
+                                          prompt_template=PROMPT_TEMPLATE) # [!code ++]
+            t1 = time.time() # [!code ++]
+            for answer_result in self.llm.generatorAnswer(prompt=prompt, # [!code ++]
+                                                          history=chat_history, # [!code ++]
+                                                          streaming=streaming): # [!code ++]
+                resp = answer_result.llm_output["answer"] # [!code ++]
+                prompt = answer_result.prompt # [!code ++]
+                history = answer_result.history # [!code ++]
+ # [!code ++]
+                # logging.info(f"[debug] get_knowledge_based_answer history = {history}") # [!code ++]
+                history[-1][0] = query # [!code ++]
+                response = {"query": query, # [!code ++]
+                            "prompt": prompt, # [!code ++]
+                            "result": resp, # [!code ++]
+                            "retrieval_documents": retrieval_documents, # [!code ++]
+                            "source_documents": source_documents} # [!code ++]
+                yield response, history # [!code ++]
+
+        t2 = time.time()
+        debug_logger.info(f"LLM time: {t2 - t1}")
+```
+
+使用：
+```python
+def search_content(question, verbose=True):
+    url = ip_addr + ':8777/api/local_doc_qa/local_doc_search'
+    headers = {
+        'content-type': 'application/json'
+    }
+    data = {
+        "user_id": "zzp",
+        "kb_ids": ["KBee49e51dccce44df8932b4407b7d3015"],
+        "question": question,
+    }
+    try:
+        start_time = time.time()
+        response = requests.post(url=url, headers=headers, json=data, timeout=60)
+        end_time = time.time()
+        res = response.json()
+        if verbose:
+          #  print(res['retrieval_documents'])
+            print(f"响应状态码: {response.status_code}, 响应时间: {end_time - start_time}秒")
+            for doc in res['source_documents']:
+                print("#"*50)
+                print(doc['file_name'])
+                if len(doc['content']) > 200:
+                    print(doc['content'][:200] + '......')
+                else:
+                    print(doc['content'])
+                print(doc['score'])
+    except Exception as e:
+        print(f"请求发送失败: {e}")
 ```
 
 ### OCR
