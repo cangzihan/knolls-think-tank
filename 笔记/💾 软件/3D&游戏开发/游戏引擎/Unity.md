@@ -200,3 +200,28 @@ public TMP_InputField InputField;
 选中canvas后，可以直接点上面的单元，然后在Inspector里有操作说明，比如按b换笔刷（模型），按x点击模型是清除模型。
 
 让单元变大：改canvas和【tiles】（或其他名字）的grid_size，在此之前要清除所有的模型。生成时也要修改map的gridsize
+
+## 常见问题
+
+- Insecure connection not allowed: [Edit] - [Project Settings] - [Player] 中设定`Allow downloads over HTTP*`为`Always allowed`。
+
+- UnauthorizedAccessException: Access to the path XXX is denied.
+  1. Modify Save Path: Use a path within the application's sandboxed environment, such as `Application.persistentDataPath` which Unity guarantees to be writable.
+
+- 找不到Newtonsoft:
+
+  Step 1: Download JSON.NET DLL
+  1. Download the Newtonsoft.Json DLL:
+     - Visit the [Newtonsoft.Json GitHub Releases page](https://github.com/JamesNK/Newtonsoft.Json/releases).
+     - Download the latest stable release `.zip` file.
+     - Extract the `.zip` file to a location on your computer.
+
+  2. Locate the DLL file:
+     - Inside the extracted folder, navigate to the `Bin` directory.
+     - Find the `Newtonsoft.Json.dll` file.
+
+  Step 2: Add the DLL to Your Unity Project
+  1. Create a Plugins folder:
+     - In your Unity project, create a folder named Plugins (if it doesn't already exist) inside the `Assets` directory.
+  2. Copy the DLL:
+     - Copy the `Newtonsoft.Json.dll` file to the Assets/Plugins folder.

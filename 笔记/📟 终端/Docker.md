@@ -148,3 +148,12 @@ docker run -it --rm -v ~/yolov8:/yolov8 ultralytics/ultralytics:latest yolo segm
 ```shell
 docker run -it --rm -v ~/yolov8:/yolov8 ultralytics/ultralytics:latest yolo classify predict save model=yolov8s-cls.pt source=inputs/test.jpg
 ```
+
+## Nvidia Docker
+https://hub.docker.com/r/nvidia/cuda/
+
+在docker页面的Tags选项卡中有最新版本的各个系统的容器命令，
+如在Ubuntu20的主机中，安装cuda12.4容器：
+```shell
+docker pull nvidia/cuda:12.4.1-cudnn-devel-ubuntu20.04
+```
