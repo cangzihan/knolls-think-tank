@@ -136,6 +136,14 @@ UnityEngine.GUIUtility:ProcessEvent (int,intptr,bool&)
 Universal Render Pipeline (URP)
 High Definition Render Pipeline (HDRP)
 
+### 内置渲染管线材质转URP材质
+
+选中材质后[Edit]-[Rendering]-[Material]-[XXXXX]
+
+### URP材质转内置渲染管线材质
+
+选中材质后，在`Inspector`中`Shader`设为`Standard`。
+
 ### Skybox
 教程：https://blog.csdn.net/Jeffxu_lib/article/details/95477352
 在2023版本中，选择Windows-Render-Lighting
@@ -153,22 +161,211 @@ High Definition Render Pipeline (HDRP)
 
 ### Text Mesh Pro
 中文支持：先把一个字体文件拖进Assets来，是Aa图标的字体，然后右键-【create】-【text mesh pro】-【第一个选项】创建F图标的字体。
+
+#### C井代码
 ```cs
+using UnityEngine;
 using TMPro;
 
-TMP_Text tmpText;
+public class TMPTextExample : MonoBehaviour
+{
+    public TMP_Text myTMPText;
 
-tmpText.text = content;
-tmpText = GetComponent<TMP_Text>();
+    void Start()
+    {
+        // 初始化并设置TMP_Text组件
+        if (myTMPText != null)
+        {
+            myTMPText.text = "Hello, World!";
+            myTMPText.color = Color.red;
+            myTMPText.fontSize = 24;
+        }
+        else
+        {
+            Debug.LogError("TMP_Text component is not assigned.");
+        }
+    }
+}
 ```
 
 ### InputField(TMP)
+
+#### C井代码
 ```cs
+using UnityEngine;
 using TMPro;
 
-public TMP_InputField InputField;
+public class TMPInputFieldExample : MonoBehaviour
+{
+    public TMP_InputField myTMPInputField;
 
+    void Start()
+    {
+        // 初始化并设置TMP_InputField组件
+        if (myTMPInputField != null)
+        {
+            myTMPInputField.text = "Enter text here...";
+            myTMPInputField.characterLimit = 50;
+            myTMPInputField.onValueChanged.AddListener(OnInputFieldChanged);
+        }
+        else
+        {
+            Debug.LogError("TMP_InputField component is not assigned.");
+        }
+    }
+
+    void OnInputFieldChanged(string value)
+    {
+        Debug.Log("Input field value: " + value);
+    }
+}
+
+// public TMP_InputField InputField;
 // InputField.text
+```
+
+### Dropdown(TMP)
+
+#### C井代码
+```cs
+using UnityEngine;
+using TMPro;
+
+public class TMPDropdownExample : MonoBehaviour
+{
+    public TMP_Dropdown myTMPDropdown;
+
+    void Start()
+    {
+        // 初始化并设置TMP_Dropdown组件
+        if (myTMPDropdown != null)
+        {
+            myTMPDropdown.options.Clear();
+            myTMPDropdown.options.Add(new TMP_Dropdown.OptionData("Option 1"));
+            myTMPDropdown.options.Add(new TMP_Dropdown.OptionData("Option 2"));
+            myTMPDropdown.options.Add(new TMP_Dropdown.OptionData("Option 3"));
+            myTMPDropdown.onValueChanged.AddListener(OnDropdownValueChanged);
+        }
+        else
+        {
+            Debug.LogError("TMP_Dropdown component is not assigned.");
+        }
+    }
+
+    void OnDropdownValueChanged(int index)
+    {
+        Debug.Log("Selected option: " + myTMPDropdown.options[index].text);
+    }
+}
+```
+
+### Button
+
+#### C井代码
+虽然TextMeshPro本身不提供`Button`组件，但你可以结合`Button`和`TMP_Text`组件来创建带有TextMeshPro文本的按钮。在Unity脚本中，你可以这样初始化并设置`Button`组件以及其包含的`TMP_Text`组件：
+```cs
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+
+public class TMPButtonExample : MonoBehaviour
+{
+    public Button myButton;
+    public TMP_Text buttonText;
+
+    void Start()
+    {
+        // 初始化并设置Button组件
+        if (myButton != null)
+        {
+            myButton.onClick.AddListener(OnButtonClick);
+        }
+        else
+        {
+            Debug.LogError("Button component is not assigned.");
+        }
+
+        // 初始化并设置TMP_Text组件
+        if (buttonText != null)
+        {
+            buttonText.text = "Click Me!";
+            buttonText.color = Color.white;
+        }
+        else
+        {
+            Debug.LogError("TMP_Text component for button is not assigned.");
+        }
+    }
+
+    void OnButtonClick()
+    {
+        Debug.Log("Button was clicked!");
+    }
+}
+```
+
+### Slider
+
+#### C井代码
+虽然TextMeshPro本身不提供`Slider`组件，但你可以结合`Slider`和`TMP_Text`组件来创建带有TextMeshPro文本的滑块。
+在Unity脚本中，你可以这样初始化并设置`Slider`组件以及其包含的`TMP_Text`组件：
+```cs
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+
+public class TMPSliderExample : MonoBehaviour
+{
+    public Slider mySlider;
+    public TMP_Text sliderValueText;
+
+    void Start()
+    {
+        // 初始化并设置Slider组件
+        if (mySlider != null)
+        {
+            mySlider.minValue = 0;
+            mySlider.maxValue = 100;
+            mySlider.value = 50;
+            mySlider.onValueChanged.AddListener(OnSliderValueChanged);
+        }
+        else
+        {
+            Debug.LogError("Slider component is not assigned.");
+        }
+
+        // 初始化并设置TMP_Text组件
+        if (sliderValueText != null)
+        {
+            sliderValueText.text = mySlider.value.ToString();
+            sliderValueText.color = Color.white;
+        }
+        else
+        {
+            Debug.LogError("TMP_Text component for slider is not assigned.");
+        }
+    }
+
+    void OnSliderValueChanged(float value)
+    {
+        sliderValueText.text = value.ToString();
+        Debug.Log("Slider value: " + value);
+    }
+}
+
+```
+
+### 点击展开功能
+
+https://blog.csdn.net/weixin_44001286/article/details/137739299
+
+### 初始化UI对象对应的代码
+```cs
+public TMP_Text myTMPText;
+public TMP_InputField myTMPInputField;
+public TMP_Dropdown myTMPDropdown;
+public Button myButton;
+public Slider mySlider;
 ```
 
 ## 其它

@@ -34,6 +34,10 @@ tags:
 将AnimateDiff在原有算法的基础上结合视角控制的LoRA并入一个工作流
 ![img](assets/animatediff_dlora_workflow.png)
 
+#### AnimateDiff-Lightning
+
+[Demo](https://huggingface.co/spaces/ByteDance/AnimateDiff-Lightning) | [Model & Workflow](https://huggingface.co/ByteDance/AnimateDiff-Lightning)
+
 ### 文生图 + SVD
 ![img](assets/T2I_SVD.png)
 *通过文字生成视频序列工作流*
