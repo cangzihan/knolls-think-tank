@@ -12,8 +12,31 @@ tags:
 Open set object detection
 ![img](assets/open_set.png)
 
+
+<style>
+html.dark .light-mode {
+  display: none;
+}
+
+html.dark .dark-mode {
+  display: block;
+}
+
+html:not(.dark) .light-mode {
+  display: block;
+}
+
+html:not(.dark) .dark-mode {
+  display: none;
+}
+</style>
+
 Framework
-![img](assets/grounding_dino_framework.png)
+<div class="theme-image">
+  <img src="./assets/grounding_dino_framework.png" alt="Light Mode Image" class="light-mode">
+  <img src="./assets/dark_grounding_dino_framework.png" alt="Dark Mode Image" class="dark-mode">
+</div>
+
 
 ## Install
 

@@ -17,3 +17,9 @@ git config --global --unset https.proxy
 ```shell
 git pull origin main # master
 ```
+
+## 修改名字
+```shell
+git config --global user.email "you@example.com"
+git config --global user.name "Your Name"
+```

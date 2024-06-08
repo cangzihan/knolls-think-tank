@@ -8,7 +8,7 @@ tags:
 
 ## 原理图
 ### 快捷键
-画线：Ctrl + M
+画线：<kbd>Ctrl</kbd> + <kbd>M</kbd> 
 
 
 

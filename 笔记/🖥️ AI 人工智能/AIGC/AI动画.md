@@ -68,7 +68,14 @@ Sora的一个复现项目 [Project(已失效)](https://pku-yuangroup.github.io/O
 ### Animate Anyone
 [Project](https://humanaigc.github.io/animate-anyone/) | [Code](https://github.com/HumanAIGC/AnimateAnyone/tree/main)
 
+复刻项目：
+- https://github.com/novitalabs/AnimateAnyone
+- https://github.com/MooreThreads/Moore-AnimateAnyone
+
 Animate Anyone 是阿里提出的用于人物动画场景的图生视频的方法，只需一张人物照片，再配合骨骼动画引导，就能生成动画视频。
+
+### MusePose
+[Code](https://github.com/TMElyralab/MusePose)
 
 ### Magic Animate
 
@@ -77,6 +84,17 @@ Animate Anyone 是阿里提出的用于人物动画场景的图生视频的方�
 [Project](https://showlab.github.io/magicanimate/) | [Code](https://github.com/magic-research/magic-animate)
 
 新加坡国立大学与字节合作推出MagicAnimate框架，可以通过一张照片和一组语义分割图像生成动画视频。
+
+### ToonCrafter
+我草这啥玩意儿
+https://github.com/ToonCrafter/ToonCrafter | [Model](https://huggingface.co/Doubiiu/ToonCrafter)
+
+ToonCrafter can interpolate two cartoon images by leveraging the pre-trained image-to-video diffusion priors.
+
+### MegActor
+[Project](https://megvii-research.github.io/MegFaceAnimate/)
+
+通过人像说话的视频驱动照片
 
 ### Stable Video Diffusion
 ![img](assets/SVD_workflow.png)

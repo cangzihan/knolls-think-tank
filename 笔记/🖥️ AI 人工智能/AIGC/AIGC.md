@@ -1,7 +1,26 @@
 ---
 tags:
   - Stable Diffusion
+  - AI绘图
 ---
+
+<style>
+html.dark .light-mode {
+  display: none;
+}
+
+html.dark .dark-mode {
+  display: block;
+}
+
+html:not(.dark) .light-mode {
+  display: block;
+}
+
+html:not(.dark) .dark-mode {
+  display: none;
+}
+</style>
 
 # AIGC
 
@@ -37,6 +56,61 @@ ComfyUI 插件:
 
 ## Stable Diffusion
 Stable Diffusion最初是由Heidelberg 大学和[Stability AI](https://stability.ai/), [Runway](https://runwayml.com/)合作的开源项目。
+
+### 原理
+
+<div class="theme-image">
+  <img src="./assets/SD.png" alt="Light Mode Image" class="light-mode">
+  <img src="./assets/dark_SD.png" alt="Dark Mode Image" class="dark-mode">
+</div>
+
+#### 分词器(tokenizer)
+text先由CLIP进行标记化，CLIP是由OpenAI开发（英文版）的一种多模态模型，旨在理解图像和文本之间的关系。CLIP的训练过程包括：
+1. **数据集**：CLIP使用包含图像和相应描述性文本对的大规模数据集进行训练。
+2. **对比学习**：CLIP采用对比学习的方法，通过最大化图像和对应文本的相似性（而不是与随机文本的相似性）来训练模型。CLIP使用了两个独立的神经网络，一个用于处理图像（图像编码器），一个用于处理文本（文本编码器）。
+
+[[Blog]](https://openai.com/blog/clip/) [[Paper]](https://arxiv.org/abs/2103.00020) [[Model Card]](model-card.md) [[Colab]](https://colab.research.google.com/github/openai/clip/blob/master/notebooks/Interacting_with_CLIP.ipynb)
+
+
+功能：
+- 图像-文本相似性评估：CLIP可以计算任意图像和文本之间的相似性，找到最相关的图像或文本。
+- 零样本分类：通过对文本描述进行编码，CLIP可以在没有明确训练过的分类任务上进行图像分类。
+- 图像生成指导：在生成任务中，CLIP可以提供目标图像的特征指导，帮助生成高质量的图像。
+
+#### 令牌化(Tokenization)
+max 75个令牌
+
+#### 嵌入/标签(Embedding)
+ViT-L/14
+
+#### VAE（Variational Autoencoder）
+VAE是一种生成模型，用于学习数据的潜在表示并生成新数据。VAE包括两个主要部分：
+1. 编码器（Encoder）：将输入数据（例如图像）编码为潜在表示（通常是一个潜在向量）。
+2. 解码器（Decoder）：从潜在表示中重建输入数据。
+VAE的训练目标是最大化变分下界（Variational Lower Bound），以使重建的图像尽可能接近原始图像，并使潜在表示的分布接近先验分布（通常是标准正态分布）。
+
+#### why VAE? not CLIP
+CLIP和VAE的区别
+
+CLIP（Contrastive Language-Image Pre-Training）：
+
+- 功能：CLIP是一个用于理解图像和文本之间关系的多模态模型。它包含两个部分：图像编码器和文本编码器。
+- 作用：CLIP用于计算图像和文本之间的相似性。通过对比学习，CLIP能够将图像和文本映射到同一个特征空间中，从而可以进行相似性评估。
+限制：CLIP没有解码器部分，因此无法直接生成图像。它主要用于评估和指导生成过程，而不是直接参与图像生成。
+
+VAE（Variational Autoencoder）：
+
+功能：VAE是一种生成模型，用于学习数据的潜在表示，并能够从潜在表示生成新数据。VAE包含编码器和解码器两部分。
+作用：在Stable Diffusion中，VAE用于将图像编码为潜在向量（编码器），并从潜在向量生成图像（解码器）。
+优势：VAE的解码器部分在图像生成过程中起关键作用，能够从扩散模型生成的潜在表示重建图像。
+
+为什么使用VAE而不是CLIP进行解码
+
+CLIP没有解码器部分，所以它不能直接从潜在表示生成图像。CLIP的主要作用是提供文本和图像之间的相似性指导。例如，在生成过程中，CLIP可以帮助确保生成的图像与给定的文本描述相符，但实际的图像生成和解码过程需要依赖其他模型（如VAE）。
+
+总结
+
+在Stable Diffusion中，VAE的解码器用于将扩散模型生成的潜在表示转化为图像。CLIP则用于提供文本-图像相似性指导，确保生成的图像符合文本描述。由于CLIP缺乏解码器部分，Stable Diffusion使用VAE来完成图像的实际生成。
 
 ### 版本
 #### SD 3
@@ -274,6 +348,217 @@ Model:
 - 将`CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors`放入`models\clip_vision`中
 - 将`ip-adapter-plus_sdxl_vit-h.safetensors`放入`models\ipadapter`中(if folder not exist, create one)
 
+
+## 混元-DiT
+
+[Project](https://dit.hunyuan.tencent.com/) | [Paper](https://arxiv.org/abs/2405.08748) | [Model](https://huggingface.co/Tencent-Hunyuan/HunyuanDiT) | [Code](https://github.com/tencent/HunyuanDiT)
+
+混元-DiT是腾讯提出的一个支持中英文生成图片的模型。
+
+### CLIP model
+使用了一种bilingual CLIP。
+
+在`hydit/inference.py`中，有：
+```python
+#...
+from transformers import BertModel, BertTokenizer
+# ...
+from .diffusion.pipeline import StableDiffusionPipeline
+# ...
+
+def get_pipeline(args, vae, text_encoder, tokenizer, model, device, rank,
+                 embedder_t5, infer_mode, sampler=None):
+    #...
+    pipeline = StableDiffusionPipeline(vae=vae,
+                                       text_encoder=text_encoder,
+                                       tokenizer=tokenizer,
+                                       unet=model,
+                                       scheduler=scheduler,
+                                       feature_extractor=None,
+                                       safety_checker=None,
+                                       requires_safety_checker=False,
+                                       progress_bar_config=progress_bar_config,
+                                       embedder_t5=embedder_t5,
+                                       infer_mode=infer_mode,
+                                       )
+
+    pipeline = pipeline.to(device)
+
+    return pipeline, sampler
+# ...
+class End2End(object):
+    def __init__(self, args, models_root_path):
+        # ...
+        # ========================================================================
+        logger.info(f"Loading CLIP Text Encoder...")
+        text_encoder_path = self.root / "clip_text_encoder"
+        self.clip_text_encoder = BertModel.from_pretrained(str(text_encoder_path), False, revision=None).to(self.device)
+        logger.info(f"Loading CLIP Text Encoder finished")
+
+        # ========================================================================
+        logger.info(f"Loading CLIP Tokenizer...")
+        tokenizer_path = self.root / "tokenizer"
+        self.tokenizer = BertTokenizer.from_pretrained(str(tokenizer_path))
+        logger.info(f"Loading CLIP Tokenizer finished")
+        # ...
+        self.pipeline, self.sampler = self.load_sampler()
+        # ...
+
+    def load_sampler(self, sampler=None):
+        pipeline, sampler = get_pipeline(self.args,
+                                         self.vae,
+                                         self.clip_text_encoder,
+                                         self.tokenizer,
+                                         self.model,
+                                         device=self.device,
+                                         rank=0,
+                                         embedder_t5=self.embedder_t5,
+                                         infer_mode=self.infer_mode,
+                                         sampler=sampler,
+                                         )
+        return pipeline, sampler
+    # ...
+    def predict(self,
+                user_prompt,
+                height=1024,
+                width=1024,
+                seed=None,
+                enhanced_prompt=None,
+                negative_prompt=None,
+                infer_steps=100,
+                guidance_scale=6,
+                batch_size=1,
+                src_size_cond=(1024, 1024),
+                sampler=None,
+                ):
+        # ...
+
+        samples = self.pipeline(
+            height=target_height,
+            width=target_width,
+            prompt=prompt,
+            negative_prompt=negative_prompt,
+            num_images_per_prompt=batch_size,
+            guidance_scale=guidance_scale,
+            num_inference_steps=infer_steps,
+            image_meta_size=image_meta_size,
+            style=style,
+            return_dict=False,
+            generator=generator,
+            freqs_cis_img=freqs_cis_img,
+            use_fp16=self.args.use_fp16,
+            learn_sigma=self.args.learn_sigma,
+        )[0]
+        gen_time = time.time() - start_time
+        logger.debug(f"Success, time: {gen_time}")
+
+        return {
+            'images': samples,
+            'seed': seed,
+        }
+```
+在`hydit/diffusion/pipeline.py`中，有：
+```python
+# ...
+from diffusers.pipelines.pipeline_utils import DiffusionPipeline
+# ...
+class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, LoraLoaderMixin, FromSingleFileMixin):
+    # ...
+    def __init__(
+        self,
+        vae: AutoencoderKL,
+        text_encoder: Union[BertModel, CLIPTextModel],
+        tokenizer: Union[BertTokenizer, CLIPTokenizer],
+        unet: Union[HunYuanDiT, UNet2DConditionModel],
+        scheduler: KarrasDiffusionSchedulers,
+        safety_checker: StableDiffusionSafetyChecker,
+        feature_extractor: CLIPImageProcessor,
+        requires_safety_checker: bool = True,
+        progress_bar_config: Dict[str, Any] = None,
+        embedder_t5=None,
+        infer_mode='torch',
+    ):
+        super().__init__()
+        # ...
+        self.register_modules(
+            vae=vae,
+            text_encoder=text_encoder,
+            tokenizer=tokenizer,
+            unet=unet,
+            scheduler=scheduler,
+            safety_checker=safety_checker,
+            feature_extractor=feature_extractor,
+        )
+        # ...
+    @torch.no_grad()
+    @replace_example_docstring(EXAMPLE_DOC_STRING)
+    def __call__(
+            self,
+            height: int,
+            width: int,
+            prompt: Union[str, List[str]] = None,
+            num_inference_steps: Optional[int] = 50,
+            guidance_scale: Optional[float] = 7.5,
+            negative_prompt: Optional[Union[str, List[str]]] = None,
+            num_images_per_prompt: Optional[int] = 1,
+            eta: Optional[float] = 0.0,
+            generator: Optional[Union[torch.Generator, List[torch.Generator]]] = None,
+            latents: Optional[torch.FloatTensor] = None,
+            prompt_embeds: Optional[torch.FloatTensor] = None,
+            prompt_embeds_t5: Optional[torch.FloatTensor] = None,
+            negative_prompt_embeds: Optional[torch.FloatTensor] = None,
+            negative_prompt_embeds_t5: Optional[torch.FloatTensor] = None,
+            output_type: Optional[str] = "pil",
+            return_dict: bool = True,
+            callback: Optional[Callable[[int, int, torch.FloatTensor, torch.FloatTensor], None]] = None,
+            callback_steps: int = 1,
+            cross_attention_kwargs: Optional[Dict[str, Any]] = None,
+            guidance_rescale: float = 0.0,
+            image_meta_size: Optional[torch.LongTensor] = None,
+            style: Optional[torch.LongTensor] = None,
+            progress: bool = True,
+            use_fp16: bool = False,
+            freqs_cis_img: Optional[tuple] = None,
+            learn_sigma: bool = True,
+    ):
+        # ...
+```
+
+再后面查下去就到diffuser内部库了（用了很多继承的变量和方法），综上一顿瞎分析可知，如果想单独使用“CLIP”模型，先下载[Model](https://huggingface.co/Tencent-Hunyuan/HunyuanDiT) 中`clip_text_encoder`和`tokenizer`的模型：
+```python
+import torch
+from transformers import BertTokenizer, BertModel
+
+# 设置模型和Tokenizer的路径
+model_dir = "hunyuanDiT/clip_text_encoder"  # 包含config.json和pytorch_model.bin的目录
+tokenizer_dir = "hunyuanDiT/tokenizer"  # 包含tokenizer文件的目录
+
+# 加载Tokenizer和模型
+tokenizer = BertTokenizer.from_pretrained(tokenizer_dir)
+model = BertModel.from_pretrained(model_dir)
+
+# 准备输入文本
+text = "你好，世界！"
+inputs = tokenizer(text, return_tensors="pt", max_length=512, truncation=True, padding="max_length")
+
+# 进行推理
+with torch.no_grad():
+    outputs = model(**inputs)
+
+# 输出结果
+last_hidden_state = outputs.last_hidden_state
+print(last_hidden_state)
+print("Shape:", last_hidden_state.shape)
+
+
+```
+
+在`dialoggen/llava/model/multimodal_encoder/clip_encoder.py`中
+```python
+from transformers import CLIPVisionModel, CLIPImageProcessor, CLIPVisionConfig
+
+```
+
 ## 平面设计
 [ArchiGAN](https://developer.nvidia.com/blog/archigan-generative-stack-apartment-building-design/?linkId=70968833)
 
@@ -307,11 +592,40 @@ Depth Map
 
 DreamScene: [Project](https://dreamscene-project.github.io/) | [Paper](https://arxiv.org/abs/2404.03575) | [Code](https://github.com/DreamScene-Project/DreamScene)
 
+DreamScene360: [Paper](https://arxiv.org/abs/2404.06903)
+
 Text2Room: [Project](https://lukashoel.github.io/text-to-room/) | [Code](https://github.com/lukasHoel/text2room)
 
 Text2NeRF: [Project](https://eckertzhang.github.io/Text2NeRF.github.io/) | [Code](https://github.com/eckertzhang/Text2NeRF)
 
-LGM: [Project](https://me.kiui.moe/lgm/) | [Paper](https://arxiv.org/abs/2402.05054) | [Demo](https://huggingface.co/spaces/ashawkey/LGM)
+GaussianCube: [Project](https://gaussiancube.github.io/) | [Paper](https://arxiv.org/abs/2403.19655) | [Code](https://github.com/GaussianCube/GaussianCube)
+
+### CAT3D
+[Project](https://cat3d.github.io/) | [Paper](https://arxiv.org/abs/2405.10314)
+
+之前的工作是侧重于如何更好地重建模型/提升单图重建模型的质量，但这篇文章的侧重点是如何通过diffusion model 产生更多视角的图像，解决最大的痛点。
+
+<div class="theme-image">
+  <img src="./assets/CAT3D.png" alt="Light Mode Image" class="light-mode">
+  <img src="./assets/dark_CAT3D.png" alt="Dark Mode Image" class="dark-mode">
+</div>
+
+CAT3D has two stages:
+
+(1) generate a large set of synthetic views from a **multi-view latent diffusion model** conditioned on the input views alongside
+the camera poses of target views;
+
+(2) run a **robust 3D reconstruction pipeline** on the observed and
+generated views to learn a NeRF representation.
+
+CAT3D最终可以通过多张图像、单张图像或纯文本生成3D模型。
+
+### LGM
+[Project](https://me.kiui.moe/lgm/) | [Paper](https://arxiv.org/abs/2402.05054) | [Demo](https://huggingface.co/spaces/ashawkey/LGM)
+
+推荐环境：CUDA 11.8以上
+
+
 
 ## 动物动作的生成
 
