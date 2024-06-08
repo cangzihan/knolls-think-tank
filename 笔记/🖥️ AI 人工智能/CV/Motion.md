@@ -4,6 +4,24 @@ tags:
   - Computer Vision
 ---
 
+<style>
+html.dark .light-mode {
+  display: none;
+}
+
+html.dark .dark-mode {
+  display: block;
+}
+
+html:not(.dark) .light-mode {
+  display: block;
+}
+
+html:not(.dark) .dark-mode {
+  display: none;
+}
+</style>
+
 # Motion
 
 https://github.com/facebookresearch/SlowFast/blob/main/INSTALL.md
@@ -14,7 +32,10 @@ https://github.com/facebookresearch/SlowFast/blob/main/INSTALL.md
 ### 原理
 
 SlowFast是Facebook一篇视频识别论文，受到灵长类动物的视网膜神经细胞种类的启发（大约80%的细胞（P-cells）以低频运作，可以识别细节信息；而大约20%的细胞（M-cells）则以高频运作，对时间的变化敏感）
-![img](assets/slow_fast.png)
+<div class="theme-image">
+  <img src="./assets/slow_fast.png" alt="Light Mode Image" class="light-mode">
+  <img src="./assets/dark_slow_fast.png" alt="Dark Mode Image" class="dark-mode">
+</div>
 
 ### Install
 ```shell

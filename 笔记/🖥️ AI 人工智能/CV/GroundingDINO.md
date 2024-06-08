@@ -4,15 +4,6 @@ tags:
   - Computer Vision
 ---
 
-# Grounding DINO
-
-[Paper](https://arxiv.org/pdf/2303.05499) | [grounding-dino-tiny](https://huggingface.co/IDEA-Research/grounding-dino-tiny/tree/main)
-| [grounding-dino-base](https://huggingface.co/IDEA-Research/grounding-dino-base)
-
-Open set object detection
-![img](assets/open_set.png)
-
-
 <style>
 html.dark .light-mode {
   display: none;
@@ -30,6 +21,18 @@ html:not(.dark) .dark-mode {
   display: none;
 }
 </style>
+
+# Grounding DINO
+
+[Paper](https://arxiv.org/pdf/2303.05499) | [grounding-dino-tiny](https://huggingface.co/IDEA-Research/grounding-dino-tiny/tree/main)
+| [grounding-dino-base](https://huggingface.co/IDEA-Research/grounding-dino-base)
+
+Open set object detection
+<div class="theme-image">
+  <img src="./assets/open_set.png" alt="Light Mode Image" class="light-mode">
+  <img src="./assets/dark_open_set.png" alt="Dark Mode Image" class="dark-mode">
+</div>
+
 
 Framework
 <div class="theme-image">
