@@ -148,6 +148,43 @@ SD Turbo的大号版(高质量)
 [Code](https://github.com/CompVis/stable-diffusion)(2022.8)
 - 尺寸: 512x512
 
+### 采样器
+#### 分类
+
+| 旧采样器                                                          | DPM采样器                                                                                                             | 新采样器
+|---------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------|------------------|
+| LMS<br>LMS Karras<br>Heun<br>Euler<br>Euler a<br>DDIM<br>PLMS | DPM2<br>DPM2a<br>DPM++2S a<br>DPM++2M<br>DPM++SDE<br>DPM++2M SDE<br>DPM++3M SDE<br>...<br>DPM fast<br>DPM adaptive | UniPC<br>Restart |
+
+#### 旧采样器
+推荐Euler, Euler a
+
+a代表祖先采样器，(迭代噪声)不收敛
+
+#### DPM采样器
+- **DPM++2M Karras**
+最推荐算法，收敛，速度快，质量OK
+
+- DPM++SDE Karras
+随机微分方程算法
+
+- DPM++2M SDE Exponential(WebUI1.6 新增)
+指数算法，不收敛，细节少些，画面柔和、干净
+
+- DPM++3M SDE Karas(WebUI1.6 新增)
+速度和2M一样，需要更多采样步数，调低CFG，采样步数>30步效果更好
+
+- DPM++3M SDE Exponential(WebUI1.6 新增)
+同上
+
+#### 新采样器
+- UniPC (2023)
+统一预测校正器，兼容性很好收敛，10步左右就能生成可用画面。
+
+- Restart(WebUI1.6 新增)
+每步渲染长些，但只需很少的采样步数
+
+在WebUI中可以在【设置】-【Sampler parameters】设定显示和隐藏采样器
+
 ### Comfy UI
 
 #### 共享路径设置
@@ -279,6 +316,21 @@ git clone https://github.com/Akegarasu/lora-scripts.git
 # chmod a+x train.ps1
 ./train.ps1
 ```
+
+### LCM
+[Project](https://latent-consistency-models.github.io/) | [Paper](https://arxiv.org/abs/2310.04378) | [Code](https://github.com/luosiallen/latent-consistency-model) | [Model](https://huggingface.co/SimianLuo/LCM_Dreamshaper_v7)
+
+LCM-LoRA: [Paper](https://arxiv.org/abs/2311.05556) | [Model](https://huggingface.co/latent-consistency/lcm-lora-sdv1-5)
+
+LCM可以让迭代步数进一步减少到7
+
+#### 使用方法
+- WebUI: https://www.bilibili.com/video/BV1Q94y1E7uc
+- ComfyUI: https://www.bilibili.com/video/BV1D94y1P7FM
+
+参数：step:4 cfg:1.5 采样器:lcm
+
+可以配合AnimateDiff使用
 
 ## SD & 3D Model
 
