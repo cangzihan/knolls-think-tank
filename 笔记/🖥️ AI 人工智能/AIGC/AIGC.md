@@ -652,6 +652,8 @@ Text2NeRF: [Project](https://eckertzhang.github.io/Text2NeRF.github.io/) | [Code
 
 GaussianCube: [Project](https://gaussiancube.github.io/) | [Paper](https://arxiv.org/abs/2403.19655) | [Code](https://github.com/GaussianCube/GaussianCube)
 
+ReconFusion: [Project](https://reconfusion.github.io/)
+
 ### CAT3D
 [Project](https://cat3d.github.io/) | [Paper](https://arxiv.org/abs/2405.10314)
 

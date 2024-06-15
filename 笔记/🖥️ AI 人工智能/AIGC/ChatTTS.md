@@ -24,3 +24,8 @@ tags:
 
 商业Idea:
 - (配合GPT4创作/直接下载现成的/翻译国外的)短篇恐怖故事
+
+## Other
+SeedTTS: https://bytedancespeech.github.io/seedtts_tech_report/#full-diffusion-samples
+
+[Paper](https://arxiv.org/pdf/2406.02430)

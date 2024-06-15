@@ -161,6 +161,9 @@ for result in results:
 ```
 
 ## YOLO-World
+
+https://docs.ultralytics.com/models/yolo-world/
+
 Computer vision projects often involve spending a lot of time annotating data and training **object detection** models.
 But, that might soon be a thing of the past. Tencent’s AI Lab released **YOLO-World**, a real-time, open-vocabulary object detection model, on January 31st, 2024.
 YOLO-World is a zero-shot model, meaning you can run object detection inferences on images without having to train it.
@@ -190,3 +193,118 @@ results[0].save(filename='result.jpg')
 ```
 散了吧，没那么神。都区分不了女人，男人，还是用YOLO v8吧
 
+### 基于YOLO实现的自动化标注
+```python
+from ultralytics import YOLO
+import numpy as np
+import os
+from xml.etree import ElementTree as ET
+from xml.dom import minidom
+import tqdm
+
+img_label_path = "XXXXX"
+verbose = False
+
+def remove_empty_lines(file_path):
+    try:
+        # 读取文件内容
+        with open(file_path, 'r') as file:
+            lines = file.readlines()
+
+        # 删除空行
+        non_empty_lines = [line for line in lines if line.strip()]
+
+        # 保存修改后的内容
+        with open(file_path, 'w') as file:
+            file.writelines(non_empty_lines)
+
+        #print(f"Empty lines removed from {file_path}")
+    except Exception as e:
+        print(f"Error: {e}")
+
+
+def prettify(elem):
+    """Return a pretty-printed XML string for the Element."""
+    rough_string = ET.tostring(elem, 'utf-8')
+    reparsed = minidom.parseString(rough_string)
+    return reparsed.toprettyxml(indent="  ")
+
+
+def add_object_to_annotation(xml_path, predictions, class_names):
+    tree = ET.parse(xml_path)
+    root = tree.getroot()
+
+    for prediction, class_name in zip(predictions, class_names):
+        if class_name == 'person':
+            obj = ET.Element('object')
+
+            name = ET.Element('name')
+            name.text = class_name
+            obj.append(name)
+
+            bndbox = ET.Element('bndbox')
+            xmin = ET.Element('xmin')
+            xmin.text = str(prediction[0])
+            bndbox.append(xmin)
+
+            ymin = ET.Element('ymin')
+            ymin.text = str(prediction[1])
+            bndbox.append(ymin)
+
+            xmax = ET.Element('xmax')
+            xmax.text = str(prediction[2])
+            bndbox.append(xmax)
+
+            ymax = ET.Element('ymax')
+            ymax.text = str(prediction[3])
+            bndbox.append(ymax)
+
+            obj.append(bndbox)
+
+            root.append(obj)
+
+   # save_file = xml_path[:-len('.xml')]+'_new.xml'
+    save_file = xml_path
+    # Save the updated XML with pretty formatting
+    with open(save_file, 'w') as file:
+        file.write(prettify(root))
+
+    remove_empty_lines(save_file)
+
+
+if __name__ == '__main__':
+    files = os.listdir(img_label_path)
+    img_list = [f for f in files if '.jpg' in f]
+    annotation_list = [f for f in files if '.xml' in f and 'new' not in f]
+    img_list.sort()
+    annotation_list.sort()
+    print(len(img_list), len(annotation_list))
+
+    # Load a model
+    model = YOLO('yolov8x.pt')  # load an official model
+
+    for i in tqdm.tqdm(range(len(img_list))[27:]):
+        img_file = os.path.join(img_label_path, img_list[i])
+        # Predict with the model
+        result = model(img_file, verbose=verbose)[0]  # predict on an image
+
+        # Update the corresponding XML annotation
+        annotation_path = os.path.join(img_label_path, annotation_list[i])
+        predictions = [(int(box[0]), int(box[1]), int(box[2]), int(box[3])) for box in result.boxes.xyxy.cpu().numpy()]
+        class_names = [result.names[cls] for cls in result.boxes.cls.cpu().numpy()]
+        add_object_to_annotation(annotation_path, predictions, class_names)
+
+        if verbose:
+            #boxes = result.boxes.data.cpu().numpy().astype(np.uint16)  # Boxes object for bbox outputs
+            xyxy = result.boxes.xyxy.cpu().numpy().astype(np.uint16)
+            cls = result.boxes.cls.cpu().numpy().astype(np.uint16)
+            h = result.boxes.orig_shape[0]
+            w = result.boxes.orig_shape[1]
+            print("Processing", annotation_list[i])
+            print("width:%d, height:%d" % (w, h))
+            for i in range(len(xyxy)):
+                # person
+                if cls[i] == 0:
+                    print(xyxy[i], result.names[cls[i]])
+
+```

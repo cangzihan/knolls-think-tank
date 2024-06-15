@@ -161,6 +161,7 @@ High Definition Render Pipeline (HDRP)
 
 ### Text Mesh Pro
 中文支持：先把一个字体文件拖进Assets来，是Aa图标的字体，然后右键-【create】-【text mesh pro】-【第一个选项】创建F图标的字体。
+最简单的方法：直接下载中文字体的Unity包，然后导入package https://gitcode.com/wy-luke/Unity-TextMeshPro-Chinese-Characters-Set/tree/main/Fonts
 
 #### C井代码
 ```cs

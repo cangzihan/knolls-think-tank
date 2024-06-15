@@ -144,4 +144,84 @@ API最新价格：https://dashscope.aliyun.com/
 [Online](https://www.baichuan-ai.com/chat?from=%2Fhome) |
 [API](https://platform.baichuan-ai.com/docs/api)
 
+### API
 API最新价格：https://platform.baichuan-ai.com/price
+
+```python
+import os
+os.environ["all_proxy"] = ""
+
+import json
+import requests
+
+
+class Baichuan_turbo:
+    def __init__(self):
+        self.url = "https://api.baichuan-ai.com/v1/chat/completions"
+        self.api_key = "XXXXXXXXXX"
+
+    def call_llm(self, query, bc_model="Baichuan2-Turbo", stream=False, verbose=True):
+        def end_sentence(sent):
+            if sent and (sent.endswith("……") or
+                         (sent.endswith("：") and len(sent) > 15) or
+                         (sent.endswith("，") and len(sent) > 15) or
+                         sent.endswith("。") or
+                         sent.endswith("！") or
+                         sent.endswith("？")):
+                return True
+            return False
+        if not query:
+            print('query is empty')
+            return ''
+        data = {
+            "model": bc_model,
+            "messages": query,
+            "stream": stream  # 流式
+        }
+
+        json_data = json.dumps(data)
+
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + self.api_key
+        }
+
+        response = requests.post(self.url, data=json_data, headers=headers, timeout=60, stream=True)
+
+        if response.status_code == 200:
+            if stream:
+                collected_messages = ''
+                if verbose:
+                    print("请求成功！")
+                    print("请求成功，X-BC-Request-Id:", response.headers.get("X-BC-Request-Id"))
+                for line in response.iter_lines():
+                    if line:
+                        if verbose:
+                            print(line.decode('utf-8'))
+                        rcv_data = line[6:]
+                        if b'{' in rcv_data:
+                           # print(json.loads(rcv_data)['choices'][0]['delta']['content'])
+                            chunk_content = json.loads(rcv_data)['choices'][0]['delta']['content']
+                            collected_messages += chunk_content.replace("\n", "")
+
+                            if end_sentence(collected_messages):
+                                yield collected_messages
+                                collected_messages = ''
+                            elif '。' in collected_messages and len(collected_messages) > 15:
+                                yield collected_messages.split('。')[0] + '。'
+                                collected_messages = collected_messages[collected_messages.index('。')+1:]
+                            elif '，' in collected_messages and len(collected_messages) > 20:
+                                yield collected_messages.split('，')[0] + '，'
+                                collected_messages = collected_messages[collected_messages.index('，')+1:]
+
+                if len(collected_messages) > 0:
+                    yield collected_messages
+                yield "[Done]"
+            else:
+                answers = json.loads(list(response.iter_lines())[0])['choices'][0]['message']['content']
+                return answers
+        else:
+            print("请求失败，状态码:", response.status_code)
+            print("请求失败，body:", response.text)
+            print("请求失败，X-BC-Request-Id:", response.headers.get("X-BC-Request-Id"))
+```

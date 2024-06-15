@@ -1084,5 +1084,8 @@ if __name__ == "__main__":
 pip install tiktoken matplotlib
 ```
 
+## GLM4
+[glm-4-9b-chat](https://huggingface.co/THUDM/glm-4-9b-chat)
+
 ## 其他
 XXXXXXX
