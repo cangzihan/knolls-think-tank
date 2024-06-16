@@ -118,6 +118,13 @@ Paper(soon)
 
 combines a [diffusion transformer](https://arxiv.org/abs/2212.09748) architecture and [flow matching](https://arxiv.org/abs/2210.02747).
 
+#### SDXL-Lightning
+[HuggingFace](https://huggingface.co/ByteDance/SDXL-Lightning) | [Paper](https://arxiv.org/abs/2402.13929) （2024.2）
+
+SDXL-Lightning是由字节跳动开发的一个项目，采用了创新的蒸馏策略，优化了扩散模型，实现了从文本到高分辨率图像的快速、高质量生成。
+
+在WebUI 1.9版本中，集成了SDXL-Lightning使用的sgm_uniform采样器（2024.4）
+
 #### SDXL Turbo
 [HuggingFace](https://huggingface.co/stabilityai/sdxl-turbo) | [Paper](https://stability.ai/research/adversarial-diffusion-distillation) (2023.12)
 SD Turbo的大号版(高质量)
@@ -128,9 +135,20 @@ SD Turbo的大号版(高质量)
 由SD2.1微调而来
 - 尺寸: 512x512(fix)
 
+#### SDXL
+[stable-diffusion-xl-base-1.0](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0)
+
 #### SDXL 0.9
 [HuggingFace](https://huggingface.co/stabilityai/stable-diffusion-xl-base-0.9) | [Paper](https://arxiv.org/abs/2307.01952)
-使用不同尺寸的图像训练（最高1024x1024）
+使用不同尺寸的图像训练（最高1024x1024)
+
+
+<div class="theme-image">
+  <img src="./assets/SDXL_pipeline.png" alt="Light Mode Image" class="light-mode">
+  <img src="./assets/dark_SDXL_pipeline.png" alt="Dark Mode Image" class="dark-mode">
+</div>
+
+SDXL模型更复杂一些，除了Base模型以外还包含Refiner模型（两个U-Net?）
 
 #### SD 2.0/2.1
 [SD2.1 HuggingFace](https://huggingface.co/stabilityai/stable-diffusion-2-1) (2.1:2022.12, 2.0: 2022.11)
@@ -331,6 +349,23 @@ LCM可以让迭代步数进一步减少到7
 参数：step:4 cfg:1.5 采样器:lcm
 
 可以配合AnimateDiff使用
+
+### SDXL-Lightning
+
+#### 使用方法
+在官方Model Card上有ComfyUI workflow供下载
+
+1. 直接使用大模型
+Checkpoint: sdxl_lighting_4step.safetensors
+Latent Image: 1024, 1024
+steps: 4
+cfg: 1.0
+sampler: euler
+scheduler: sgm_uniform
+
+2. 使用LoRA(如果使用的是non-SDXL base models)
+
+3. 1-step模型（不稳定）
 
 ## SD & 3D Model
 
