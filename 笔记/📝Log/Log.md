@@ -63,6 +63,15 @@ torchsde                  0.2.5
 torchvision               0.15.2+cu118
 tqdm                      4.65.0
 ```
+
+```
+torch                        2.0.1+cu117
+torchaudio                   2.0.2+cu117
+torchvision                  0.15.2+cu117
+triton                       2.0.0
+xformers                     0.0.20
+```
+
 CUDA 11.6 + Python 3.9.17 + 515.65.01 + 5.15.0-46-generic
 ```
 clip                      1.0
@@ -178,6 +187,8 @@ sudo cp cudnn-linux-x86_64-8.9.2.26_cuda11-archive/lib/libcudnn*    /usr/local/c
 sudo chmod a+r /usr/local/cuda-11.6/include/cudnn.h   /usr/local/cuda-11.6/lib64/libcudnn*
 echo "安完了"
 ```
+
+官网有最新安装教程：https://developer.nvidia.com/rdp/cudnn-download
 
 - 应用安装
 ```shell

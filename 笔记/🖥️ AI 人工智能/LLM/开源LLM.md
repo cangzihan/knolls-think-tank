@@ -454,7 +454,7 @@ Demo [Qwen1.5-72B-Chat](https://huggingface.co/spaces/Qwen/Qwen1.5-72B-Chat) | [
 
 14B [Qwen1.5-14B](https://huggingface.co/Qwen/Qwen1.5-14B) | [Qwen1.5-14B-Chat](https://huggingface.co/Qwen/Qwen1.5-14B-Chat)
 
-7B [Qwen-7B-Chat](https://huggingface.co/Qwen/Qwen-7B-Chat)
+7B [Qwen-7B-Chat](https://huggingface.co/Qwen/Qwen-7B-Chat) | [Qwen2-7B-Instruct](https://huggingface.co/Qwen/Qwen2-7B-Instruct)
 
 [CodeQwen1.5-7b-Chat](https://huggingface.co/spaces/Qwen/CodeQwen1.5-7b-Chat-demo)
 

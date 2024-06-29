@@ -369,6 +369,12 @@ public Button myButton;
 public Slider mySlider;
 ```
 
+## 材质
+### 高度图
+https://juejin.cn/post/7109778061574275109
+
+目前只有HDRP的材质支持直接使用高度图
+
 ## 其它
 
 ### Asset Store
@@ -378,6 +384,155 @@ public Slider mySlider;
 
 打开【Window】-【Asset Store】后会告诉你，Asset Store已经被移除。并说明了如何下载购买的assets，在【Window】-【Package Manager】中
 选择【My Assets】(+号右边那个下拉菜单)，然后等一会加载完就有了。
+
+### Websocket
+1. 安装 WebSocketSharp：
+下载 WebSocketSharp DLL 文件：`WebSocketSharp.dll` (可以在 https://www.nuget.org/ 中搜索)
+将 `WebSocketSharp.dll` 文件放入 Unity 项目的 Assets/Plugins 文件夹中。
+
+2. 编写 WebSocket 客户端脚本：
+创建一个名为 `WebSocketClient.cs` 的脚本，并将其附加到一个空的 GameObject 上。
+```cs
+using UnityEngine;
+using WebSocketSharp;
+using TMPro;
+
+public class WebSocketClient : MonoBehaviour
+{
+    private WebSocket ws;
+    public TMP_InputField InputField;
+    public TMP_Text OutputText;
+
+    void Start()
+    {
+        ws = new WebSocket("ws://localhost:5000/echo");
+
+        ws.OnOpen += (sender, e) =>
+        {
+            Debug.Log("WebSocket connection opened");
+        };
+
+        ws.OnMessage += (sender, e) =>
+        {
+            Debug.Log("WebSocket message received: " + e.Data);
+            UpdateOutputText(e.Data);
+        };
+
+        ws.OnClose += (sender, e) =>
+        {
+            Debug.Log("WebSocket connection closed");
+        };
+
+        ws.OnError += (sender, e) =>
+        {
+            Debug.LogError("WebSocket error: " + e.Message);
+        };
+
+        ws.Connect();
+    }
+
+    void UpdateOutputText(string message)
+    {
+        // Update the UI text in the main thread
+        UnityMainThreadDispatcher.Instance().Enqueue(() =>
+        {
+            OutputText.text += "\n" + message;
+        });
+    }
+
+    public void SendMessage()
+    {
+        if (ws != null && ws.IsAlive)
+        {
+            string message = InputField.text;
+            ws.Send(message);
+        }
+    }
+
+    void OnDestroy()
+    {
+        if (ws != null)
+        {
+            ws.Close();
+            ws = null;
+        }
+    }
+}
+```
+
+3. 设置 Unity 主线程调度器：
+Unity 不允许在非主线程中直接修改 UI 元素，因此需要一个调度器来将更新操作切换回主线程。可以使用 `UnityMainThreadDispatcher` 脚本，下面是如何实现的示例：
+
+创建一个名为 `UnityMainThreadDispatcher.cs` 的脚本：
+```cs
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class UnityMainThreadDispatcher : MonoBehaviour
+{
+    private static readonly Queue<Action> _executionQueue = new Queue<Action>();
+
+    private static UnityMainThreadDispatcher _instance = null;
+
+    public static UnityMainThreadDispatcher Instance()
+    {
+        if (!_instance)
+        {
+            throw new Exception("UnityMainThreadDispatcher not initialized.");
+        }
+        return _instance;
+    }
+
+    void Awake()
+    {
+        if (_instance == null)
+        {
+            _instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    public void Enqueue(IEnumerator action)
+    {
+        lock (_executionQueue)
+        {
+            _executionQueue.Enqueue(() =>
+            {
+                StartCoroutine(action);
+            });
+        }
+    }
+
+    public void Enqueue(Action action)
+    {
+        Enqueue(ActionWrapper(action));
+    }
+
+    IEnumerator ActionWrapper(Action action)
+    {
+        action();
+        yield return null;
+    }
+
+    void Update()
+    {
+        lock (_executionQueue)
+        {
+            while (_executionQueue.Count > 0)
+            {
+                _executionQueue.Dequeue().Invoke();
+            }
+        }
+    }
+}
+```
+- 在 Unity 编辑器中创建一个空的 GameObject 并将 `UnityMainThreadDispatcher` 脚本附加到该对象上。
 
 ## Project
 ### WFC 2019

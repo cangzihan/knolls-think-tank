@@ -160,6 +160,50 @@ for result in results:
     cv2.destroyAllWindows()
 ```
 
+### TensorRT加速
+
+#### 1.安装 NVIDIA TensorRT
+1. 前往[NVIDIA TensorRT 下载页面](https://developer.nvidia.com/tensorrt)。
+2. 根据你的 CUDA 版本和操作系统下载合适的 TensorRT tar 包。
+3. 解压并安装 TensorRT：
+```shell
+tar -xvzf TensorRT-<version>.Linux.x86_64-gnu.cuda-<cuda_version>.cudnn<...>.tar.gz
+cd TensorRT-<version>
+sudo cp include/* /usr/include/
+
+# 或者不执行这步，将环境变量指向解压的路径，如果系统空间不够的话
+sudo cp lib/* /usr/lib/
+```
+或者？
+```shell
+pip install nvidia-pyindex
+pip install nvidia-tensorrt
+```
+
+#### 2.设置环境变量
+确保将 TensorRT 库的路径添加到环境变量中：
+```shell
+# 或者路径变为解压的路径
+echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib' >> ~/.bashrc
+source ~/.bashrc
+```
+
+#### 3.重新安装`ultralytics`库
+```shell
+pip install ultralytics --upgrade
+```
+
+#### 4.导出 YOLOv8 模型为 TensorRT 引擎
+```shell
+from ultralytics import YOLO
+
+# 加载 YOLOv8 模型
+model = YOLO('yolov8s.pt')
+
+# 导出模型为 TensorRT 引擎
+model.export(format='engine')
+```
+
 ## YOLO-World
 
 https://docs.ultralytics.com/models/yolo-world/

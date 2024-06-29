@@ -108,3 +108,138 @@ cv2.imwrite("output.jpg", image_cv)
 
 ```
 
+### 基于DINO实现的自动化标注
+```python
+import os
+os.environ["all_proxy"] = ""
+
+import cv2
+import numpy as np
+
+import torch
+from PIL import Image
+from transformers import AutoProcessor, AutoModelForZeroShotObjectDetection
+
+from xml.etree import ElementTree as ET
+from xml.dom import minidom
+import tqdm
+
+prompt = ["person", "car"]
+model_id = "IDEA-Research/grounding-dino-tiny"
+
+img_label_path = "XXXXX"
+verbose = False
+thr = 0.42
+
+device = "cuda"
+#device = "cpu"
+
+processor = AutoProcessor.from_pretrained(model_id)
+model = AutoModelForZeroShotObjectDetection.from_pretrained(model_id).to(device)  # 这个语句会使imshow失效
+
+
+def remove_empty_lines(file_path):
+    try:
+        # 读取文件内容
+        with open(file_path, 'r') as file:
+            lines = file.readlines()
+
+        # 删除空行
+        non_empty_lines = [line for line in lines if line.strip()]
+
+        # 保存修改后的内容
+        with open(file_path, 'w') as file:
+            file.writelines(non_empty_lines)
+
+        #print(f"Empty lines removed from {file_path}")
+    except Exception as e:
+        print(f"Error: {e}")
+
+
+def prettify(elem):
+    """Return a pretty-printed XML string for the Element."""
+    rough_string = ET.tostring(elem, 'utf-8')
+    reparsed = minidom.parseString(rough_string)
+    return reparsed.toprettyxml(indent="  ")
+
+
+def add_object_to_annotation(xml_path, predictions, class_names, img_shape, fname):
+    tree = ET.parse("template.xml")
+    root = tree.getroot()
+
+   # print(root.findall('path')[0].text)
+    size_element = root.find('size')
+    width_element = size_element.find('width')
+    width_element.text = str(img_shape[0])
+    height_element = size_element.find('height')
+    height_element.text = str(img_shape[1])
+
+    file_name_element = root.find('filename')
+    file_name_element.text = fname
+
+
+    for prediction, class_name in zip(predictions, class_names):
+        if True:
+            obj = ET.Element('object')
+
+            name = ET.Element('name')
+            name.text = class_name
+            obj.append(name)
+
+            bndbox = ET.Element('bndbox')
+            xmin = ET.Element('xmin')
+            xmin.text = str(prediction[0])
+            bndbox.append(xmin)
+
+            ymin = ET.Element('ymin')
+            ymin.text = str(prediction[1])
+            bndbox.append(ymin)
+
+            xmax = ET.Element('xmax')
+            xmax.text = str(prediction[2])
+            bndbox.append(xmax)
+
+            ymax = ET.Element('ymax')
+            ymax.text = str(prediction[3])
+            bndbox.append(ymax)
+
+            obj.append(bndbox)
+
+            root.append(obj)
+
+   # save_file = xml_path[:-len('.xml')]+'_new.xml'
+    save_file = xml_path
+    # Save the updated XML with pretty formatting
+    with open(save_file, 'w+') as file:
+        file.write(prettify(root))
+
+    remove_empty_lines(save_file)
+
+
+files = os.listdir(img_label_path)
+img_list = [f for f in files if '.jpg' in f]
+img_list.sort()
+text = ". ".join(prompt) + '.'
+
+for i in tqdm.tqdm(range(len(img_list))[:]):
+    img_file = os.path.join(img_label_path, img_list[i])
+    image = Image.open(img_file)
+
+    inputs = processor(images=image, text=text, return_tensors="pt").to(device)
+    with torch.no_grad():
+        outputs = model(**inputs)
+
+    results = processor.post_process_grounded_object_detection(
+        outputs,
+        inputs.input_ids,
+        box_threshold=thr,
+        text_threshold=0.3,
+        target_sizes=[image.size[::-1]]
+    )
+
+    # Update the corresponding XML annotation
+    annotation_path = os.path.join(img_label_path, img_list[i].replace('.jpg', '.xml'))
+    predictions = results[0]['boxes'].cpu().numpy().astype(np.float16)
+    class_names = results[0]['labels']
+    add_object_to_annotation(annotation_path, predictions, class_names, image.size, img_list[i])
+```

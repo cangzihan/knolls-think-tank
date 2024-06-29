@@ -14,15 +14,18 @@ tags:
 模型信息
 
 |          | Model        | Web | API |
-|----------|--------------|---| --- |
-| ChatGPT  | GPT-4        | ✔ | ✔ |
-|          | GPT-3.5      | ✔ | ✔ |
-| Baichuan | Baichuan2    | ✔ | ✔ |
-|          | Baichuan-NPC |   | ✔ |
-| 通义千问     | 通义千问 | ✔ | ✔ |
+|----------|--------------|---|-----|
+| ChatGPT  | GPT-4        | ✔ | ✔   |
+|          | GPT-4o       | ✔ | ✔   |
+|          | GPT-4v       | ✔ |     |
+|          | GPT-3.5      | ✔ | ✔   |
+| Baichuan | Baichuan2    | ✔ | ✔   |
+|          | Baichuan-NPC | ✔  | ✔   |
+| 通义千问     | 通义千问         | ✔ | ✔   |
 
 
-API价格（2024.4.22）
+## API价格
+统计日期 2024.6.23
 
 <table>
   <tr>
@@ -31,9 +34,17 @@ API价格（2024.4.22）
     <th>价格</th>
   </tr>
   <tr>
-    <td rowspan="4">ChatGPT</td>
-    <td>gpt-4</td>
+    <td rowspan="6">ChatGPT</td>
+    <td>gpt-4o / gpt-4o-2024-05-13</td>
+    <td>Input: $0.005 / 1K tokens <br>	Output: $0.015 / 1K tokens</td>
+  </tr>
+  <tr>
+    <td>gpt-4 </td>
     <td>Input: $0.03 / 1K tokens <br>	Output: $0.06 / 1K tokens</td>
+  </tr>
+  <tr>
+    <td>gpt-4-turbo / -2024-04-09 </td>
+    <td>Input: $0.01 / 1K tokens <br>	Output: $0.03 / 1K tokens</td>
   </tr>
   <tr>
     <td>gpt-4-32k</td>
@@ -48,9 +59,21 @@ API价格（2024.4.22）
     <td>Input: $0.0015 / 1K tokens <br>	Output: $0.0020 / 1K tokens</td>
   </tr>
   <tr>
-    <td rowspan="5">Baichuan</td>
+    <td rowspan="8">Baichuan</td>
+    <td>Baichuan4</td>
+    <td> ￥0.1 / 1K tokens</td>
+  </tr>
+  <tr>
+    <td>Baichuan3-Turbo</td>
+    <td> ￥0.012 / 1K tokens</td>
+  </tr>
+  <tr>
     <td>Baichuan2-Turbo</td>
     <td> ￥0.008 / 1K tokens</td>
+  </tr>
+  <tr>
+    <td>Baichuan3-Turbo-128k</td>
+    <td> ￥0.024 / 1K tokens</td>
   </tr>
   <tr>
     <td>Baichuan2-Turbo-192k</td>

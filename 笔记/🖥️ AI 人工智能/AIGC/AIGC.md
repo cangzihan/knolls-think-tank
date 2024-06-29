@@ -40,6 +40,7 @@ https://github.com/AUTOMATIC1111/stable-diffusion-webui
 WebUI插件：
 - LoRA: https://github.com/kohya-ss/sd-webui-additional-networks
 - ControlNet: https://github.com/Mikubill/sd-webui-controlnet
+- 腾讯ControlNet模型: [T2I-Adapter](https://huggingface.co/TencentARC/T2I-Adapter/tree/main/models) | [t2i-adapter-lineart-sdxl](https://huggingface.co/TencentARC/t2i-adapter-lineart-sdxl-1.0)
 - IP2P(非ControlNet版): https://github.com/Klace/stable-diffusion-webui-instruct-pix2pix
 - AnimateDiff: https://github.com/continue-revolution/sd-webui-animatediff
 
@@ -50,7 +51,7 @@ pip install -r requirements.txt  -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
 ComfyUI 插件:
 - 插件管理器: https://github.com/ltdrdata/ComfyUI-Manager
-- lllyasviel/ControlNet:
+- lllyasviel/ControlNet [安装](#controlnet-aux):
   1. https://huggingface.co/lllyasviel/Annotators/tree/5bc80eec2b4fddbb743c1e9329e3bd94b2cae14d
   2. https://huggingface.co/dhkim2810/MobileSAM/tree/main
 
@@ -114,9 +115,9 @@ CLIP没有解码器部分，所以它不能直接从潜在表示生成图像。C
 
 ### 版本
 #### SD 3
-Paper(soon)
+[Paper](https://arxiv.org/pdf/2403.03206)
 
-combines a [diffusion transformer](https://arxiv.org/abs/2212.09748) architecture and [flow matching](https://arxiv.org/abs/2210.02747).
+combines a [diffusion transformer](https://arxiv.org/abs/2212.09748) architecture and [flow matching](https://arxiv.org/abs/2210.02747). T5 是一个seq-to-seq模型。
 
 #### SDXL-Lightning
 [HuggingFace](https://huggingface.co/ByteDance/SDXL-Lightning) | [Paper](https://arxiv.org/abs/2402.13929) （2024.2）
@@ -137,6 +138,19 @@ SD Turbo的大号版(高质量)
 
 #### SDXL
 [stable-diffusion-xl-base-1.0](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0)
+
+- DreamShaper XL Alpha 2
+[Model](https://civitai.com/models/112902?modelVersionId=126688)
+
+在模型页面上可以看到，其使用的Basemodel 是SDXL 1.0
+
+What does it do better than SDXL1.0?
+- No need for refiner. Just do highres fix (upscale+i2i)
+- Better looking people
+- Less blurry edges
+- 75% better dragons 🐉
+- Better NSFW
+
 
 #### SDXL 0.9
 [HuggingFace](https://huggingface.co/stabilityai/stable-diffusion-xl-base-0.9) | [Paper](https://arxiv.org/abs/2307.01952)
@@ -240,6 +254,83 @@ folder_names_and_paths["vae_approx"] = ([os.path.join(models_dir, "vae_approx")]
 folder_names_and_paths["controlnet"] = ([os.path.join(share_path, "controlnet"), os.path.join(models_dir, "t2i_adapter")], supported_pt_extensions)
 ```
 
+#### comfyui-various
+https://github.com/jamesWalker55/comfyui-various/tree/main
+
+`match`语句在Python3.10版本以下引发的报错`SyntaxError: invalid syntax`问题解决方案：
+
+在`comfyui_primitive_ops.py`的`line280`中
+```python
+    if from_right:
+        splits = source.rsplit(split_by, 1)
+    else:
+        splits = source.split(split_by, 1)
+    #match splits:
+    #    case a, b:
+    #        return (a, b)
+    #    case a:
+    #        return (a, "")
+    # 检查 splits 是否是一个包含两个元素的序列
+    if isinstance(splits, (list, tuple)) and len(splits) == 2:
+        a, b = splits
+        return (a, b)
+    # 检查 splits 是否是一个包含一个元素的序列
+    elif isinstance(splits, (list, tuple)) and len(splits) == 1:
+        a = splits[0]
+        return (a, "")
+    else:
+        return ("Invalid input",)
+```
+
+#### WD14 Tagger
+https://github.com/pythongosssss/ComfyUI-WD14-Tagger?tab=readme-ov-file
+
+Waifu Diffusion 1.4 Tagger，这是一个用于自动化图像标签生成的工具，专门为动漫风格图像（通常称为 "waifu" 图像）设计的。这个工具基于深度学习模型，能够为给定的动漫图像生成描述性标签，以便于分类、搜索和其他用途。
+
+主要功能
+1. 自动标签生成：
+   - WD 1.4 Tagger 使用预训练的深度学习模型来分析输入的动漫图像，并自动生成一组描述性标签。这些标签可以包括角色的外貌特征、服装、动作、背景等。
+2. 高效的动漫图像处理：
+   - 该工具专门针对动漫图像进行了优化，能够识别和生成高质量的标签，使得管理和分类大量的动漫图像变得更加容易。
+3. 集成到 ComfyUI：
+   - 在 ComfyUI 中，WD 1.4 Tagger 可以无缝集成到用户界面中，使得用户能够轻松地为他们的图像生成标签，并使用这些标签进行搜索和过滤。
+
+模型下载：https://huggingface.co/SmilingWolf
+
+**Offline Use**
+
+Simplest way is to use it online, interrogate an image, and the model will be downloaded and cached, however if you want to manually download the models:
+
+- Create a `models` folder (in same folder as the `wd14tagger.py`)
+- Use URLs for models from the list in `pysssss.json`
+- Download `model.onnx` and name it with the model name e.g. `wd-v1-4-convnext-tagger-v2.onnx`
+- Download `selected_tags.csv` and name it with the model name e.g. `wd-v1-4-convnext-tagger-v2.csv`
+
+#### IPAdapter plus
+https://github.com/cubiq/ComfyUI_IPAdapter_plus
+
+下载模型：
+- `/ComfyUI/models/clip_vision`
+    - [CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors](https://huggingface.co/h94/IP-Adapter/resolve/main/models/image_encoder/model.safetensors), download and rename
+    - [CLIP-ViT-bigG-14-laion2B-39B-b160k.safetensors](https://huggingface.co/h94/IP-Adapter/resolve/main/sdxl_models/image_encoder/model.safetensors), download and rename
+- `/ComfyUI/models/ipadapter`, create it if not present
+    - [ip-adapter_sd15.safetensors](https://huggingface.co/h94/IP-Adapter/resolve/main/models/ip-adapter_sd15.safetensors), Basic model, average strength
+    - [ip-adapter_sd15_light_v11.bin](https://huggingface.co/h94/IP-Adapter/resolve/main/models/ip-adapter_sd15_light_v11.bin), Light impact model
+    - [ip-adapter-plus_sd15.safetensors](https://huggingface.co/h94/IP-Adapter/resolve/main/models/ip-adapter-plus_sd15.safetensors), Plus model, very strong
+    - [ip-adapter-plus-face_sd15.safetensors](https://huggingface.co/h94/IP-Adapter/resolve/main/models/ip-adapter-plus-face_sd15.safetensors), Face model, portraits
+    - [ip-adapter-full-face_sd15.safetensors](https://huggingface.co/h94/IP-Adapter/resolve/main/models/ip-adapter-full-face_sd15.safetensors), Stronger face model, not necessarily better
+    - [ip-adapter_sd15_vit-G.safetensors](https://huggingface.co/h94/IP-Adapter/resolve/main/models/ip-adapter_sd15_vit-G.safetensors), Base model, **requires bigG clip vision encoder**
+    - [ip-adapter_sdxl_vit-h.safetensors](https://huggingface.co/h94/IP-Adapter/resolve/main/sdxl_models/ip-adapter_sdxl_vit-h.safetensors), SDXL model
+    - [ip-adapter-plus_sdxl_vit-h.safetensors](https://huggingface.co/h94/IP-Adapter/resolve/main/sdxl_models/ip-adapter-plus_sdxl_vit-h.safetensors), SDXL plus model
+    - [ip-adapter-plus-face_sdxl_vit-h.safetensors](https://huggingface.co/h94/IP-Adapter/resolve/main/sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors), SDXL face model
+    - [ip-adapter_sdxl.safetensors](https://huggingface.co/h94/IP-Adapter/resolve/main/sdxl_models/ip-adapter_sdxl.safetensors), vit-G SDXL model, **requires bigG clip vision encoder**
+    - **Deprecated** [ip-adapter_sd15_light.safetensors](https://huggingface.co/h94/IP-Adapter/resolve/main/models/ip-adapter_sd15_light.safetensors), v1.0 Light impact model
+
+
+#### controlnet-aux
+下载模型 https://huggingface.co/lllyasviel/Annotators/tree/main 到：
+`ComfyUI/custom_nodes/comfyui_controlnet_aux/ckpts/lllyasviel/Annotators`
+
 ### 优化加速
 Xformers安装： https://post.smzdm.com/p/axzmd56d/
 bash webui.sh --xformers
@@ -340,7 +431,7 @@ git clone https://github.com/Akegarasu/lora-scripts.git
 
 LCM-LoRA: [Paper](https://arxiv.org/abs/2311.05556) | [Model](https://huggingface.co/latent-consistency/lcm-lora-sdv1-5)
 
-LCM可以让迭代步数进一步减少到7
+LCM(Latent Consistency Models)是清华大学提出的快速文生图模型， LCM可以让迭代步数进一步减少到7
 
 #### 使用方法
 - WebUI: https://www.bilibili.com/video/BV1Q94y1E7uc
@@ -366,6 +457,17 @@ scheduler: sgm_uniform
 2. 使用LoRA(如果使用的是non-SDXL base models)
 
 3. 1-step模型（不稳定）
+
+(模型后面的1-step, 2-step, 4-step, and 8-step 标注代表它能在这些步骤画图)
+
+
+- DreamShaper XL - Lightning DPM++ SDE
+
+[Model](https://civitai.com/models/112902?modelVersionId=354657)
+
+DreamShaper is a general purpose SD model that aims at doing everything well, photos, art, anime, manga. It's designed to go against other general purpose models and pipelines like Midjourney and DALL-E.
+
+在模型页面上可以看到，其使用的Basemodel 是SDXL lighting
 
 ## SD & 3D Model
 

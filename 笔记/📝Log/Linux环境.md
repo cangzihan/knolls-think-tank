@@ -93,16 +93,59 @@ onnxruntime
 ```shell
 #pip install torch==1.12.0+cu116 torchvision==0.13.0+cu116 torchaudio==0.12.0 --extra-index-url https://download.pytorch.org/whl/cu116
 pip install torch==2.3.0+cu118 torchvision==0.18.0+cu118 torchaudio==2.3.0+cu118 --extra-index-url https://download.pytorch.org/whl/cu118
+pip install torch==2.3.0+cu121 torchvision==0.18.0+cu121 torchaudio==2.3.0+cu121 --extra-index-url https://download.pytorch.org/whl/cu121
 ```
 
-### 显卡（N卡）
-#### 驱动
+## 显卡（N卡）
+### 驱动
 查看显卡驱动/使用情况
 ```shell
 nvidia-smi
 ```
 
-#### Cuda
+#### 常见问题
+【报错】Failed to initialize NVML: Driver/library version mismatch
+  NVML library version: 535.86
+
+  この`nvidia-smi`のerrorの原因の一つとして、NVML（NVIDIA Management Library）と NVRM（NVIDIA Resource Manager）のバージョンの不一致が挙げられます。これらのバージョンは、それぞれ以下のコマンドで確認できます。
+  ```shell
+  # NVMLのバージョンの確認コマンド
+  cat /sys/module/nvidia/version
+  # NVRMのバージョンの確認コマンド
+  cat /proc/driver/nvidia/version
+  ```
+
+  解决方案：
+  1.更新驱动：
+  - 你需要更新 NVIDIA 驱动到匹配 NVML 库的版本。可以通过以下命令更新驱动：
+  ```shell
+  sudo apt update
+  sudo apt install --reinstall nvidia-driver-535
+  # 这么简单就更新完了
+  ```
+  2.重启系统：
+  - 更新驱动后，重启系统以确保新的驱动版本被正确加载：
+  ```shell
+  sudo reboot
+  ```
+
+#### 卸载驱动并安装另一版本的驱动
+1. 卸载
+```shell
+sudo apt-get purge nvidia-*
+sudo apt-get autoremove
+sudo apt-get autoclean
+```
+2. 安装另一版本驱动
+```shell
+sudo nala install nvidia-driver-550-server-open
+```
+3. 重启
+```shell
+sudo reboot
+```
+
+### Cuda
 检查Cuda版本
 ```shell
 nvcc -V
