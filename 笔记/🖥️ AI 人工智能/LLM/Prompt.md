@@ -8,6 +8,7 @@ tags:
 
 # Prompt
 - OpenAI官方文档: https://platform.openai.com/docs/guides/prompt-engineering
+- 一份涉及知识面很全的文档（不只是Prompt Engineering）: https://www.promptingguide.ai/
 
 ## Six strategies for getting better results
 1. Write clear instructions

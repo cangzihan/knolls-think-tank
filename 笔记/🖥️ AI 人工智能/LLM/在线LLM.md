@@ -136,10 +136,12 @@ https://poe.com/explore?category=Official
 https://huggingface.co/chat/
 
 ## ChatGPT
-[Online](https://chat.openai.com/) | [API](https://platform.openai.com/settings/organization/billing/overview)
+[Online](https://chat.openai.com/) | [API](https://platform.openai.com/settings/organization/billing/overview) | [AzureAPI](https://learn.microsoft.com/zh-cn/azure/ai-services/openai/)
 
 ### API
 API最新价格：https://openai.com/pricing
+
+微软的，都一个价格：https://azure.microsoft.com/en-us/pricing/details/cognitive-services/openai-service/
 
 API说明：https://platform.openai.com/docs/api-reference/chat/create
 

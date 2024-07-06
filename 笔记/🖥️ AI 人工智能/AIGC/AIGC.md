@@ -113,6 +113,34 @@ CLIP没有解码器部分，所以它不能直接从潜在表示生成图像。C
 
 在Stable Diffusion中，VAE的解码器用于将扩散模型生成的潜在表示转化为图像。CLIP则用于提供文本-图像相似性指导，确保生成的图像符合文本描述。由于CLIP缺乏解码器部分，Stable Diffusion使用VAE来完成图像的实际生成。
 
+### Install
+
+#### WebUI Linux
+```shell
+conda create -n AIGC python=3.10
+conda activate AIGC
+pip install torch==2.3.0+cu121 torchvision==0.18.0+cu121 torchaudio==2.3.0+cu121 --extra-index-url https://download.pytorch.org/whl/cu121
+
+git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git
+#放入模型文件到models/StableDiffusion
+
+cd repositories/
+git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui-assets.git
+git clone https://github.com/Stability-AI/stablediffusion.git
+
+mkdir openai
+mkdir openai/clip-vit-large-patch14
+#放入这个仓库的模型文件
+
+CUDA_VISIBLE_DEVICES=0 python3 launch.py --listen --enable-insecure-extension-access --xformers
+
+# 安装xformers
+pip install xformers
+CUDA_VISIBLE_DEVICES=0 python3 launch.py --listen --enable-insecure-extension-access --xformers
+
+
+```
+
 ### 版本
 #### SD 3
 [Paper](https://arxiv.org/pdf/2403.03206)

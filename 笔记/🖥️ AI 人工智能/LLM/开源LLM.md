@@ -437,11 +437,33 @@ if __name__ == '__main__':
 ### Llama3
 [Project](https://huggingface.co/blog/llama3)
 
-[Llama-3-8B-Instruct](https://huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct)
+[Llama-3-8B-Instruct](https://huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct) (需要申请使用，一般会被拒绝)
+
+[官方模型下载](https://llama.meta.com/llama-downloads/)
+
+#### Convert the model weights using Hugging Face transformer from source
+模型下载后不是Hugging Face格式，因此需要转换，按照[教程](https://github.com/meta-llama/llama-recipes/blob/main/recipes/quickstart/Running_Llama3_Anywhere/Running_Llama_on_HF_transformers.ipynb)
+```shell
+python3 -m venv hf-convertor
+source hf-convertor/bin/activate
+git clone https://github.com/huggingface/transformers.git
+cd transformers
+pip install -e .
+pip install torch tiktoken blobfile accelerate
+python3 src/transformers/models/llama/convert_llama_weights_to_hf.py --input_dir ${path_to_meta_downloaded_model} --output_dir ${path_to_save_converted_hf_model} --model_size 8B --llama_version 3
+```
+扎克伯格可真能整人啊
 
 一些模型说明：
 - 训练环境：24000个GPU
 
+#### FastChat版
+需要先将模型转换转换为Hugging Face版
+
+使用方法基本和[Qwen](#_2-fastchat版)等其他大模型一样
+```shell
+CUDA_VISIBLE_DEVICES=0 python3 -m fastchat.serve.model_worker --model-path Llama-3-8B-Instruct-hf --controller http://localhost:21001 --port 31000 --worker http://localhost:31000
+```
 
 ## Qwen
 **通义千问（Qwen）** 是阿里云研发的基于Transformer的大语言模型, 在超大规模的预训练数据上进行训练得到。预训练数据类型多样，覆盖广泛，包括大量网络文本、专业书籍、代码等。
