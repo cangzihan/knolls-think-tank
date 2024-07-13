@@ -31,7 +31,10 @@ conda activate chat_tts
 #可能还要重新安装一遍
 # pip install torch==2.1.0+cu118 torchaudio==2.1.0+cu118 --extra-index-url https://download.pytorch.org/whl/cu118
 
-pip3 install chattts-fork
+# pip3 install chattts-fork
+
+pip install ChatTTS
+pip install soundfile
 ```
 
 将model文件存到一个文件夹
@@ -43,7 +46,8 @@ import ChatTTS
 import soundfile
 
 chat = ChatTTS.Chat()
-chat.load_models(source='local', compile=False, local_path=【路径】) # Set to True for better performance
+chat.load_models(source='local', compile=False, local_path=【路径】) # Set to True for better performance  # [!code --]
+chat.load(source='custom', compile=False, custom_path=【路径】) # Set to True for better performance # [!code ++]
 
 texts = ["六王毕，四海一，赵爽是个大傻逼",]
 
@@ -58,20 +62,34 @@ import torch
 import soundfile
 
 chat = ChatTTS.Chat()
-chat.load_models(source='local', compile=False, local_path=【路径】) # Set to True for better performance
+chat.load_models(source='local', compile=False, local_path=【路径】) # Set to True for better performance  # [!code --]
+chat.load(source='custom', compile=False, custom_path=【路径】) # Set to True for better performance # [!code ++]
 
 texts = ["六王毕，四海一，赵爽是个大傻逼",]
 
 spk = torch.load("seed_1397_restored_emb.pt")
-params_infer_code = {
-    'spk_emb': spk,
-        # 'spk_emb': rand_spk, # add sampled speaker
-  'temperature': 0.95, # using custom temperature
-  'top_P': 0.7, # top P decode
-  'top_K': 20, # top K decode
-}
+params_infer_code = { # [!code --]
+    'spk_emb': spk, # [!code --]
+        # 'spk_emb': rand_spk, # add sampled speaker # [!code --]
+  'temperature': 0.95, # using custom temperature # [!code --]
+  'top_P': 0.7, # top P decode # [!code --]
+  'top_K': 20, # top K decode # [!code --]
+} # [!code --]
+params_infer_code = ChatTTS.Chat.InferCodeParams( # [!code ++]
+  spk_emb = spk, # [!code ++]
+  temperature = 0.55, # [!code ++]
+  top_P = 0.7, # [!code ++]
+  top_K = 20, # top K decode # [!code ++]
+) # [!code ++]
 
-wavs = chat.infer(texts, params_infer_code=params_infer_code)
+params_refine_text = ChatTTS.Chat.RefineTextParams(
+    prompt='[oral_0][laugh_0][break_6]',
+)
+
+wavs = chat.infer(
+  texts,
+  params_refine_text=params_refine_text,
+  params_infer_code=params_infer_code)
 
 #torchaudio.save("output1.wav", torch.from_numpy(wavs[0]), 24000)
 soundfile.write("output1.wav", wavs[0][0], 24000)
@@ -130,7 +148,7 @@ class TorchSeedContext:
         torch.random.set_rng_state(self.state)
 
 chat = ChatTTS.Chat()
-chat.load_models(source='local', compile=False, local_path=【路径】) # Set to True for better performance
+chat.load(source='custom', compile=False, custom_path=【路径】) # Set to True for better performance
 
 inputs_cn = """
  xl
@@ -146,23 +164,33 @@ for audio_seed_input in range(10000):
     #print(rand_spk) # save it for later timbre recovery
 
 
-    params_infer_code = {
-        'spk_emb': rand_spk, # add sampled speaker
-    'temperature': 0.8, # using custom temperature
-    'top_P': 0.7, # top P decode
-    'top_K': 20, # top K decode
-    }
+    params_infer_code = ChatTTS.Chat.InferCodeParams(
+      spk_emb = rand_spk, # add sampled speaker
+      temperature = 0.8, # using custom temperature
+      top_P = 0.7, # top P decode
+      top_K = 20, # top K decode
+    )
 
-    params_refine_text = {
-    'prompt': '[oral_0][laugh_0][break_4]'
-    }
+    params_refine_text = ChatTTS.Chat.RefineTextParams(
+      prompt='[oral_0][laugh_0][break_4]',
+    )
     audio_array_cn = chat.infer(inputs_cn, params_refine_text=params_refine_text, params_infer_code=params_infer_code)
 
     soundfile.write(os.path.join(out_dir, "xl_t08_p07_k20_seed_%04d.wav"%audio_seed_input), audio_array_cn[0][0], 24000)
 
 ```
 
+
 ## Other
 SeedTTS: https://bytedancespeech.github.io/seedtts_tech_report/#full-diffusion-samples
 
 [Paper](https://arxiv.org/pdf/2406.02430)
+
+### FunAudioLLM
+https://fun-audio-llm.github.io/
+
+语音生成
+https://github.com/FunAudioLLM/CosyVoice
+
+语音识别
+https://github.com/FunAudioLLM/SenseVoice

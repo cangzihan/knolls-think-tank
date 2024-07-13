@@ -164,7 +164,36 @@ nvcc -V
 暂时没碰到需要分区的情况
 
 
+## 日语输入法
+通常而言默认为IBUS输入系统，可以在【设置】-【区域与语言】-【管理已安装的语言】中查看
 
+安装必要的软件包：
+```shell
+sudo apt update
+sudo apt install ibus ibus-mozc -y
+```
 
+设置输入法框架为默认(貌似也可以在【设置】-【区域与语言】-【管理已安装的语言】中设置)：
+```shell
+im-config -s ibus
+```
 
+配置IBus：
+1. 打开IBus设置：
+```shell
+ibus-setup
+```
+2. 在IBus设置中，执行以下操作：
+   - 点击“输入法”标签。
+   - 点击“添加”按钮，搜索并选择“日本語 - Mozc”和“简体中文 - Pinyin”。
+   - 确保Mozc和Pinyin输入法已被添加到输入法列表中。
 
+重新启动输入法框架：
+```shell
+pkill ibus-daemon
+ibus-daemon -drx &
+```
+
+(可能要重启系统)在【设置】-【键盘】中添加输入法
+
+按<kbd>Win</kbd> + <kbd>Space</kbd>可切换输入法

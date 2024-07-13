@@ -91,6 +91,56 @@ https://github.com/ToonCrafter/ToonCrafter | [Model](https://huggingface.co/Doub
 
 ToonCrafter can interpolate two cartoon images by leveraging the pre-trained image-to-video diffusion priors.
 
+#### Install
+```shell
+conda create -n tooncrafter python=3.8.5
+conda activate tooncrafter
+pip install -r requirements.txt
+
+mkdir checkpoints
+mkdir checkpoints/tooncrafter_512_interp_v1
+mkdir laion
+mkdir CLIP-ViT-H-14-laion2B-s32B-b79K
+```
+
+- Download pretrained [ToonCrafter_512](https://huggingface.co/Doubiiu/ToonCrafter/tree/main) and put the `model.ckpt` in `checkpoints/tooncrafter_512_interp_v1/model.ckpt`.
+- 【本地加载CLIP-ViT-H-14-laion2B-s32B-b79K】下载 https://huggingface.co/laion/CLIP-ViT-H-14-laion2B-s32B-b79K/tree/main 的`open_clip_pytorch_model.bin`，放入刚创建的`laion/CLIP-ViT-H-14-laion2B-s32B-b79K`，修改`lvdm/modules/encoders/condition.py`
+```python
+class FrozenOpenCLIPEmbedder(AbstractEncoder):
+    """
+    Uses the OpenCLIP transformer encoder for text
+    """
+    LAYERS = [
+        # "pooled",
+        "last",
+        "penultimate"
+    ]
+
+    def __init__(self, arch="ViT-H-14", version="laion2b_s32b_b79k", device="cuda", max_length=77,
+                 freeze=True, layer="last"):
+        super().__init__()
+        assert layer in self.LAYERS
+        model, _, _ = open_clip.create_model_and_transforms(arch, device=torch.device('cpu'), pretrained=version) # [!code --]
+        model, _, _ = open_clip.create_model_and_transforms(arch, device=torch.device('cpu'), pretrained="laion/CLIP-ViT-H-14-laion2B-s32B-b79K/open_clip_pytorch_model.bin") # [!code ++]
+        ......
+
+class FrozenOpenCLIPImageEmbedderV2(AbstractEncoder):
+    """
+    Uses the OpenCLIP vision transformer encoder for images
+    """
+
+    def __init__(self, arch="ViT-H-14", version="laion2b_s32b_b79k", device="cuda",
+                 freeze=True, layer="pooled", antialias=True):
+        super().__init__()
+        model, _, _ = open_clip.create_model_and_transforms(arch, device=torch.device('cpu'), pretrained=version) # [!code --]
+        model, _, _ = open_clip.create_model_and_transforms(arch, device=torch.device('cpu'), pretrained="laion/CLIP-ViT-H-14-laion2B-s32B-b79K/open_clip_pytorch_model.bin") # [!code ++]
+```
+
+#### Run
+```shell
+CUDA_VISIBLE_DEVICES=0 python3 gradio_app.py
+```
+
 ### MegActor
 [Project](https://megvii-research.github.io/MegFaceAnimate/)
 
@@ -119,3 +169,10 @@ ToonCrafter can interpolate two cartoon images by leveraging the pre-trained ima
 主要功能有：
 - 修改风格和环境
 - **Connecting videos:** 输入两个video，生成一个新视频包含有两个视频的内容和过渡
+
+## 名词解释
+
+- **Toon**
+TOONは漫画・アニメ。
+さてtoonという英単語には、漫画やアニメを表すcartoonの簡略表記の意味がある。
+

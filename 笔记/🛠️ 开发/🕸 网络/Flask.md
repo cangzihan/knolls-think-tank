@@ -297,3 +297,20 @@ public class UnityMainThreadDispatcher : MonoBehaviour
    4. 为按钮添加点击事件，将 `WebSocketClient` 的 `OnSendButtonClick` 方法绑定到按钮的点击事件中。
 
 5. 运行项目
+
+## 跨域请求
+在 Flask 服务器中添加 CORS 头信息，允许来自不同来源的请求。
+
+```shell
+pip install flask-cors
+```
+
+```python
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+
+app = Flask(__name__)
+CORS(app)
+```
+
+

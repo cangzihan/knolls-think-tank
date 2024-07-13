@@ -1109,5 +1109,69 @@ pip install tiktoken matplotlib
 ## GLM4
 [glm-4-9b-chat](https://huggingface.co/THUDM/glm-4-9b-chat)
 
+```shell
+pip install transformers==4.36.0
+```
+
+### FastChat版
+目前还不兼容
+
+## EvoLLM-JP
+2024.3 SakanaAI发布EvoLLM-JP（大语言模型）、EvoVLM-JP(视觉语言模型)和EvoSDXL-JP(图像生成模型)。
+[EvoLLM-JP-v1-10B](https://huggingface.co/SakanaAI/EvoLLM-JP-v1-10B/tree/main) | [Paper](https://arxiv.org/abs/2403.13187)
+
+### Install
+创建一个路径命为`SakanaAI/EvoLLM-v1-JP-10B`，然后把文件存入这里，注意一定是`EvoLLM-v1-JP-10B`，不能是其他的，因为这帮人的代码不是很好，在`config.json`中写死了。
+
+然后安装库
+```shell
+pip install simpletransformers
+pip install flash_attn
+pip install transformers==4.41.2
+```
+
+然后代码也不能直接用HuggingFace上的，因为这帮人的代码不是很好
+```python
+import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+# 1. load model
+device = "cuda" if torch.cuda.is_available() else "cpu"
+repo_id = "SakanaAI/EvoLLM-v1-JP-10B"
+model = AutoModelForCausalLM.from_pretrained(repo_id, torch_dtype="auto", trust_remote_code=True)
+tokenizer = AutoTokenizer.from_pretrained(repo_id)
+model.to(device)
+
+# 2. prepare inputs
+text = "東京のおいしいものは何ですか？"
+messages = [
+    {"role": "system", "content": "あなたはAIアシスタントです"},
+    {"role": "user", "content": text},
+]
+
+# 拼接消息内容
+full_text = ""
+for message in messages:
+    if message["role"] == "system":
+        full_text += f"{message['content']}\n"
+    elif message["role"] == "user":
+        full_text += f"{message['content']}"
+
+# 使用tokenizer进行编码
+inputs = tokenizer(full_text, return_tensors="pt")
+
+# 将inputs移动到device上，并转换为字典格式
+input_ids = inputs["input_ids"].to(device)
+attention_mask = inputs["attention_mask"].to(device)
+input_dict = {"input_ids": input_ids, "attention_mask": attention_mask}
+
+# 3. generate
+output_ids = model.generate(**input_dict, max_new_tokens=50)
+output_ids = output_ids[:, inputs.input_ids.shape[1]:]
+generated_text = tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0]
+print("问:", text)
+print("答:", generated_text)
+```
+
 ## 其他
 XXXXXXX

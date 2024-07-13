@@ -128,6 +128,7 @@ cd repositories/
 git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui-assets.git
 git clone https://github.com/Stability-AI/stablediffusion.git
 
+cd ..
 mkdir openai
 mkdir openai/clip-vit-large-patch14
 #放入这个仓库的模型文件
@@ -245,6 +246,8 @@ a代表祖先采样器，(迭代噪声)不收敛
 
 在WebUI中可以在【设置】-【Sampler parameters】设定显示和隐藏采样器
 
+#### 实例
+采样器的具体实现代码可参考 https://github.com/crowsonkb/k-diffusion.git 的`k_diffusion/sampling.py`
 ### Comfy UI
 
 #### 共享路径设置
@@ -313,7 +316,7 @@ https://github.com/jamesWalker55/comfyui-various/tree/main
 #### WD14 Tagger
 https://github.com/pythongosssss/ComfyUI-WD14-Tagger?tab=readme-ov-file
 
-Waifu Diffusion 1.4 Tagger，这是一个用于自动化图像标签生成的工具，专门为动漫风格图像（通常称为 "waifu" 图像）设计的。这个工具基于深度学习模型，能够为给定的动漫图像生成描述性标签，以便于分类、搜索和其他用途。
+Waifu Diffusion 1.4 Tagger，这是一个用于自动化图像标签生成的工具，专门为动漫风格图像（通常称为 "[waifu](https://zh.wiktionary.org/wiki/waifu)" 图像）设计的。这个工具基于深度学习模型，能够为给定的动漫图像生成描述性标签，以便于分类、搜索和其他用途。
 
 主要功能
 1. 自动标签生成：
@@ -496,6 +499,245 @@ scheduler: sgm_uniform
 DreamShaper is a general purpose SD model that aims at doing everything well, photos, art, anime, manga. It's designed to go against other general purpose models and pipelines like Midjourney and DALL-E.
 
 在模型页面上可以看到，其使用的Basemodel 是SDXL lighting
+
+### 代码分C
+
+#### WebUI
+这里以1.9.4版本为准
+
+UI部分在`modules/ui.py`
+- create_ui()
+  - with gr.Blocks(analytics_enabled=False) as txt2img_interface: ......
+  - with gr.Blocks(analytics_enabled=False) as img2img_interface: ......
+  - with gr.Blocks(analytics_enabled=False) as pnginfo_interface: ......
+  - with gr.Blocks(analytics_enabled=False) as train_interface: ......
+  - 【汉化】interfaces = [(txt2img_interface, "txt2img", "txt2img")......]
+  - interfaces += script_callbacks.ui_tabs_callback()
+  - 【网页标题】with gr.Blocks(theme, ..., title="Stable Diffusion") as demo: ......
+
+部分组件在`modules/ui_toprow.py`中
+
+文生图部分在`modules/txt2img.py`的`txt2img()`函数中，`modules.scripts.scripts_txt2img.run`实际上是运行了`txt2img_create_processing`
+
+::: details `from contextlib import closing`是做什么的?
+
+from contextlib import closing是Python标准库中的一个模块，它提供了一个上下文管理器，用于确保某个资源的正确打开和关闭。
+
+当使用closing()函数时，我们可以将需要打开、使用后需要关闭的资源作为参数传递给它。这样，当代码块执行完毕后，closing()函数会自动调用该资源的关闭方法，确保资源得到正确地释放。
+
+这个模块的好处是，它可以确保在打开资源后，无论代码执行是否正常，都能确保资源被正确地关闭。例如，在打开文件时，如果文件操作出错，那么closing()函数就会确保文件被关闭。
+
+以下是一个使用`closing()`函数的例子：
+
+```python
+from contextlib import closing
+
+with closing(open('example.txt', 'r')) as f:
+    data = f.read()
+    # 使用文件数据...
+```
+在这个例子中，`open()`函数打开了一个文件，并返回了一个文件对象。然后，`closing()`函数接收这个文件对象作为参数，并将其作为一个上下文管理器。在这个上下文管理器中，我们读入了文件的数据，并使用这些数据进行一些操作。当代码块执行完毕后，closing()函数会自动调用f.close()方法，确保文件被正确地关闭。
+
+```python
+    p = txt2img_create_processing(id_task, request, *args)
+
+    with closing(p):
+        processed = modules.scripts.scripts_txt2img.run(p, *p.script_args)
+
+        if processed is None:
+            processed = processing.process_images(p)
+```
+在这里，`p`是一个可能需要关闭的资源。使用with closing(p)可以确保在代码块执行完毕后，会调用p的close()方法。这对于文件、网络连接、数据库连接等资源管理非常有用。
+
+以下是`closing`的实现，可以帮助你更好地理解它的工作原理：
+```python
+from contextlib import closing
+
+class ClosingExample:
+    def close(self):
+        print("Resource has been closed")
+
+# 使用示例
+example = ClosingExample()
+
+with closing(example):
+    print("Using the resource")
+# 输出: Resource has been closed
+```
+:::
+
+`txt2img()`的输入参数`*args`（除此之外前面还有两个参数）
+```shell
+[1]: bottle (<class 'str'>)
+[2]:  (<class 'str'>)
+[3]: [] (<class 'list'>)
+[4]: 1 (<class 'int'>)
+[5]: 1 (<class 'int'>)
+[6]: 7 (<class 'int'>)
+[7]: 512 (<class 'int'>)
+[8]: 512 (<class 'int'>)
+[9]: False (<class 'bool'>)
+[10]: 0.7 (<class 'float'>)
+[11]: 2 (<class 'int'>)
+[12]: Latent (<class 'str'>)
+[13]: 0 (<class 'int'>)
+[14]: 0 (<class 'int'>)
+[15]: 0 (<class 'int'>)
+[16]: Use same checkpoint (<class 'str'>)
+[17]: Use same sampler (<class 'str'>)
+[18]: Use same scheduler (<class 'str'>)
+[19]:  (<class 'str'>)
+[20]:  (<class 'str'>)
+[21]: [] (<class 'list'>)
+[22]: 0 (<class 'int'>)
+[23]: 20 (<class 'int'>)
+[24]: DPM++ 2M (<class 'str'>)
+[25]: Automatic (<class 'str'>)
+[26]: False (<class 'bool'>)
+[27]:  (<class 'str'>)
+[28]: 0.8 (<class 'float'>)
+[29]: -1 (<class 'int'>)
+[30]: False (<class 'bool'>)
+[31]: -1 (<class 'int'>)
+[32]: 0 (<class 'int'>)
+[33]: 0 (<class 'int'>)
+[34]: 0 (<class 'int'>)
+[35]: False (<class 'bool'>)
+[36]: False (<class 'bool'>)
+[37]: LoRA (<class 'str'>)
+[38]: None (<class 'str'>)
+[39]: 1 (<class 'int'>)
+[40]: 1 (<class 'int'>)
+[41]: LoRA (<class 'str'>)
+[42]: None (<class 'str'>)
+[43]: 1 (<class 'int'>)
+[44]: 1 (<class 'int'>)
+[45]: LoRA (<class 'str'>)
+[46]: None (<class 'str'>)
+[47]: 1 (<class 'int'>)
+[48]: 1 (<class 'int'>)
+[49]: LoRA (<class 'str'>)
+[50]: None (<class 'str'>)
+[51]: 1 (<class 'int'>)
+[52]: 1 (<class 'int'>)
+[53]: LoRA (<class 'str'>)
+[54]: None (<class 'str'>)
+[55]: 1 (<class 'int'>)
+[56]: 1 (<class 'int'>)
+[57]: None (<class 'NoneType'>)
+[58]: Refresh models (<class 'str'>)
+[59]: False (<class 'bool'>)
+[60]: False (<class 'bool'>)
+[61]: positive (<class 'str'>)
+[62]: comma (<class 'str'>)
+[63]: 0 (<class 'int'>)
+[64]: False (<class 'bool'>)
+[65]: False (<class 'bool'>)
+[66]: start (<class 'str'>)
+[67]:  (<class 'str'>)
+[68]: 1 (<class 'int'>)
+[69]:  (<class 'str'>)
+[70]: [] (<class 'list'>)
+[71]: 0 (<class 'int'>)
+[72]:  (<class 'str'>)
+[73]: [] (<class 'list'>)
+[74]: 0 (<class 'int'>)
+[75]:  (<class 'str'>)
+[76]: [] (<class 'list'>)
+[77]: True (<class 'bool'>)
+[78]: False (<class 'bool'>)
+[79]: False (<class 'bool'>)
+[80]: False (<class 'bool'>)
+[81]: False (<class 'bool'>)
+[82]: False (<class 'bool'>)
+[83]: False (<class 'bool'>)
+[84]: 0 (<class 'int'>)
+[85]: False (<class 'bool'>)
+```
+
+文生图最后执行了`modules/processing.py`的`line 861`处`process_images_inner`函数。
+其中的sample过程最终是进入到了[外部库](https://github.com/crowsonkb/k-diffusion.git)`repositories/k-diffusion/k_diffusion/sampling.py`中的各个采样器，如`sample_dpmpp_2m()`函数。
+
+`KDiffusionSampler`也是继承了`sd_samplers_common.Sampler`
+
+::: details 关于`@property`
+`@property`是Python中一个装饰器，主要用于将一个方法变成一个只读属性。它使得对属性值的修改变得非常自然和直观，尤其是在对象属性上进行各种计算时。
+
+使用`@property`装饰器可以定义一个方法，该方法在调用时会自动执行，而且可以作为属性来使用。当对象实例通过点语法访问该属性的值时，会自动调用该方法，执行方法内的逻辑，然后返回其返回值。
+
+下面是一个简单的例子：
+```python
+class Person:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+
+    @property
+    def age_status(self):
+        if self.age < 18:
+            return "Minor"
+        elif self.age < 65:
+            return "Adult"
+        else:
+            return "Senior"
+
+# 创建Person实例
+person = Person("Alice", 30)
+
+# 直接通过点语法访问属性，会自动调用@property装饰器定义的getter方法
+print(person.age_status)  # 输出 "Adult"
+```
+在这个例子中，`age_status`是一个通过`@property`装饰器定义的属性，但它背后是一个方法。
+当我们尝试通过`person.age_status`来获取这个属性值时，实际上是在调用`age_status`方法并返回其返回值。
+
+在`modules/sd_samplers_kdiffusion.py`中
+```python
+class CFGDenoiserKDiffusion(sd_samplers_cfg_denoiser.CFGDenoiser):
+    @property
+    def inner_model(self):
+        if self.model_wrap is None:
+            denoiser = k_diffusion.external.CompVisVDenoiser if shared.sd_model.parameterization == "v" else k_diffusion.external.CompVisDenoiser
+            self.model_wrap = denoiser(shared.sd_model, quantize=shared.opts.enable_quantization)
+
+        return self.model_wrap
+```
+这段代码定义了一个名为`CFGDenoiserKDiffusion`的类，它继承自`sd_samplers_cfg_denoiser.CFGDenoiser`类。在这个类中，有一个名为`inner_model`的属性，通过`@property`装饰器定义。
+
+当访问`inner_model`属性时，Python会自动调用`inner_model`方法。在这个方法内部，首先检查`self.model_wrap`是否为`None`。如果不是`None`，则直接返回`self.model_wrap`的值。
+如果`self.model_wrap为None`，则执行以下逻辑：
+1. 根据`shared.sd_model.parameterization`的值来选择使用`k_diffusion.external.CompVisVDenoiser`还是`k_diffusion.external.CompVisDenoiser`类。
+2. 使用上面选定的类创建一个新的对象，传入`shared.sd_model`作为参数，并设置`quantize`参数为`shared.opts.enable_quantization`的值。
+3. 将新创建的对象赋值给`self.model_wrap`。
+最后，方法返回`self.model_wrap`的值，即`self.model_wrap`对象，这个对象在第一次调用`inner_model`属性时被创建并返回。
+
+可以查到，它继承的类中也有`inner_model`的函数，默认使用时会引发`NotImplementedError()`
+```python
+    @property
+    def inner_model(self):
+        raise NotImplementedError()
+```
+:::
+
+::: details 关于`model`为什么可以像函数一样使用
+在PyTorch中，继承自torch.nn.Module的类可以像函数一样使用，这主要是因为torch.nn.Module类实现了特殊方法`__call__`。当你创建一个自定义的神经网络类并继承自torch.nn.Module时，`__call__`方法会自动调用你在子类中定义的forward方法。
+
+`repositories/k-diffusion/k_diffusion/sampling.py`
+```python
+    for i in trange(len(sigmas) - 1, disable=disable):
+        denoised = model(x, sigmas[i] * s_in, **extra_args)
+```
+`sd_samplers_cfg_denoiser.py`
+```python
+class CFGDenoiser(torch.nn.Module):
+    @property
+    def inner_model(self):
+        raise NotImplementedError()
+
+    def forward(self, x, sigma, uncond, cond, cond_scale, s_min_uncond, image_cond):
+        ......
+        return denoised
+```
+:::
 
 ## SD & 3D Model
 
@@ -844,7 +1086,10 @@ CAT3D最终可以通过多张图像、单张图像或纯文本生成3D模型。
 
 推荐环境：CUDA 11.8以上
 
-
+#### Run
+```shell
+CUDA_VISIBLE_DEVICES=0 python3 app.py big --resume pretrained/model_fp16_fixrot.safetensors
+```
 
 ## 动物动作的生成
 
@@ -992,3 +1237,7 @@ Stable Diffusion.
 
 - **SVD**
 Stable Video Diffusion.
+
+- **Waifu**
+https://zh.wiktionary.org/wiki/waifu
+
