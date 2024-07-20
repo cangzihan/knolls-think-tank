@@ -101,7 +101,7 @@ soundfile.write("output1.wav", wavs[0][0], 24000)
 ```shell
 python3 examples/cmd/run.py "六王毕,四海一,赵爽是个大傻逼"
 ```
-你可能需要修改`examples/cmd/run.py`的`chat.load_models`那行的模型地址
+你可能需要修改`examples/cmd/run.py`~~的`chat.load_models`那行~~的`chat.load`那行的模型地址
 
 
 WebUI:

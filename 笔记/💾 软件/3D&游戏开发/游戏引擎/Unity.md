@@ -30,18 +30,19 @@ sudo nala autoremove
 鼠标右键
 
 ### 平移
-左右平移的方法： 鼠标右键 + A/D (同时按shift可以加速)
-上下平移的方法： 鼠标右键 + Q/E (同时按shift可以加速)
+左右平移的方法： 鼠标右键 + A/D (同时按<kbd>Shift</kbd>可以加速)
+
+上下平移的方法： 鼠标右键 + Q/E (同时按<kbd>Shift</kbd>可以加速)
 
 方法2：
-切换到Hand tool（快捷键Q）鼠标左键左右划
+切换到Hand tool（快捷键<kbd>Q</kbd>）鼠标左键左右划
 
 ![img](assets/Toolbar.png)
 
 ### 放缩（前后）
 - 方法1：鼠标滚轮
-- 方法2：鼠标右键 + W/A (同时按shift可以加速)
-- 方法3：Alt + 鼠标右键
+- 方法2：鼠标右键 + W/A (同时按<kbd>Shift</kbd>可以加速)
+- 方法3：<kbd>Alt</kbd> + 鼠标右键
 
 ## 对象
 
@@ -63,6 +64,9 @@ If this were a C# script, you would have to play, stop, edit your script, and re
 
 #### 删除线
 右键点线的起点
+
+#### 创建组
+<kbd>Ctrl</kbd> + 左键拖动
 
 ## C井编程
 不会就问大模型，以下为一个案例(ChatGPT 3.5)：

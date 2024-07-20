@@ -718,6 +718,74 @@ class CFGDenoiserKDiffusion(sd_samplers_cfg_denoiser.CFGDenoiser):
 ```
 :::
 
+::: details 关于`@property` 和 `.setter`
+先抛出问题，在`modules/processing.py`中：
+```python
+@dataclass(repr=False)
+class StableDiffusionProcessing:
+    @property
+    def script_args(self):
+        return self.script_args_value
+
+    @script_args.setter
+    def script_args(self, value):
+        self.script_args_value = value
+
+        if self.scripts_value and self.script_args_value and not self.scripts_setup_complete:
+            self.setup_scripts()
+```
+关于`@dataclass`装饰器会在后面说明，在 Python 中，可以使用`@property`装饰器来定义属性，同时使用同名的`@property`装饰器的`.setter`方法来定义该属性的设置方法。这使得你可以创建具有更复杂行为的属性。例如，可以控制属性的获取和设置操作，添加额外的逻辑或验证。
+```python
+class Person:
+    def __init__(self, name):
+        self._name = name
+        self._age = 0  # 默认年龄为0
+
+    @property
+    def age(self):
+        return self._age
+
+    @age.setter
+    def age(self, value):
+        if value < 0:
+            raise ValueError("Age cannot be negative")
+        self._age = value
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        if not value:
+            raise ValueError("Name cannot be empty")
+        self._name = value
+
+# 使用示例
+try:
+    p = Person("Alice")
+    print(p.age)  # 输出: 0
+
+    p.age = 30
+    print(p.age)  # 输出: 30
+
+    p.age = -5  # 这将引发 ValueError
+except ValueError as e:
+    print(e)
+
+# 输出:
+# 0
+# 30
+# Age cannot be negative
+
+# 尝试设置空名字
+try:
+    p.name = ""  # 这将引发 ValueError
+except ValueError as e:
+    print(e)
+```
+:::
+
 ::: details 关于`model`为什么可以像函数一样使用
 在PyTorch中，继承自torch.nn.Module的类可以像函数一样使用，这主要是因为torch.nn.Module类实现了特殊方法`__call__`。当你创建一个自定义的神经网络类并继承自torch.nn.Module时，`__call__`方法会自动调用你在子类中定义的forward方法。
 
@@ -738,6 +806,79 @@ class CFGDenoiser(torch.nn.Module):
         return denoised
 ```
 :::
+
+::: details Python 标准库`dataclasses`
+`dataclass` 和 `field` 是`dataclasses`模块中的两个组件。`dataclasses`模块用于简化数据类的创建和管理。数据类是一种特殊的类，主要用于存储数据而不需要定义很多样板代码。
+
+以下是一个简单的示例，展示了如何使用 `@dataclass` 和 `field`：
+```python
+from dataclasses import dataclass, field
+from typing import List
+
+@dataclass
+class Person:
+    name: str
+    age: int
+    friends: List[str] = field(default_factory=list)
+
+# 创建一个 Person 实例
+john = Person(name="John Doe", age=30)
+
+print(john)  # 输出: Person(name='John Doe', age=30, friends=[])
+```
+
+`@dataclass(repr=False)`的含义：
+如果你不希望数据类自动生成`__repr__`方法，可以将`repr`参数设置为`False`。这意味着你需要手动定义`__repr__`方法，或者根本不定义。
+```python
+from dataclasses import dataclass
+
+@dataclass(repr=False)
+class Person:
+    name: str
+    age: int
+
+# 手动定义 __repr__ 方法
+@dataclass(repr=False)
+class PersonWithCustomRepr:
+    name: str
+    age: int
+
+    def __repr__(self):
+        return f'Person(name={self.name})'
+
+# 创建实例
+person = Person(name="John Doe", age=30)
+person_with_custom_repr = PersonWithCustomRepr(name="Jane Doe", age=25)
+
+print(repr(person))  # 输出: <__main__.Person object at 0x...>
+print(repr(person_with_custom_repr))  # 输出: Person(name=Jane Doe)
+```
+:::
+
+ldm是`repositories/stable-diffusion-stability-ai`里的一个文件夹。`No module 'xformers'. Proceeding without it.`是在
+`repositories/stable-diffusion-stability-ai/ldm/modules/diffusionmodules/model.py`中初始化。
+```python
+try:
+    import xformers
+    import xformers.ops
+    XFORMERS_IS_AVAILBLE = True
+except:
+    XFORMERS_IS_AVAILBLE = False
+    print("No module 'xformers'. Proceeding without it.")
+```
+这里是判断能否成功导入`xformers`库来决定是否使用xformers，但是在实际使用中，用过Linux版的都知道即使环境有这个库，如果在使用时不添加`--xfomers`
+这一项，依然不会载入`xformers`，因此可知，之前有代码会影响这一步导入库是否成功。在`modules/import_hook.py`中有：
+
+```python
+import sys
+
+# this will break any attempt to import xformers which will prevent stability diffusion repo from trying to use it
+if "--xformers" not in "".join(sys.argv):
+    sys.modules["xformers"] = None
+```
+
+至于为什么要这么判断，我想应该是这两个代码不属于同一个仓库，但是需要一个方法共享相同的信息，直接这样最方便
+
 
 ## SD & 3D Model
 

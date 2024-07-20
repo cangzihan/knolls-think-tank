@@ -90,6 +90,9 @@ python3 -m fastchat.serve.controller
 CUDA_VISIBLE_DEVICES=0 python3 -m fastchat.serve.model_worker --model-path lmsys/vicuna-7b-v1.5 --controller http://localhost:21001 --port 31000 --worker http://localhost:31000
 # worker 1
 CUDA_VISIBLE_DEVICES=1 python3 -m fastchat.serve.model_worker --model-path lmsys/fastchat-t5-3b-v1.0 --controller http://localhost:21001 --port 31001 --worker http://localhost:31001
+# 双卡方案命令（控制两个GPU各占一半显存）
+CUDA_VISIBLE_DEVICES=0,1 python3 -m fastchat.serve.model_worker --model-path cyberagent/calm3-22b-chat --controller http://localhost:21001 --port 31000 --worker http://localhost:31000 --num-gpus=2 --max-gpu-memory 26GiB
+
 # Web UI
 python3 -m fastchat.serve.gradio_web_server
 ```
@@ -1172,6 +1175,26 @@ generated_text = tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0]
 print("问:", text)
 print("答:", generated_text)
 ```
+
+## CyberAgentLM
+
+[calm3-22b-chat](https://huggingface.co/cyberagent/calm3-22b-chat/tree/main) | [Demo](https://huggingface.co/spaces/cyberagent/calm3-22b-chat-demo)
+
+[公司简介](https://www.cyberagent.co.jp/corporate/overview/)
+
+### 部署
+测试代码可以照搬，不会有报错
+
+#### FastChat版
+能够兼容FastChat，估计是因为和Llama很像，再就是这家的程序水平高一些，使用方法基本和[Qwen](#_2-fastchat版)等其他大模型一样
+```shell
+# 双卡方案命令（控制两个GPU各占一半显存）
+CUDA_VISIBLE_DEVICES=0,1 python3 -m fastchat.serve.model_worker --model-path cyberagent/calm3-22b-chat --controller http://localhost:21001 --port 31000 --worker http://localhost:31000 --num-gpus=2 --max-gpu-memory 26GiB
+# 1卡方案命令
+CUDA_VISIBLE_DEVICES=0 python3 -m fastchat.serve.model_worker --model-path cyberagent/calm3-22b-chat --controller http://localhost:21001 --port 31000 --worker http://localhost:31000
+```
+
+Muji词书链接：https://www.mojidict.com/
 
 ## 其他
 XXXXXXX
