@@ -14,19 +14,21 @@ tags:
 模型信息
 
 |          | Model        | Web | API |
-|----------|--------------|---|-----|
-| ChatGPT  | GPT-4        | ✔ | ✔   |
-|          | GPT-4o       | ✔ | ✔   |
-|          | GPT-4v       | ✔ |     |
-|          | GPT-3.5      | ✔ | ✔   |
-| Baichuan | Baichuan2    | ✔ | ✔   |
-|          | Baichuan-NPC | ✔  | ✔   |
-| 通义千问     | 通义千问         | ✔ | ✔   |
+|----------|--------------|-----|-----|
+| ChatGPT  | GPT-4        | ✔   | ✔   |
+|          | GPT-4o       | ✔   | ✔   |
+|          | GPT-4v       | ✔   |  ✔  |
+|          | GPT-4o mini  | ✔   | ✔   |
+|          | GPT-3.5      | -   | ✔   |
+| Baichuan | Baichuan2    | ✔   | ✔   |
+|          | Baichuan-NPC | ✔   | ✔   |
+| 通义千问     | 通义千问         | ✔   | ✔   |
 
 
 ## API价格
-统计日期 2024.6.23
+统计日期 2024.7.25
 
+大量请求可使用OpenAI Batch API 会有 <font color="green">-50%</font> 折扣。
 <table>
   <tr>
     <th></th>
@@ -34,7 +36,7 @@ tags:
     <th>价格</th>
   </tr>
   <tr>
-    <td rowspan="6">ChatGPT</td>
+    <td rowspan="8">ChatGPT</td>
     <td>gpt-4o / gpt-4o-2024-05-13</td>
     <td>Input: $0.005 / 1K tokens <br>	Output: $0.015 / 1K tokens</td>
   </tr>
@@ -51,12 +53,20 @@ tags:
     <td>Input: $0.06 / 1K tokens <br>	Output: $0.12 / 1K tokens</td>
   </tr>
   <tr>
+    <td>gpt-4o-mini / -2024-07-18 <font color="red">new</font> </td>
+    <td>Input: $0.00015 / 1K tokens <br>	Output: $0.0006 / 1K tokens</td>
+  </tr>
+  <tr>
     <td>gpt-3.5-turbo-0125</td>
     <td>Input: $0.0005 / 1K tokens <br>	Output: $0.0015 / 1K tokens</td>
   </tr>
   <tr>
     <td>gpt-3.5-turbo-instruct</td>
-    <td>Input: $0.0015 / 1K tokens <br>	Output: $0.0020 / 1K tokens</td>
+    <td>Input: $0.0005 / 1K tokens <br>	Output: $0.0020 / 1K tokens</td>
+  </tr>
+  <tr>
+    <td>gpt-4-vision-preview</td>
+    <td>Input: $0.01 / 1K tokens <br>	Output: $0.003 / 1K tokens</td>
   </tr>
   <tr>
     <td rowspan="8">Baichuan</td>
@@ -136,7 +146,7 @@ https://poe.com/explore?category=Official
 https://huggingface.co/chat/
 
 ## ChatGPT
-[Online](https://chat.openai.com/) | [API](https://platform.openai.com/settings/organization/billing/overview) | [AzureAPI](https://learn.microsoft.com/zh-cn/azure/ai-services/openai/)
+[Online](https://chat.openai.com/) | [API](https://platform.openai.com/settings/organization/billing/overview) | [AzureAPI](https://learn.microsoft.com/zh-cn/azure/ai-services/openai/) | [API定价](https://openai.com/api/pricing/)
 
 ### API
 API最新价格：https://openai.com/pricing

@@ -35,6 +35,17 @@ sudo lsof -i :<端口号>
 sudo kill -9 <PID>
 ```
 
+## 查看相机
+```shell
+sudo apt install v4l-utils
+v4l2-ctl --list-devices
+```
+
+## 自动输入密码
+```shell
+echo 123456 | sudo -S /path/to/my_script.sh
+```
+
 ## GPU分配
 ```shell
 # 不分配

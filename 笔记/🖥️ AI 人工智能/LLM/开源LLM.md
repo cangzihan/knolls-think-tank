@@ -743,6 +743,8 @@ python3 -m fastchat.serve.controller
 
 # 第二个终端
 CUDA_VISIBLE_DEVICES=0 python3 -m fastchat.serve.model_worker --model-path Qwen1.5-32B-Chat --controller http://localhost:21001 --port 31000 --worker http://localhost:31000
+# 双卡
+CUDA_VISIBLE_DEVICES=0,1 python3 -m fastchat.serve.model_worker --model-path Qwen1.5-32B-Chat --controller http://localhost:21001 --port 31000 --worker http://localhost:31000 --num-gpus=2 --max-gpu-memory 35GiB
 
 # 第三个终端
 ## Gradio Web
@@ -1195,6 +1197,88 @@ CUDA_VISIBLE_DEVICES=0 python3 -m fastchat.serve.model_worker --model-path cyber
 ```
 
 Muji词书链接：https://www.mojidict.com/
+
+## 量化
+### Install AutoGPTQ
+```shell
+conda create -n quant python=3.10
+conda activate quant
+pip install torch==2.2.1+cu118 --extra-index-url https://download.pytorch.org/whl/cu118
+pip install auto-gptq --no-build-isolation --extra-index-url https://huggingface.github.io/autogptq-index/whl/cu118/
+```
+
+### Quick Start
+```python
+from transformers import AutoTokenizer, TextGenerationPipeline
+from auto_gptq import AutoGPTQForCausalLM, BaseQuantizeConfig
+import logging
+
+logging.basicConfig(
+    format="%(asctime)s %(levelname)s [%(name)s] %(message)s", level=logging.INFO, datefmt="%Y-%m-%d %H:%M:%S"
+)
+
+pretrained_model_dir = "facebook/opt-125m"
+quantized_model_dir = "opt-125m-4bit"
+
+tokenizer = AutoTokenizer.from_pretrained(pretrained_model_dir, use_fast=True)
+examples = [
+    tokenizer(
+        "auto-gptq is an easy-to-use model quantization library with user-friendly apis, based on GPTQ algorithm."
+    )
+]
+
+quantize_config = BaseQuantizeConfig(
+    bits=4,  # quantize model to 4-bit
+    group_size=128,  # it is recommended to set the value to 128
+    desc_act=False,  # set to False can significantly speed up inference but the perplexity may slightly bad
+)
+
+# load un-quantized model, by default, the model will always be loaded into CPU memory
+model = AutoGPTQForCausalLM.from_pretrained(pretrained_model_dir, quantize_config)
+
+# quantize model, the examples should be list of dict whose keys can only be "input_ids" and "attention_mask"
+model.quantize(examples)
+
+# save quantized model
+model.save_quantized(quantized_model_dir)
+
+# save quantized model using safetensors
+model.save_quantized(quantized_model_dir, use_safetensors=True)
+
+# push quantized model to Hugging Face Hub.
+# to use use_auth_token=True, Login first via huggingface-cli login.
+# or pass explcit token with: use_auth_token="hf_xxxxxxx"
+# (uncomment the following three lines to enable this feature)
+# repo_id = f"YourUserName/{quantized_model_dir}"
+# commit_message = f"AutoGPTQ model for {pretrained_model_dir}: {quantize_config.bits}bits, gr{quantize_config.group_size}, desc_act={quantize_config.desc_act}"
+# model.push_to_hub(repo_id, commit_message=commit_message, use_auth_token=True)
+
+# alternatively you can save and push at the same time
+# (uncomment the following three lines to enable this feature)
+# repo_id = f"YourUserName/{quantized_model_dir}"
+# commit_message = f"AutoGPTQ model for {pretrained_model_dir}: {quantize_config.bits}bits, gr{quantize_config.group_size}, desc_act={quantize_config.desc_act}"
+# model.push_to_hub(repo_id, save_dir=quantized_model_dir, use_safetensors=True, commit_message=commit_message, use_auth_token=True)
+
+# load quantized model to the first GPU
+model = AutoGPTQForCausalLM.from_quantized(quantized_model_dir, device="cuda:0")
+
+# download quantized model from Hugging Face Hub and load to the first GPU
+# model = AutoGPTQForCausalLM.from_quantized(repo_id, device="cuda:0", use_safetensors=True, use_triton=False)
+
+# inference with model.generate
+print(tokenizer.decode(model.generate(**tokenizer("auto_gptq is", return_tensors="pt").to(model.device))[0]))
+
+# or you can also use pipeline
+pipeline = TextGenerationPipeline(model=model, tokenizer=tokenizer)
+print(pipeline("auto-gptq is")[0]["generated_text"])
+```
+
+[量化/微调教程](https://mp.weixin.qq.com/s?__biz=MzA5ODg3Mzk5NQ==&mid=2453344848&idx=1&sn=cf6274840839dde767496f20344664e6&chksm=874555b4b032dca2452b2b0391b85de94f31a7176fca0509b5d1883aa3cc12e68bcc0c1b6c66&scene=178&cur_album_id=3377603146426613767#rd)
+
+## OpenGPT-4o
+[Demo](https://huggingface.co/spaces/KingNish/OpenGPT-4o)
+
+就是LLava
 
 ## 其他
 XXXXXXX

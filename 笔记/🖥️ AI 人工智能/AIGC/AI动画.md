@@ -170,6 +170,9 @@ CUDA_VISIBLE_DEVICES=0 python3 gradio_app.py
 - 修改风格和环境
 - **Connecting videos:** 输入两个video，生成一个新视频包含有两个视频的内容和过渡
 
+### LivePortrait
+[model](https://huggingface.co/KwaiVGI/LivePortrait) | [demo](https://huggingface.co/spaces/KwaiVGI/LivePortrait)
+
 ## 名词解释
 
 - **Toon**

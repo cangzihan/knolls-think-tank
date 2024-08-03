@@ -54,6 +54,53 @@ sudo nala install pulseaudio
 sudo nala install ffmpeg
 ```
 
+Ubuntu 24系统可能需要改变虚拟环境C++库
+
+【报错】ImportError: [你的Anaconda路径如/home/xxx/anaconda3]/envs/py310_cv/lib/libstdc++.so.6: version GLIBCXX_3.4.32' not found (required by /lib/x86_64-linux-gnu/libjack.so.0)
+```shell
+conda install -c conda-forge gcc
+# 或者
+# If necessary, create a symbolic link to the system's libstdc++.so.6:
+ln -sf /usr/lib/x86_64-linux-gnu/libstdc++.so.6 [你的Anaconda路径如/home/xxx/anaconda3]/envs/py310_cv/lib/libstdc++.so.6
+```
+
+#### 麦克风
+注意：插入麦克风后，可能在设置中【声音】中的输入没有明显的选项增加（只有一个选项），但是其中一个选项会由【Internal Microphone - Built-in Audio】变为【Microphone - Built-in Audio】
+同时，音频大小（Ubuntu24可看到）会在插入后变大，这时实际上是麦克已经成功链接。
+
+#### 蓝牙
+Airpods连接
+1. 解禁蓝牙
+```shell
+sudo rmmod btusb
+sleep 1
+sudo modprobe btusb
+sudo /etc/init.d/bluetooth restart
+```
+
+2. 安装blueman
+```shell
+sudo nala install blueman
+sudo nala install pulseaudio-module-bluetooth
+sudo service bluetooth restart
+```
+
+3. 设置模式
+```shell
+sudo gedit /etc/bluetooth/main.conf
+```
+
+添加一行
+```text
+#ControllerMode = dual # [!code --]
+ControllerMode = bredr # [!code ++]
+```
+
+
+```shell
+sudo /etc/init.d/bluetooth restart
+```
+
 #### 串口
 ```shell
 # 查看CH340驱动，替换内核名
@@ -197,3 +244,19 @@ ibus-daemon -drx &
 (可能要重启系统)在【设置】-【键盘】中添加输入法
 
 按<kbd>Win</kbd> + <kbd>Space</kbd>可切换输入法
+
+## 远程桌面
+### Todesk远程连接Ubuntu卡100%，以及小窗口打不开
+https://blog.csdn.net/Q95470/article/details/140008314
+
+解决方案：
+```shell
+sudo vim /etc/gdm3/custom.conf
+```
+
+```text
+#WaylandEnable=false # [!code --]
+WaylandEnable=false  # [!code ++]
+```
+重启系统或命令行输入reboot重启就可以啦
+

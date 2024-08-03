@@ -386,8 +386,17 @@ https://juejin.cn/post/7109778061574275109
 
 使用：
 
+#### 打开管理器
 打开【Window】-【Asset Store】后会告诉你，Asset Store已经被移除。并说明了如何下载购买的assets，在【Window】-【Package Manager】中
 选择【My Assets】(+号右边那个下拉菜单)，然后等一会加载完就有了。
+
+#### 删除某个包的文件(Linux)
+文件在`~/.local/share/unity3d/Asset Store-5.x`中，不同的包是以**作者名**按文件夹进行分类的
+
+查询方法
+```shell
+find ~ -type d -name "【作者名】"
+```
 
 ### Websocket
 1. 安装 WebSocketSharp：
@@ -582,3 +591,6 @@ public class UnityMainThreadDispatcher : MonoBehaviour
      - In your Unity project, create a folder named Plugins (if it doesn't already exist) inside the `Assets` directory.
   2. Copy the DLL:
      - Copy the `Newtonsoft.Json.dll` file to the Assets/Plugins folder.
+
+- 高斯模型马赛克问题：Mesh模型在前，高斯模型在后，会在交界处出现马赛克。需要在项目偏好中找到图形（不是点URP那个子项），然后找到URP的资产对应的是哪一个asset，一般是High，pipline之类的名字。然后在Inspector改变上面的参数
+

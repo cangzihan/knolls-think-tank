@@ -27,7 +27,7 @@ html:not(.dark) .dark-mode {
 常用的AI绘图模型：
 1. [Midjourney](https://midjourney.co/generator): 在线AI绘图网站，免费使用15次。
 2. 文心一格: 由百度飞桨、文心大模型的技术创新推出的“AI 作画”产品，在线使用。
-3. Stable Diffusion
+3. Stable Diffusion: 有开源模型，也有API
 4. [DALL·E 2](https://openai.com/dall-e-2): 付费订阅ChatGPT后可直接使用
 
 ## 项目地址
@@ -337,6 +337,19 @@ Simplest way is to use it online, interrogate an image, and the model will be do
 - Download `model.onnx` and name it with the model name e.g. `wd-v1-4-convnext-tagger-v2.onnx`
 - Download `selected_tags.csv` and name it with the model name e.g. `wd-v1-4-convnext-tagger-v2.csv`
 
+requirements
+```text
+flax
+wandb
+clu
+```
+
+TypeError: Descriptors cannot be created directly.
+
+If this call came from a _pb2.py file, your generated code is out of date and must be regenerated with protoc >= 3.19.0.
+```text
+pip install protobuf==3.20.*
+```
 #### IPAdapter plus
 https://github.com/cubiq/ComfyUI_IPAdapter_plus
 
