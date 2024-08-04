@@ -1275,6 +1275,24 @@ print(pipeline("auto-gptq is")[0]["generated_text"])
 
 [量化/微调教程](https://mp.weixin.qq.com/s?__biz=MzA5ODg3Mzk5NQ==&mid=2453344848&idx=1&sn=cf6274840839dde767496f20344664e6&chksm=874555b4b032dca2452b2b0391b85de94f31a7176fca0509b5d1883aa3cc12e68bcc0c1b6c66&scene=178&cur_album_id=3377603146426613767#rd)
 
+## 微调
+- LoRA
+- QLoRA
+- 全参数微调
+
+GPUEZ智能算力云平台: https://gpuez.com/
+
+### 训练数据
+可以用GPT进行扩充
+```json
+[
+  {
+    "question": "9.11和9.9哪个大？",
+    "answer": "9.9更大"
+  }
+]
+```
+
 ## OpenGPT-4o
 [Demo](https://huggingface.co/spaces/KingNish/OpenGPT-4o)
 
