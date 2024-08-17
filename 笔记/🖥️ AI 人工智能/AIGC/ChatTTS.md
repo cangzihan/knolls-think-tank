@@ -12,6 +12,10 @@ tags:
 
 因为我不是做语音的，所以并不感兴趣它的具体原理，大概需要至少6G显存。
 
+DVAE = Diffusion + VAE
+
+Transformer Engine (TE) 是一个用于在NVIDIA GPU 上加速Transformer 模型的库，包括在Hopper GPU 上使用8 位浮点(FP8) 精度，以在训练和推理中以较低的内存利用率提供更好的性能。
+
 ## Install
 
 ### Win/Mac

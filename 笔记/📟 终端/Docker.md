@@ -152,8 +152,139 @@ docker run -it --rm -v ~/yolov8:/yolov8 ultralytics/ultralytics:latest yolo clas
 ## Nvidia Docker
 https://hub.docker.com/r/nvidia/cuda/
 
+### Install
+#### 直接拉取镜像
 在docker页面的Tags选项卡中有最新版本的各个系统的容器命令，
-如在Ubuntu20的主机中，安装cuda12.4容器：
+如在Ubuntu20的主机中，安装cuda12.4容器(注意你的GPU驱动允许的最高cuda版本，否则可能搭建环境不成功)：
 ```shell
 docker pull nvidia/cuda:12.4.1-cudnn-devel-ubuntu20.04
+```
+镜像`nvidia/cuda:12.4.1-cudnn-devel-ubuntu20.04`是一个包含 CUDA 和 cuDNN 开发环境的 Docker 镜像。具体说明如下：
+
+1. CUDA 版本: 12.4.1
+包含了 CUDA 12.4.1 版本的工具包，这是一套用于开发并行计算应用的工具和库，特别是针对 NVIDIA GPU。
+2. cuDNN:
+cuDNN (CUDA Deep Neural Network library) 是 NVIDIA 提供的一个用于深度学习的 GPU 加速库。这个库在训练和推理阶段能大大提高卷积神经网络的性能。这个镜像包含 cuDNN，可以直接用于开发和运行深度学习应用。
+3. 开发环境 (devel):
+devel 表示这是一个开发版本的镜像，包含了完整的开发工具链，例如 CUDA 编译器 (nvcc)、cuDNN 库、其他 CUDA 库（如 cuBLAS、cuFFT 等），以及各种示例代码和调试工具。
+适合在容器中进行 CUDA 应用程序的开发、编译和测试。
+4. Ubuntu 版本: 20.04
+这个镜像是基于 Ubuntu 20.04 LTS 构建的。Ubuntu 20.04 是一个长期支持版本，适合用于生产环境。
+
+#### 拉取失败了？
+方法1：使用老毛子固件的路由配置ShadowSocks，或经过ROOT后的安卓手机/有无线收发模块安卓嵌入式设备使用【VPN热点】APP和Clash分享WiFi。
+
+方法2: 用Google Colab下载离线包。
+1. 首先应用到这个工具 https://github.com/drengskapur/docker-in-colab 按照提示在Colab中创建一个cell
+```shell
+# Copyright 2024 Drengskapur
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# @title {display-mode:"form"}
+# @markdown <br/><br/><center><img src="https://cdn.jsdelivr.net/gh/drengskapur/docker-in-colab/assets/docker.svg" height="150"><img src="https://cdn.jsdelivr.net/gh/drengskapur/docker-in-colab/assets/colab.svg" height="150"></center><br/>
+# @markdown <center><h1>Docker in Colab</h1></center><center>github.com/drengskapur/docker-in-colab<br/><br/><br/><b>udocker("run hello-world")</b></center><br/>
+def udocker_init():
+    import os
+    if not os.path.exists("/home/user"):
+        !pip install udocker > /dev/null
+        !udocker --allow-root install > /dev/null
+        !useradd -m user > /dev/null
+    print(f'Docker-in-Colab 1.1.0\n')
+    print(f'Usage:     udocker("--help")')
+    print(f'Examples:  https://github.com/indigo-dc/udocker?tab=readme-ov-file#examples')
+
+    def execute(command: str):
+        user_prompt = "\033[1;32muser@pc\033[0m"
+        print(f"{user_prompt}$ udocker {command}")
+        !su - user -c "udocker $command"
+
+    return execute
+
+udocker = udocker_init()
+```
+
+2. 创建第2个cell
+```shell
+def save_image(image_name):
+  udocker("pull " + image_name)
+  file_name = image_name.replace(":", "_")
+  file_name = file_name.replace("/", "_")+'.tar'
+  udocker("save -o "+ file_name+" " + image_name)
+  !gzip -c /home/user/{file_name} > /content/{file_name}.gz
+```
+
+3. 创建第3个cell
+```shell
+save_image("nvidia/cuda:12.4.1-cudnn-devel-ubuntu20.04")
+```
+
+4. 下载后本地读取
+```shell
+docker load -i nvidia_cuda_12.4.1-cudnn-devel-ubuntu20.04.tar.gz
+```
+
+#### 使用镜像
+[查看已经安装的镜像](#列出所有镜像)
+
+使用GPU资源运行容器
+```shell
+docker run -it --gpus all --name my_cuda_container nvidia/cuda:12.4.1-cudnn-devel-ubuntu20.04 /bin/bash
+```
+- `-it`：表示交互模式运行容器。
+- `--name my_cuda_container`：指定容器的名字，你可以根据需要更改。
+- `/bin/bash`：指定要运行的命令，这里是启动一个 Bash shell。
+- `--gpus all`：表示容器可以访问所有可用的 GPU。
+
+启动一个后台守护进程
+```shell
+docker run -d --gpus all --name my_cuda_container nvidia/cuda:12.4.1-cudnn-devel-ubuntu20.04 tail -f /dev/null
+```
+这会启动容器并运行`tail -f /dev/null`，保持容器运行而不执行任何实际任务。
+你可以之后通过`docker exec -it my_cuda_container /bin/bash`进入容器。
+
+挂载本地目录（可选）
+```shell
+docker run -it --gpus all --name my_cuda_container -v /path/on/host:/path/in/container nvidia/cuda:12.4.1-cudnn-devel-ubuntu20.04 /bin/bash
+# 后台运行
+docker run -d --gpus all --name chat_tts_cu124 -v /mnt/knoll/chat_tts:/home/knoll/chat_tts nvidia/cuda:12.4.1-cudnn-devel-ubuntu20.04 tail -f /dev/null
+```
+`/path/on/host:/path/in/container`：将主机的路径`/path/on/host`挂载到容器中的`/path/in/container`。
+
+带端口映射的
+```shell
+docker run -d --name my_flask_container -p 6300:6300 nvidia/cuda:12.4.1-cudnn-devel-ubuntu20.04
+```
+`-p 6300:6300`: Maps port 6300 on the host machine to port 6300 in the container. Unfortunately, once a container is created without the port mapping, you can't add it later without recreating the container. So you'll need to remove the existing container and create a new one with the correct port mapping.
+
+```shell
+apt-get install -y curl unzip python3 python3-pip git
+apt-get install -y git vim
+apt update && apt upgrade
+```
+
+#### 安装Conda
+1. 手动把安装包放到挂载的目录下，然后进到容器里安装。安好后`exit`然后`docker exec -it my_cuda_container /bin/bash`重进一下
+
+安装好后，如果创建环境卡住了可以换源，参考【终端】-【anaconda】-【换源】
+
+#### 安装驱动
+查看那些版本可用
+```shell
+apt search nvidia-driver
+```
+
+安装
+```shell
+apt install nvidia-driver-<version>
 ```

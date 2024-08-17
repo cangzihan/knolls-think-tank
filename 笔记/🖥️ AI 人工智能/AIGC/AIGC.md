@@ -30,6 +30,9 @@ html:not(.dark) .dark-mode {
 3. Stable Diffusion: 有开源模型，也有API
 4. [DALL·E 2](https://openai.com/dall-e-2): 付费订阅ChatGPT后可直接使用
 
+## 实用工具
+Stable Diffusion XL Inpainting: https://huggingface.co/spaces/diffusers/stable-diffusion-xl-inpainting
+
 ## 项目地址
 Stable Diffusion:
 https://github.com/CompVis/stable-diffusion
@@ -1199,21 +1202,29 @@ Application
 
 ## 3D
 
-Depth Map
+- Depth Map
+- 3D-GPT: [Project](https://chuny1.github.io/3DGPT/3dgpt.html) | [Paper](https://arxiv.org/abs/2310.12945) | [Code](https://github.com/Chuny1/3DGPT)
+- DreamScene: [Project](https://dreamscene-project.github.io/) | [Paper](https://arxiv.org/abs/2404.03575) | [Code](https://github.com/DreamScene-Project/DreamScene)
+- DreamScene360: [Paper](https://arxiv.org/abs/2404.06903)
+- Text2Room: [Project](https://lukashoel.github.io/text-to-room/) | [Code](https://github.com/lukasHoel/text2room)
+- Text2NeRF: [Project](https://eckertzhang.github.io/Text2NeRF.github.io/) | [Code](https://github.com/eckertzhang/Text2NeRF)
+- GaussianCube: [Project](https://gaussiancube.github.io/) | [Paper](https://arxiv.org/abs/2403.19655) | [Code](https://github.com/GaussianCube/GaussianCube)
+- ReconFusion: [Project](https://reconfusion.github.io/)
+- TripoSR: [Demo](https://huggingface.co/spaces/stabilityai/TripoSR)
+- Stable Fast 3D: [Project](https://stable-fast-3d.github.io) | [Paper](https://arxiv.org/abs/2408.00653) | [Demo](https://huggingface.co/spaces/stabilityai/stable-fast-3d)
+- GRM: [Project](https://justimyhxu.github.io/projects/grm/) | [Demo目前无效](https://huggingface.co/spaces/GRM-demo/GRM)
+- InstantMesh: [Project](https://github.com/TencentARC/InstantMesh?tab=readme-ov-file) | [Demo](https://huggingface.co/spaces/TencentARC/InstantMesh)
+  - 可以生成`.obj`和`.glb`模型。
 
-3D-GPT: [Project](https://chuny1.github.io/3DGPT/3dgpt.html) | [Paper](https://arxiv.org/abs/2310.12945) | [Code](https://github.com/Chuny1/3DGPT)
+### 3D Editing
+[GaussCtrl](https://gaussctrl.active.vision/)
 
-DreamScene: [Project](https://dreamscene-project.github.io/) | [Paper](https://arxiv.org/abs/2404.03575) | [Code](https://github.com/DreamScene-Project/DreamScene)
+### 模型重优化
+InFusion: [Project](https://johanan528.github.io/Infusion/) | [Code](https://github.com/ali-vilab/infusion) | [Model](https://huggingface.co/Johanan0528/Infusion/tree/main)
 
-DreamScene360: [Paper](https://arxiv.org/abs/2404.06903)
+首先训练一个高斯模型（待优化），然后把这个模型渲染出来。然后挑选一张渲染图片，把要编辑的部位画出来，做成Mask图像，通过SDXL-Inpainting这张图像。得到inpaint后的图像，然后训练模型，最后微调模型。
 
-Text2Room: [Project](https://lukashoel.github.io/text-to-room/) | [Code](https://github.com/lukasHoel/text2room)
-
-Text2NeRF: [Project](https://eckertzhang.github.io/Text2NeRF.github.io/) | [Code](https://github.com/eckertzhang/Text2NeRF)
-
-GaussianCube: [Project](https://gaussiancube.github.io/) | [Paper](https://arxiv.org/abs/2403.19655) | [Code](https://github.com/GaussianCube/GaussianCube)
-
-ReconFusion: [Project](https://reconfusion.github.io/)
+如果能通过UNet自动检测缺陷部位，生成Mask，那么就可以自动化。
 
 ### CAT3D
 [Project](https://cat3d.github.io/) | [Paper](https://arxiv.org/abs/2405.10314)
@@ -1238,15 +1249,57 @@ CAT3D最终可以通过多张图像、单张图像或纯文本生成3D模型。
 ### LGM
 [Project](https://me.kiui.moe/lgm/) | [Paper](https://arxiv.org/abs/2402.05054) | [Demo](https://huggingface.co/spaces/ashawkey/LGM)
 
+生成高斯模型
+
 推荐环境：CUDA 11.8以上
+
+![img](assets/LGM.png)
 
 #### Run
 ```shell
 CUDA_VISIBLE_DEVICES=0 python3 app.py big --resume pretrained/model_fp16_fixrot.safetensors
 ```
 
-## 动物动作的生成
+#### 代码分C
+- 多视角图片
 
+代码中已经很明确标注了各个Tensor的尺寸，文本生成和图像生成分别对应于`pipe_text`和`pipe_image`（MVDream和ImageDream）
+
+对于图生多视角图片，这里首先使用了`rembg`库（自动会下载一个UNet）获取背景的mask，然后通过[`kiui.op.recenter()`](https://kit.kiui.moe/ops/#kiui.op.recenter)方法获取一个新图片，最后将这个图片归一化，由0-255归一化到0-1。
+
+- 高斯渲染
+
+可以看到里面涉及一个库：[diff-gaussian-rasterization](https://github.com/ashawkey/diff-gaussian-rasterization)
+
+保存和读取高斯模型时使用另一个库: [plyfile](https://python-plyfile.readthedocs.io/en/latest/) （这两个函数都他妈是静态的，还非得写在类里面加个self）
+
+可以看到每个高斯模型是使用一个矩阵存储信息（3维张量，实际上只有2维，第一个维度长度是1），形状为(N,14),其中，颜色为最后3个维度（归一化），依次为R,G,B。
+```python
+        means3D = gaussians[0, :, 0:3].contiguous().float()
+        opacity = gaussians[0, :, 3:4].contiguous().float()
+        scales = gaussians[0, :, 4:7].contiguous().float()
+        rotations = gaussians[0, :, 7:11].contiguous().float()
+        shs = gaussians[0, :, 11:].unsqueeze(1).contiguous().float() # [N, 1, 3]
+```
+
+```python
+gaussians[:, :, -3] # 红色通道
+gaussians[:, :, -2] # 绿色通道
+gaussians[:, :, -1] # 蓝色通道
+```
+
+### Unique3D
+[Project](https://wukailu.github.io/Unique3D/) | [Paper](https://arxiv.org/abs/2405.20343) | [Demo](https://huggingface.co/spaces/Wuvin/Unique3D)
+
+可以生成`.glb`模型，效果比Stable Fast 3D好。
+
+<div class="theme-image">
+  <img src="./assets/Unique3D.jpg" alt="Light Mode Image" class="light-mode">
+  <img src="./assets/dark_Unique3D.jpg" alt="Dark Mode Image" class="dark-mode">
+</div>
+
+
+## 动物动作的生成
 
 ### MANN
 
@@ -1375,7 +1428,6 @@ ReActor
 facefusion
 
 DeepFaceLive
-
 
 
 

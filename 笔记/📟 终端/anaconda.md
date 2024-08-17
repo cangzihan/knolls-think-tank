@@ -12,3 +12,18 @@ conda create -n XXX python=3.8
 ```shell
 conda create --prefix /path/to/your/env python=3.9
 ```
+
+换源
+```shell
+vim ~/.condarc
+```
+```
+channels:
+  - http://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
+  - http://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/
+  - http://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/
+  - http://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/bioconda/
+  - http://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
+show_channel_urls: true
+ssl_verify: false
+```

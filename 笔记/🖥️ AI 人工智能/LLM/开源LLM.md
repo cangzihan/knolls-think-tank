@@ -473,7 +473,7 @@ CUDA_VISIBLE_DEVICES=0 python3 -m fastchat.serve.model_worker --model-path Llama
 
 [Github](https://github.com/QwenLM/Qwen1.5) | [Paper](https://arxiv.org/abs/2309.16609)
 
-Demo [Qwen1.5-72B-Chat](https://huggingface.co/spaces/Qwen/Qwen1.5-72B-Chat) | [Qwen1.5-110B-Chat](https://huggingface.co/spaces/Qwen/Qwen1.5-110B-Chat-demo)
+Demo [Qwen2-72B-Instruct](https://huggingface.co/spaces/Qwen/Qwen2-72B-Instruct) | [Qwen1.5-110B-Chat](https://huggingface.co/spaces/Qwen/Qwen1.5-110B-Chat-demo)
 
 32B [Qwen1.5-32B](https://huggingface.co/Qwen/Qwen1.5-32B) | [Qwen1.5-32B-Chat](https://huggingface.co/Qwen/Qwen1.5-32B-Chat) |
 
