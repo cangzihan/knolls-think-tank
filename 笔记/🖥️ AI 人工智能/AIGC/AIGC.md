@@ -516,6 +516,71 @@ DreamShaper is a general purpose SD model that aims at doing everything well, ph
 
 在模型页面上可以看到，其使用的Basemodel 是SDXL lighting
 
+### SDXL Inpainting
+```shell
+pip install diffusers
+```
+
+#### Deploy
+下载diffusers/stable-diffusion-xl-1.0-inpainting-0.1的全部文件，和stabilityai/stable-diffusion-xl-base-1.0的`scheduler`文件夹里的文件即可，分别放入两个路径下
+```python
+from diffusers import AutoPipelineForInpainting
+import diffusers
+import torch
+
+from PIL import Image
+
+prompt = "gray laptop on the table"
+guidance_scale = 7.5
+steps = 20
+strength = 0.99
+
+#print(type(image))  # PIL Image
+
+
+device = "cuda" if torch.cuda.is_available() else "cpu"
+print("Using device", device)
+pipe = AutoPipelineForInpainting.from_pretrained("models/diffusers/stable-diffusion-xl-1.0-inpainting-0.1", torch_dtype=torch.float16, variant="fp16").to(device)
+
+
+def sdxl_inpaint(image, mask, negative_prompt, scheduler):
+    if negative_prompt == "":
+        negative_prompt = None
+    scheduler_class_name = scheduler.split("-")[0]
+
+    add_kwargs = {}
+    if len(scheduler.split("-")) > 1:
+        add_kwargs["use_karras"] = True
+    if len(scheduler.split("-")) > 2:
+        add_kwargs["algorithm_type"] = "sde-dpmsolver++"
+
+    scheduler = getattr(diffusers, scheduler_class_name)
+    pipe.scheduler = scheduler.from_pretrained("models/stabilityai/stable-diffusion-xl-base-1.0", subfolder="scheduler", **add_kwargs)
+
+    init_image = image.convert("RGB").resize((1024, 1024))
+    mask = mask.convert("RGB").resize((1024, 1024))
+
+    output = pipe(prompt=prompt, negative_prompt=negative_prompt, image=init_image, mask_image=mask,
+                  guidance_scale=guidance_scale, num_inference_steps=int(steps), strength=strength)
+
+    out_pil = output.images[0]
+
+    # 获取图像的宽度和高度
+    width, height = image.size
+    resized_image = out_pil.resize((width, height))
+    return resized_image
+
+
+if __name__ == "__main__":
+    image = Image.open("IMG_1024_540.png")
+    mask = Image.open("mask.png")
+    negative_prompt = "QR code"
+    scheduler = "EulerDiscreteScheduler"
+    image_new = sdxl_inpaint(image, mask, negative_prompt, scheduler)
+    image_new.save('edit.png', format='PNG')
+
+```
+
 ### 代码分C
 
 #### WebUI
@@ -1215,6 +1280,7 @@ Application
 - GRM: [Project](https://justimyhxu.github.io/projects/grm/) | [Demo目前无效](https://huggingface.co/spaces/GRM-demo/GRM)
 - InstantMesh: [Project](https://github.com/TencentARC/InstantMesh?tab=readme-ov-file) | [Demo](https://huggingface.co/spaces/TencentARC/InstantMesh)
   - 可以生成`.obj`和`.glb`模型。
+- VFUsion3D: [Demo](https://huggingface.co/spaces/facebook/VFusion3D)
 
 ### 3D Editing
 [GaussCtrl](https://gaussctrl.active.vision/)
@@ -1429,6 +1495,8 @@ facefusion
 
 DeepFaceLive
 
+## Propainter
+https://github.com/sczhou/ProPainter
 
 
 ## 名词解释

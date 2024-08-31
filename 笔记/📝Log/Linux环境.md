@@ -198,6 +198,34 @@ sudo reboot
 nvcc -V
 ```
 
+```shell
+vim ~/.bashrc
+```
+
+虚拟环境装Cuda: https://anaconda.org/nvidia/cuda
+```shell
+conda install nvidia/label/cuda-12.4.0::cuda
+conda install anaconda::cudnn # https://anaconda.org/conda-forge/cudnn
+```
+
+### CUDNN
+安装直接查看官网教程即可
+```shell
+wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-keyring_1.1-1_all.deb
+sudo dpkg -i cuda-keyring_1.1-1_all.deb
+sudo apt-get update
+sudo apt-get -y install cudnn
+
+sudo apt-get -y install cudnn-cuda-12
+```
+
+```text
+export PATH=/usr/local/cuda-12.4/bin${PATH:+:${PATH}}
+export LD_LIBRARY_PATH=/usr/local/cuda-12.4/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/cuda/lib64:/usr/local/cuda/extras/CUPTI/lib64"
+export CUDA_HOME=/usr/local/cuda
+```
+
 ## 系统安装
 
 欢迎页面，选择一个语言，然后选择右边的【Install Ubuntu】(如果选择了别的语言请选择相同位置的按钮)。
@@ -260,3 +288,30 @@ WaylandEnable=false  # [!code ++]
 ```
 重启系统或命令行输入reboot重启就可以啦
 
+## 问题汇总
+- e: 无法修正错误,因为您要求某些软件包保持现状,就是它们破坏了软件包间的依赖关系。
+
+用aptitude
+
+### Python类
+- OpenCV的`cv2.imshow()`报错：Rebuild the library with Windows, GTK+ 2.x or Cocoa support. If you are on Ubuntu or Debian, install libgtk2.0-dev and pkg-config, then re-run cmake or configure script in function 'cvShowImage'
+
+最终是这样解决：
+```shell
+pip uninstall opencv-python
+pip install opencv-python
+```
+
+- qt.qpa.plugin: Could not load the Qt platform plugin "xcb" in "XXX/anaconda3/envs/vision/lib/python3XXX/site-packages/cv2/qt/plugins" even though it was found.
+
+解决方法：把上面目录的`libqxcb.so`移走，需要的时候再放回来。
+
+- 使用`ultralytics`等库之后，再调用`cv2.imshow()`出现程序卡死
+
+解决方法: `pip uninstall av`
+
+- 内核更新之后，`nvidia-smi`识别不到驱动的问题：
+```shell
+sudo apt update
+sudo apt upgrade
+```

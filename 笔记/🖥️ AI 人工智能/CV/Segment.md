@@ -7,9 +7,29 @@ tags:
 ---
 # Segment
 
+<style>
+html.dark .light-mode {
+  display: none;
+}
+
+html.dark .dark-mode {
+  display: block;
+}
+
+html:not(.dark) .light-mode {
+  display: block;
+}
+
+html:not(.dark) .dark-mode {
+  display: none;
+}
+</style>
+
 ## Segment Anything Model
 
-[Base Model DL](https://github.com/ultralytics/assets/releases/download/v8.1.0/sam_b.pt)
+[Base Model DL](https://github.com/ultralytics/assets/releases/download/v8.1.0/sam_b.pt) | [Paper](https://arxiv.org/pdf/2304.02643)
+
+SAM2: [Demo](https://huggingface.co/spaces/junma/MedSAM2)
 
 ## 自动标注
 ```python
@@ -50,4 +70,11 @@ depth.save('output.jpg')
 print("Done")
 ```
 
+## UDUN
 
+[Paper](https://arxiv.org/abs/2307.14052) | [Code](https://github.com/PJLallen/UDUN)
+
+<div class="theme-image">
+  <img src="./assets/UDUN.png" alt="Light Mode Image" class="light-mode">
+  <img src="./assets/dark_UDUN.png" alt="Dark Mode Image" class="dark-mode">
+</div>

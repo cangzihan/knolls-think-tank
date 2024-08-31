@@ -59,6 +59,8 @@ Sora的一个复现项目 [Project(已失效)](https://pku-yuangroup.github.io/O
 ## Image-to-Video
 可以分为两类，一类是给图片(可附加文字)生成视频，另一类是给图片和对应的特征(语义，关节点，normal map等)生成视频，如果每一帧都能提供特征，理论上可以使视频的长度很长，不受限制。
 
+Cinemo: [Demo](https://huggingface.co/spaces/maxin-cn/Cinemo)
+
 ### Gen-2
 
 给一个图片和一段Prompt生成视频，也可以只给图片，如果不想视频和图片差异太大就只给图片。

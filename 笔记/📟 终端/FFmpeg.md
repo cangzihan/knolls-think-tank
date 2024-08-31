@@ -80,6 +80,33 @@ ffmpeg -i input_4k_video.mp4 -vf scale=1920:1080 -c:a copy output_1080p_video.mp
 - `-c:a copy`：指定音频编解码器为复制，表示音频不需要重新编码，直接复制到输出文件。
 - `output_1080p_video.mp4`：指定输出视频文件名。
 
+### 视频合并
+
+合并视频并循环所有视频1次
+```shell
+ffmpeg \
+-stream_loop 1 -i iPhone1.mp4 -stream_loop 1 -i iPhone5.mp4 -stream_loop 1 -i 餐具1.mp4 -stream_loop 1 -i 餐具3.mp4 \
+-stream_loop 1 -i laptop1.mp4 -stream_loop 1 -i laptop2.mp4 -stream_loop 1 -i 茶具2.mp4 -stream_loop 1 -i 茶具3.mp4 \
+-stream_loop 1 -i speaker1.mp4 -stream_loop 1 -i speaker2.mp4 -stream_loop 1 -i 花束1.mp4 -stream_loop 1 -i 花束4.mp4 \
+-filter_complex "\
+[0:v]scale=512:512[v0]; \
+[1:v]scale=512:512[v1]; \
+[2:v]scale=512:512[v2]; \
+[3:v]scale=512:512[v3]; \
+[4:v]scale=512:512[v4]; \
+[5:v]scale=512:512[v5]; \
+[6:v]scale=512:512[v6]; \
+[7:v]scale=512:512[v7]; \
+[8:v]scale=512:512[v8]; \
+[9:v]scale=512:512[v9]; \
+[10:v]scale=512:512[v10]; \
+[11:v]scale=512:512[v11]; \
+[v0][v1][v2][v3]hstack=inputs=4[top]; \
+[v4][v5][v6][v7]hstack=inputs=4[middle]; \
+[v8][v9][v10][v11]hstack=inputs=4[bottom]; \
+[top][middle][bottom]vstack=inputs=3[output]" \
+-map "[output]" -c:v libx264 output2.mp4
+```
 
 ## 常见问题
 手动安装torchvision时：‘AV_CODEC_CAP_INTRA_ONLY’ was not declared in this scope; did you mean ‘AV_CODEC_PROP_INTRA_ONLY’?
