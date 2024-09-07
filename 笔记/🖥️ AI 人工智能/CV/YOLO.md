@@ -17,6 +17,7 @@ YOLO (You Only Look Once), a popular object detection and image segmentation mod
 - YOLOv7 added additional tasks such as pose estimation on the COCO keypoints dataset.
 - YOLOv8 is the latest version of YOLO by Ultralytics. As a cutting-edge, state-of-the-art (SOTA) model, YOLOv8 builds on the success of previous versions, introducing new features and improvements for enhanced performance, flexibility, and efficiency. YOLOv8 supports a full range of vision AI tasks, including detection, segmentation, pose estimation, tracking, and classification. This versatility allows users to leverage YOLOv8's capabilities across diverse applications and domains.
 - YOLOv9 Introduces innovative methods like Programmable Gradient Information (PGI) and the Generalized Efficient Layer Aggregation Network (GELAN).
+- YOLOv10 By Tsinghua University, featuring NMS-free training and efficiency-accuracy driven architecture, delivering state-of-the-art performance and latency.
 
 YOLO-NAS: YOLO Neural Architecture Search (NAS) Models.
 Realtime Detection Transformers (RT-DETR): Baidu's PaddlePaddle Realtime Detection Transformer (RT-DETR) models.
@@ -202,6 +203,23 @@ model = YOLO('yolov8s.pt')
 
 # 导出模型为 TensorRT 引擎
 model.export(format='engine')
+```
+
+## YOLO v10
+
+https://docs.ultralytics.com/zh/models/yolov10/
+
+```python
+from ultralytics import YOLO
+
+# Load a pre-trained YOLOv10n model
+model = YOLO("yolov10n.pt")
+
+# Perform object detection on an image
+results = model("image.jpg")
+
+# Display the results
+results[0].show()
 ```
 
 ## YOLO-World

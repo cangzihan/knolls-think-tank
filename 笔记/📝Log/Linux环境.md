@@ -206,6 +206,7 @@ vim ~/.bashrc
 ```shell
 conda install nvidia/label/cuda-12.4.0::cuda
 conda install anaconda::cudnn # https://anaconda.org/conda-forge/cudnn
+pip install torch==2.4.0+cu124 --extra-index-url https://download.pytorch.org/whl/cu124
 ```
 
 ### CUDNN

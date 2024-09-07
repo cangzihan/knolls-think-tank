@@ -55,3 +55,7 @@ CUDA_VISIBLE_DEVICES=0 XXX
 # 分配多卡
 CUDA_VISIBLE_DEVICES=0,1 XXX
 ```
+
+## SSH
+SSH是Secure Shell（安全外壳）的简称，是一种在不安全的网络环境中，通过加密机制和认证机制，实现安全的远程访问以及其他网络服务的安全协议。
+
