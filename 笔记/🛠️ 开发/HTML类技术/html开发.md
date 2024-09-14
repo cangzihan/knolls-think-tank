@@ -308,3 +308,103 @@ Markdown文本继续...
 在上述示例中，Markdown解析器会保留`<p>`标签和`<ul>`标签及其内容，并按照HTML的规则来渲染它们。因此，在渲染后的文档中，你会看到一个蓝色的HTML段落和一个使用方形标记的HTML列表，而Markdown部分则会按照Markdown的规则来渲染。
 
 需要注意的是，虽然Markdown支持HTML，但并不是所有的HTML标签都会被Markdown解析器识别或保留。一些HTML标签可能会被Markdown解析器解释为Markdown语法的一部分，从而导致意外的渲染效果。因此，在插入HTML代码时，最好先了解你的Markdown解析器对HTML的支持情况。
+
+## 应用
+### 分块视频制作
+
+::: code-group
+```html [main.html]
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Comparison Slider</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="comparison-container">
+    <video id="video1" autoplay loop muted>
+      <source src="video1.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+
+    <video id="video2" autoplay loop muted>
+      <source src="video2.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+
+    <div class="slider" id="slider"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
+```
+
+```css [style.css]
+/* style.css */
+.comparison-container {
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+  height: 400px;
+  margin: auto;
+  overflow: hidden;
+}
+
+#video1, #video2 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#video2 {
+  clip-path: inset(0 50% 0 0); /* Initial half of the video */
+}
+
+.slider {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 5px;
+  height: 100%;
+  background-color: white;
+  cursor: ew-resize;
+}
+```
+
+```js [script.js]
+// script.js
+const slider = document.getElementById('slider');
+const video2 = document.getElementById('video2');
+const container = document.querySelector('.comparison-container');
+
+let isSliding = false;
+
+slider.addEventListener('mousedown', () => {
+  isSliding = true;
+});
+
+window.addEventListener('mouseup', () => {
+  isSliding = false;
+});
+
+window.addEventListener('mousemove', (event) => {
+  if (isSliding) {
+    // Calculate the position of the slider relative to the container
+    let rect = container.getBoundingClientRect();
+    let position = event.clientX - rect.left;
+
+    // Clamp the position between the left and right edges of the container
+    position = Math.max(0, Math.min(position, rect.width));
+
+    // Update slider position and video clipping
+    slider.style.left = position + 'px';
+    video2.style.clipPath = `inset(0 ${rect.width - position}px 0 0)`;
+  }
+});
+```
+:::

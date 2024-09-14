@@ -1288,7 +1288,7 @@ Application
 ### 模型重优化
 InFusion: [Project](https://johanan528.github.io/Infusion/) | [Code](https://github.com/ali-vilab/infusion) | [Model](https://huggingface.co/Johanan0528/Infusion/tree/main)
 
-首先训练一个高斯模型（待优化），然后把这个模型渲染出来。然后挑选一张渲染图片，把要编辑的部位画出来，做成Mask图像，通过SDXL-Inpainting这张图像。得到inpaint后的图像，然后训练模型，最后微调模型。
+首先训练一个高斯模型（待优化，好像不是待优化，是结合预先标注好的mask训练一个不完整的高斯模型），然后把这个模型渲染出来。然后挑选一张渲染图片，把要编辑的部位画出来，做成Mask图像，通过SDXL-Inpainting这张图像。得到inpaint后的图像，然后训练模型，最后微调模型。
 
 如果能通过UNet自动检测缺陷部位，生成Mask，那么就可以自动化。
 

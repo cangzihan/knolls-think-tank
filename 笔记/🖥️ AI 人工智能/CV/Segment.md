@@ -25,6 +25,14 @@ html:not(.dark) .dark-mode {
 }
 </style>
 
+##  DeepLabv3+
+[Paper](https://arxiv.org/abs/1802.02611v3)
+
+<div class="theme-image">
+  <img src="./assets/d3p.png" alt="Light Mode Image" class="light-mode">
+  <img src="./assets/dark_d3p.png" alt="Dark Mode Image" class="dark-mode">
+</div>
+
 ## Segment Anything Model
 
 [Base Model DL](https://github.com/ultralytics/assets/releases/download/v8.1.0/sam_b.pt) | [Paper](https://arxiv.org/pdf/2304.02643)
@@ -128,3 +136,17 @@ mask = rle_decode(rle_code)
 print(rle_encode(mask) == rle_code)
 # 结果为True
 ```
+
+代码解析
+1. 输入：
+   - im：一个 NumPy 数组，表示图像的掩膜，其中 1 表示前景（mask），0 表示背景。
+2. 展平图像：
+   - 使用 flatten(order='F') 将二维图像展平为一维数组，采用列优先的顺序。
+3. 边界处理：
+   - 使用 np.concatenate 在数组的前后添加 0。这是为了确保在处理游程时能够正确识别边界。
+4. 计算游程：
+   - np.where(pixels[1:] != pixels[:-1]) 找到像素值变化的索引。
+   - runs[1::2] -= runs[::2] 计算连续相同值的长度，即游程长度。
+5. 格式化输出：
+   - 使用 ' '.join(str(x) for x in runs) 将游程长度和对应值转换为字符串形式，以便输出。
+

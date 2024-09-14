@@ -86,8 +86,8 @@ tags:
     <td> ￥0.024 / 1K tokens</td>
   </tr>
   <tr>
-    <td>Baichuan2-Turbo-192k</td>
-    <td> ￥0.016 / 1K tokens</td>
+    <td><s>Baichuan2-Turbo-192k</s></td>
+    <td><s> ￥0.016 / 1K tokens</s></td>
   </tr>
   <tr>
     <td>Baichuan2-53B</td>
