@@ -471,6 +471,31 @@ CUDA_VISIBLE_DEVICES=0 python3 -m fastchat.serve.model_worker --model-path Llama
 ## Qwen
 **通义千问（Qwen）** 是阿里云研发的基于Transformer的大语言模型, 在超大规模的预训练数据上进行训练得到。预训练数据类型多样，覆盖广泛，包括大量网络文本、专业书籍、代码等。
 
+
+### 相关模型
+#### Qwen2.5 series
+[Demo](https://huggingface.co/spaces/Qwen/Qwen2.5) | [魔塔社区](https://www.modelscope.cn/studios/qwen/Qwen2.5)
+
+Qwen2.5: Qwen2.5 language models, including pretrained and instruction-tuned models of 7 sizes, including 0.5B, 1.5B, 3B, 7B, 14B, 32B, and 72B.
+- [Qwen2.5-0.5B](https://huggingface.co/Qwen/Qwen2.5-0.5B) | [Qwen2.5-0.5B-Instruct](https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct)
+- [Qwen2.5-1.5B](https://huggingface.co/Qwen/Qwen2.5-1.5B) | [Qwen2.5-1.5B-Instruct](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct)
+- [Qwen2.5-3B](https://huggingface.co/Qwen/Qwen2.5-3B) | [Qwen2.5-3B-Instruct](https://huggingface.co/Qwen/Qwen2.5-3B-Instruct)
+- [Qwen2.5-7B](https://huggingface.co/Qwen/Qwen2.5-7B) | [Qwen2.5-7B-Instruct](https://huggingface.co/Qwen/Qwen2.5-7B-Instruct)
+- [Qwen2.5-14B](https://huggingface.co/Qwen/Qwen2.5-14B) | [Qwen2.5-14B-Instruct](https://huggingface.co/Qwen/Qwen2.5-14B-Instruct)
+- [Qwen2.5-32B](https://huggingface.co/Qwen/Qwen2.5-32B) | [Qwen2.5-32B-Instruct](https://huggingface.co/Qwen/Qwen2.5-32B-Instruct)
+- [Qwen2.5-72B](https://huggingface.co/Qwen/Qwen2.5-72B) | [Qwen2.5-72B-Instruct](https://huggingface.co/Qwen/Qwen2.5-72B-Instruct)
+
+Qwen2.5-Coder: Code-specific model series based on Qwen2.5
+- [Qwen2.5-Coder-1.5B](https://huggingface.co/Qwen/Qwen2.5-Coder-1.5B) | [Qwen2.5-Coder-1.5B-Instruct](https://huggingface.co/Qwen/Qwen2.5-Coder-1.5B-Instruct)
+- [Qwen2.5-Coder-7B](https://huggingface.co/Qwen/Qwen2.5-Coder-7B) | [Qwen2.5-Coder-7B-Instruct](https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct)
+
+Qwen2.5-Math: Math-specific model series based on Qwen2.5
+- [Qwen2.5-Math-1.5B](https://huggingface.co/Qwen/Qwen2.5-Math-1.5B) | [Qwen2.5-Math-1.5B-Instruct](https://huggingface.co/Qwen/Qwen2.5-Math-1.5B-Instruct)
+- [Qwen2.5-Math-7B](https://huggingface.co/Qwen/Qwen2.5-Math-7B)
+- [Qwen2.5-Math-72B](https://huggingface.co/Qwen/Qwen2.5-Math-72B) | [Qwen2.5-Math-72B-Instruct](https://huggingface.co/Qwen/Qwen2.5-Math-72B-Instruct)
+
+#### Qwen1 & Qwen2
+
 [Github](https://github.com/QwenLM/Qwen1.5) | [Paper](https://arxiv.org/abs/2309.16609)
 
 Demo [Qwen2-72B-Instruct](https://huggingface.co/spaces/Qwen/Qwen2-72B-Instruct) | [Qwen1.5-110B-Chat](https://huggingface.co/spaces/Qwen/Qwen1.5-110B-Chat-demo)
@@ -482,7 +507,6 @@ Demo [Qwen2-72B-Instruct](https://huggingface.co/spaces/Qwen/Qwen2-72B-Instruct)
 7B [Qwen-7B-Chat](https://huggingface.co/Qwen/Qwen-7B-Chat) | [Qwen2-7B-Instruct](https://huggingface.co/Qwen/Qwen2-7B-Instruct)
 
 [CodeQwen1.5-7b-Chat](https://huggingface.co/spaces/Qwen/CodeQwen1.5-7b-Chat-demo)
-
 
 ### Quick Start
 #### 1. 命令行
@@ -1111,6 +1135,193 @@ if __name__ == "__main__":
 pip install tiktoken matplotlib
 ```
 
+### qwen2
+[Qwen2-VL-2B-Instruct](https://huggingface.co/Qwen/Qwen2-VL-2B-Instruct)
+
+[Qwen2-VL-7B-Instruct](https://huggingface.co/Qwen/Qwen2-VL-7B-Instruct)
+
+[Qwen2-VL-72B-Instruct](https://huggingface.co/Qwen/Qwen2-VL-72B-Instruct)
+
+#### Install
+```shell
+# 升级transformers
+pip install -U git+https://github.com/huggingface/transformers
+
+pip install qwen-vl-utils
+
+# 推荐12.4的cuda环境和torch2.4
+```
+
+#### Demo
+```python
+from transformers import Qwen2VLForConditionalGeneration, AutoTokenizer, AutoProcessor
+from qwen_vl_utils import process_vision_info
+
+# default: Load the model on the available device(s)
+model = Qwen2VLForConditionalGeneration.from_pretrained(
+    "Qwen/Qwen2-VL-2B-Instruct", torch_dtype="auto", device_map="auto"
+)
+
+# We recommend enabling flash_attention_2 for better acceleration and memory saving, especially in multi-image and video scenarios.
+# model = Qwen2VLForConditionalGeneration.from_pretrained(
+#     "Qwen/Qwen2-VL-2B-Instruct",
+#     torch_dtype=torch.bfloat16,
+#     attn_implementation="flash_attention_2",
+#     device_map="auto",
+# )
+
+# default processer
+processor = AutoProcessor.from_pretrained("Qwen/Qwen2-VL-2B-Instruct")
+
+# The default range for the number of visual tokens per image in the model is 4-16384. You can set min_pixels and max_pixels according to your needs, such as a token count range of 256-1280, to balance speed and memory usage.
+# min_pixels = 256*28*28
+# max_pixels = 1280*28*28
+# processor = AutoProcessor.from_pretrained("Qwen/Qwen2-VL-2B-Instruct", min_pixels=min_pixels, max_pixels=max_pixels)
+
+messages = [
+    {
+        "role": "user",
+        "content": [
+            {
+                "type": "image",
+                "image": "00260-70362828.png",
+            },
+            {"type": "text", "text": "这是什么?"},
+        ],
+    }
+]
+
+# Preparation for inference
+text = processor.apply_chat_template(
+    messages, tokenize=False, add_generation_prompt=True
+)
+image_inputs, video_inputs = process_vision_info(messages)
+inputs = processor(
+    text=[text],
+    images=image_inputs,
+    videos=video_inputs,
+    padding=True,
+    return_tensors="pt",
+)
+inputs = inputs.to("cuda")
+
+# Inference: Generation of the output
+generated_ids = model.generate(**inputs, max_new_tokens=128)
+generated_ids_trimmed = [
+    out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
+]
+output_text = processor.batch_decode(
+    generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
+)
+print(output_text)
+
+```
+
+服务
+::: code-group
+```python [service]
+from flask import Flask, request, jsonify
+import time
+from flask_sock import Sock, Server
+from flask_cors import CORS
+from eventlet import wsgi
+import eventlet
+from PIL import Image
+import torch
+import json
+from transformers import Qwen2VLForConditionalGeneration, AutoTokenizer, AutoProcessor
+from qwen_vl_utils import process_vision_info
+
+
+torch.manual_seed(1234)
+
+device = "cuda:1"
+# Load tokenizer and model
+model = Qwen2VLForConditionalGeneration.from_pretrained(
+    "Qwen/Qwen2-VL-2B-Instruct", torch_dtype="auto", device_map=device
+)
+# default processer
+processor = AutoProcessor.from_pretrained("Qwen/Qwen2-VL-2B-Instruct")
+
+app = Flask(__name__)
+sock = Sock(app)
+app.config['JSON_AS_ASCII'] = False
+CORS(app)
+img_path = "data/temp.jpg"
+
+@app.route('/qianwen_vl', methods=['POST'])
+def qianwen_vl():
+#    if 'image' not in request.files or 'text' not in request.form:
+ #       return jsonify({'error': 'Missing image file or prompt.'}), 400
+
+    image_file = request.files['image']
+    save_jpg(image_file, img_path)
+    #prompt = request.form['prompt']
+    ask_content = json.loads(request.form.to_dict()['content'])
+    print("Ask content:", ask_content)
+    #query_list = [{'image' :img_path}] + json.loads(request.form.to_dict()['content'])
+    #print(query_list)
+
+    messages = [
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "image",
+                    "image": img_path,
+                }
+            ],
+        }
+    ]
+    for content_item in ask_content:
+        item_type = list(content_item.keys())[0]
+        messages[0]["content"].append({"type": item_type, item_type: content_item[item_type]})
+
+    print(messages)
+
+    # Preparation for inference
+    start_time = time.time()
+    text = processor.apply_chat_template(
+        messages, tokenize=False, add_generation_prompt=True
+    )
+    image_inputs, video_inputs = process_vision_info(messages)
+    inputs = processor(
+        text=[text],
+        images=image_inputs,
+        videos=video_inputs,
+        padding=True,
+        return_tensors="pt",
+    )
+    inputs = inputs.to(device)
+
+    # Inference: Generation of the output
+    generated_ids = model.generate(**inputs, max_new_tokens=128)
+    generated_ids_trimmed = [
+        out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
+    ]
+    output_text = processor.batch_decode(
+        generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
+    )
+
+   # query = f'<img>{img_path}</img>{prompt}'
+   # response, _ = model.chat(tokenizer, query=query, history=None)
+    end_time = time.time()
+
+    return jsonify({'response': output_text, 'running_time': end_time - start_time})
+
+def save_jpg(image_file, file_name):
+    image = Image.open(image_file.stream)
+    image.save(file_name, "JPEG")
+
+if __name__ == '__main__':
+    wsgi.server(eventlet.listen(('0.0.0.0', 5005)), app)
+```
+
+```python [API]
+# API向前兼容
+```
+:::
+
 ## GLM4
 [glm-4-9b-chat](https://huggingface.co/THUDM/glm-4-9b-chat)
 
@@ -1177,6 +1388,10 @@ generated_text = tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0]
 print("问:", text)
 print("答:", generated_text)
 ```
+
+## Qwen2-Audio
+[Qwen2-Audio-7B](https://huggingface.co/Qwen/Qwen2-Audio-7B) | [Qwen2-Audio-7B-Instruct](https://huggingface.co/Qwen/Qwen2-Audio-7B-Instruct)
+
 
 ## CyberAgentLM
 
@@ -1297,6 +1512,23 @@ GPUEZ智能算力云平台: https://gpuez.com/
 [Demo](https://huggingface.co/spaces/KingNish/OpenGPT-4o)
 
 就是LLava
+
+## NVIDIA-LLM
+
+TensorRT-LLM是一个开源库，用于优化最新大语言模型在NVIDIA GPU上的推理性能，它基于FastTransformer和TensorRT构建
+
+github: NVIDIA/TensorRT-LLM
+
+魔塔社区：https://www.modelscope.cn/organization/TensorRT-LLM?tab=model
+
+```shell
+conda install -c conda-forge mpi4py mpich
+sudo nala install git-lfs
+sudo nala install openmpi-bin openmpi-doc libopenmpi-dev
+
+pip3 install tensorrt_llm==0.8.0 --extra-index-url https://pypi.nvidia.com
+python3 -v -c "import tensorrt_llm"
+```
 
 ## 其他
 XXXXXXX

@@ -289,6 +289,12 @@ WaylandEnable=false  # [!code ++]
 ```
 重启系统或命令行输入reboot重启就可以啦
 
+## Python常见库安装
+### Jupyter Notebook
+```shell
+pip install jupyter
+```
+
 ## 问题汇总
 - e: 无法修正错误,因为您要求某些软件包保持现状,就是它们破坏了软件包间的依赖关系。
 

@@ -26,7 +26,7 @@ tags:
 
 
 ## API价格
-统计日期 2024.7.25
+统计日期 2024.9.14
 
 大量请求可使用OpenAI Batch API 会有 <font color="green">-50%</font> 折扣。
 <table>
@@ -36,7 +36,15 @@ tags:
     <th>价格</th>
   </tr>
   <tr>
-    <td rowspan="8">ChatGPT</td>
+    <td rowspan="10">ChatGPT</td>
+    <td>o1-preview / o1-preview-2024-09-12 <font color="red">new</font> </td>
+    <td>Input: $0.015 / 1K tokens <br>	Output: $0.06 / 1K tokens</td>
+  </tr>
+  <tr>
+    <td>o1-mini / o1-mini-2024-09-12 <font color="red">new</font> </td>
+    <td>Input: $0.003 / 1K tokens <br>	Output: $0.012 / 1K tokens</td>
+  </tr>
+  <tr>
     <td>gpt-4o / gpt-4o-2024-05-13</td>
     <td>Input: $0.005 / 1K tokens <br>	Output: $0.015 / 1K tokens</td>
   </tr>

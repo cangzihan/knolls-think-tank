@@ -171,6 +171,148 @@ SD Turbo的大号版(高质量)
 #### SDXL
 [stable-diffusion-xl-base-1.0](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0)
 
+HF版部署
+
+下载如下文件即可（代码是Model card上的）
+```shell
+models/stabilityai/
+└── stable-diffusion-xl-base-1.0
+    ├── 01.png
+    ├── comparison.png
+    ├── gitattributes
+    ├── LICENSE.md
+    ├── model_index.json
+    ├── pipeline.png
+    ├── README.md
+    ├── scheduler
+    │   └── scheduler_config.json
+    ├── sd_xl_base_1.0.safetensors
+    ├── text_encoder
+    │   ├── config.json
+    │   └── model.safetensors
+    ├── text_encoder_2
+    │   ├── config.json
+    │   └── model.safetensors
+    ├── tokenizer
+    │   ├── merges.txt
+    │   ├── special_tokens_map.json
+    │   ├── tokenizer_config.json
+    │   └── vocab.json
+    ├── tokenizer_2
+    │   ├── merges.txt
+    │   ├── special_tokens_map.json
+    │   ├── tokenizer_config.json
+    │   └── vocab.json
+    ├── unet
+    │   ├── config.json
+    │   └── diffusion_pytorch_model.safetensors
+    ├── vae
+    │   ├── config.json
+    │   └── diffusion_pytorch_model.safetensors
+    ├── vae_decoder
+    │   ├── config.json
+    │   └── model.onnx
+    └── vae_encoder
+        ├── config.json
+        └── model.onnx
+```
+
+参考示例
+```python
+from diffusers import DiffusionPipeline
+from diffusers import StableDiffusionXLImg2ImgPipeline
+import torch
+from diffusers.utils import load_image
+
+
+class SDXL:
+    def __init__(self):
+        self.pipe = None
+        self.hf_model_path = "stabilityai/stable-diffusion-xl-base-1.0"
+        self.current_pipe = "txt2img"
+        self.load_pipe("txt2img")
+
+    def load_pipe(self, pipe_type):
+        if pipe_type == "txt2img":
+            self.current_pipe = "txt2img"
+            self.pipe = DiffusionPipeline.from_pretrained(
+                self.hf_model_path,
+                torch_dtype=torch.float16,
+                use_safetensors=True, variant="fp16"
+            )
+        elif pipe_type == "img2img":
+            self.current_pipe = "img2img"
+            self.pipe = StableDiffusionXLImg2ImgPipeline.from_pretrained(
+                self.hf_model_path,
+                torch_dtype=torch.float16
+            )
+        else:
+            Warning("Unknow pipeline type%s, using default type.")
+            self.current_pipe = "txt2img"
+            self.pipe = DiffusionPipeline.from_pretrained(
+                self.hf_model_path,
+                torch_dtype=torch.float16,
+                use_safetensors=True, variant="fp16"
+            )
+
+        self.pipe.to("cuda")
+
+    def txt2img(self, prompt, negative_prompt=None, height=1024, width=1024, num_inference_steps=50):
+        if self.current_pipe != "txt2img":
+            self.load_pipe("txt2img")
+        if negative_prompt is None:
+            return self.pipe(prompt=prompt, height=height, width=width, num_inference_steps=num_inference_steps).images[0]
+        else:
+            return self.pipe(prompt=prompt, height=height, width=width, num_inference_steps=num_inference_steps, negative_prompt=negative_prompt).images[0]
+
+    def img2img(self, prompt, image, negative_prompt=None, height=1024, width=1024, num_inference_steps=50, strength=0.3):
+        if self.current_pipe != "img2img":
+            self.load_pipe("img2img")
+        return self.pipe(prompt=prompt, image=image, height=height, width=width,
+                         num_inference_steps=num_inference_steps, negative_prompt=negative_prompt, strength=strength
+                         ).images[0]
+
+
+if __name__ == "__main__":
+    prompt = "A factory, white and light background, indoor, realistic"
+    sdxl_painter = SDXL()
+    image = sdxl_painter.txt2img(prompt, height=480, width=640, num_inference_steps=30)
+    image.save('AI.png', format='PNG')
+
+    init_image = load_image('AI.png').convert("RGB")
+    prompt = "A factory, some robots, indoor, realistic"
+    image = sdxl_painter.img2img(prompt, image=init_image, height=480, width=640, num_inference_steps=30, strength=0.35)
+    image.save('AI2.png', format='PNG')
+
+```
+
+[读取LoRA示例](https://huggingface.co/fofr/sdxl-emoji)
+
+```shell
+pip install peft
+```
+```python
+import torch
+from diffusers import LCMScheduler, AutoPipelineForText2Image
+
+model_id = "stabilityai/stable-diffusion-xl-base-1.0"
+adapter_id = "latent-consistency/lcm-lora-sdxl"
+
+pipe = AutoPipelineForText2Image.from_pretrained(model_id, torch_dtype=torch.float16, variant="fp16")
+pipe.scheduler = LCMScheduler.from_config(pipe.scheduler.config)
+pipe.to("cuda")
+
+# load and fuse lcm lora
+pipe.load_lora_weights(adapter_id)
+pipe.fuse_lora()
+
+prompt = "Self-portrait oil painting, a beautiful cyborg with golden hair, 8k"
+
+# disable guidance_scale by passing 0
+image = pipe(prompt=prompt, num_inference_steps=4, guidance_scale=0).images[0]
+
+```
+
 - DreamShaper XL Alpha 2
 [Model](https://civitai.com/models/112902?modelVersionId=126688)
 

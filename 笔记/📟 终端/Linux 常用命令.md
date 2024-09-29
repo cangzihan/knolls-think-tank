@@ -59,3 +59,19 @@ CUDA_VISIBLE_DEVICES=0,1 XXX
 ## SSH
 SSH是Secure Shell（安全外壳）的简称，是一种在不安全的网络环境中，通过加密机制和认证机制，实现安全的远程访问以及其他网络服务的安全协议。
 
+## gcc
+### 基本命令
+查看版本
+```shell
+gcc --version
+```
+
+### 编译
+利用gcc工具可以编译C语言程序
+
+```shell
+# 编译
+gcc main.c -o main
+# 运行
+./main
+```
