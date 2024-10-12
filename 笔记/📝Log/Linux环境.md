@@ -295,6 +295,43 @@ WaylandEnable=false  # [!code ++]
 pip install jupyter
 ```
 
+## OpenCV GPU版
+OpenCV: https://github.com/opencv/opencv
+
+OpenCV contrib: https://github.com/opencv/opencv_contrib/tree/master
+```shell
+# 解压
+# 复制contrib文件夹至OpenCV文件
+# 开vpn!!!!
+sudo add-apt-repository "deb http://security.ubuntu.com/ubuntu xenial-security main"
+sudo apt-get update
+
+# 提示没有密钥sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys
+
+sudo apt install libjasper1 libjasper-dev
+
+sudo apt-get install build-essential libgtk2.0-dev libavcodec-dev libavformat-dev libjpeg-dev libtiff5-dev libswscale-dev
+#（libjasper-dev）
+
+# 查看显卡算力
+# https://developer.nvidia.com/cuda-gpus#compute
+# 2080Ti 7.5
+# p1000 6.1
+# 3060 8.6
+# A2000 8.6
+
+mv build/downloads downloads
+rm -rf build
+mkdir build
+mv downloads build/
+cd build
+sudo cmake -D CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++ -D CMAKE_C_COMPILER:FILEPATH=/usr/bin/gcc -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D CUDA_ARCH_BIN="8.6" -D WITH_CUDA=ON -D ENABLE_FAST_MATH=1 -D CUDA_FAST_MATH=1 -D WITH_CUBLAS=1 -D OPENCV_GENERATE_PKGCONFIG=1 -D OPENCV_EXTRA_MODULES_PATH=../opencv_contrib-4.5.5/modules/ ..
+
+sudo make -j10
+
+sudo make install
+```
+
 ## 问题汇总
 - e: 无法修正错误,因为您要求某些软件包保持现状,就是它们破坏了软件包间的依赖关系。
 

@@ -1382,6 +1382,110 @@ from transformers import CLIPVisionModel, CLIPImageProcessor, CLIPVisionConfig
 
 ```
 
+## 可图 Kolor
+
+快手的文生图模型，不使用T5而是使用ChatGLM。
+
+```python
+import torch
+
+from diffusers import DPMSolverMultistepScheduler, KolorsPipeline
+
+pipe = KolorsPipeline.from_pretrained("Kwai-Kolors/Kolors-diffusers", torch_dtype=torch.float16, variant="fp16")
+pipe.to("cuda")
+pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config, use_karras_sigmas=True)
+
+image = pipe(
+    prompt='一张瓢虫的照片，微距，变焦，高质量，电影，拿着一个牌子，写着"可图"',
+    negative_prompt="",
+    guidance_scale=6.5,
+    num_inference_steps=25,
+).images[0]
+
+image.save("kolors_sample.png")
+```
+
+## Flux
+[API](https://docs.bfl.ml/)
+
+FLUX.1-dev: [Model](https://huggingface.co/black-forest-labs/FLUX.1-dev)
+
+### 原理
+
+HF版的`FluxPipeline`类中可以看到初始化时一共包含如下参数：
+- transformer (FluxTransformer2DModel) — Conditional Transformer (MMDiT) architecture to denoise the encoded image latents.
+- scheduler (FlowMatchEulerDiscreteScheduler) — A scheduler to be used in combination with transformer to denoise the encoded image latents.
+- vae (AutoencoderKL) — Variational Auto-Encoder (VAE) Model to encode and decode images to and from latent representations.
+- text_encoder (CLIPTextModel) — CLIP, specifically the clip-vit-large-patch14 variant.
+- text_encoder_2 (T5EncoderModel) — T5, specifically the google/t5-v1_1-xxl variant.
+- tokenizer (CLIPTokenizer) — Tokenizer of class CLIPTokenizer.
+- tokenizer_2 (T5TokenizerFast) — Second Tokenizer of class T5TokenizerFast.
+
+这对应了模型load时的7个组件。
+
+### HF版程序
+HF版说明文档: https://huggingface.co/docs/diffusers/api/pipelines/flux
+
+可以不用下载根目录的大的safetensors
+```shell
+pip install diffusers==0.30.0
+pip install accelerate>=0.26.0
+pip install transformers==4.45.0
+```
+
+两张4090加CPU方案
+```python
+import random
+import os
+import torch
+from diffusers import FluxPipeline
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--count', type=int, default=1, help='x')
+opt = parser.parse_args()
+
+pipe = FluxPipeline.from_pretrained(
+        "black-forest-labs/FLUX.1-dev",
+        torch_dtype=torch.bfloat16,
+        device_map="balanced",
+        max_memory={0: "23GB", 1: "23GB"}
+        )
+#pipe.enable_model_cpu_offload() #save some VRAM by offloading the model to CPU. Remove this if you have enough GPU power
+#pipe.to("cuda")
+
+prompt = "a close-up photograph of one young woman with long brown hair, the woman on the left is wearing a white dress with intricate patterns and has her arms around her waist, she is also wearing a white dress with floral patterns, the text on the dress is in a cursive style and reads “Knoll” in all caps, there are other words in the image that are partially visible but not readable, the background shows a blurred view of trees and buildings in modern Shanghai, it appears to be an outdoor setting with natural light"
+
+for _ in range(opt.count):
+    seed = random.randrange(65535)
+
+    image = pipe(
+        prompt,
+        height=1024,
+        width=1024,
+        guidance_scale=3.5,
+        num_inference_steps=50,
+        max_sequence_length=512,
+        generator=torch.Generator("cuda").manual_seed(seed)
+    ).images[0]
+
+    image.save("out/%05d.png"%(len(os.listdir("out"))+1))
+```
+
+如果出现77 token的警报也没关系：
+
+The 77 token limit is only for CLIP text encoder. It won’t really matter since the main text encoder is T5 XXL which can handle 512 tokens.
+
+So it should still work, even with the warning.
+
+### LoRA训练
+
+https://github.com/bghira/SimpleTuner/blob/main/documentation/quickstart/FLUX.md
+
+https://huggingface.co/black-forest-labs/FLUX.1-dev/discussions/196
+
+https://www.reddit.com/r/StableDiffusion/comments/1etszmo/finetuning_flux1dev_lora_on_yourself_lessons/
+
 ## 平面设计
 [ArchiGAN](https://developer.nvidia.com/blog/archigan-generative-stack-apartment-building-design/?linkId=70968833)
 

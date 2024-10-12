@@ -20,6 +20,14 @@ ROS_PYTHON_VERSION=3
 ROS_DISTRO=noetic
 ```
 
+```shell
+ROS_VERSION=2
+ROS_PYTHON_VERSION=3
+ROS_DOMAIN_ID=52
+ROS_LOCALHOST_ONLY=0
+ROS_DISTRO=humble
+```
+
 ## 查看相机话题
 ```shell
 ros2 topic list
@@ -71,3 +79,18 @@ def main():
 if __name__ == '__main__':
     main()
 ```
+
+## Python
+### rclpy
+在ROS 2（Robot Operating System 2）中，`rclpy`是Python客户端库，用于与ROS 2的核心通信层（即中间件）交互。
+它提供了用于Python的API，使得开发者可以在Python中轻松创建和管理节点、主题（topics）、服务（services）、**动作（actions）**等ROS 2的基本组件。
+
+主要功能包括：
+1. 节点创建：`rclpy`允许创建ROS 2节点，节点是ROS 2的基本计算单元。
+2. 主题通信：支持发布和订阅主题，用于节点间的无状态数据流通信。
+3. 服务调用：提供调用服务和定义服务的接口，支持节点间的请求/响应模式。
+4. 动作接口：支持动作服务，适合处理需要时间的操作，例如机器人运动控制。
+5. 参数管理：支持在运行时设置和获取节点参数，用于动态配置。
+6. 计时器和执行器：rclpy提供定时器和事件循环，帮助在指定时间内定期执行任务。
+
+`rclpy`是ROS 2的跨语言支持层（RCL）在Python中的实现，它使得Python可以直接访问ROS 2的C++核心功能，从而实现高效的机器人应用开发。
