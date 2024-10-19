@@ -408,6 +408,30 @@ sudo apt install ./volian-archive*.deb
 sudo apt update && sudo apt install nala -y && sudo nala upgrade -y
 ```
 
+这个方法或许已经失效了，会出签名问题，按照源仓库的最新文件，有一个`install_nala.bat`
+```shell
+#!/bin/bash
+
+set -e
+
+base_url="https://deb.volian.org/volian/pool/main/v/volian-archive/"
+
+version="0.3.1"
+
+archive="volian-archive-nala_${version}_all.deb"
+keyring="volian-archive-keyring_${version}_all.deb"
+
+wget "${base_url}${archive}" -P /tmp
+wget "${base_url}${keyring}" -P /tmp
+
+echo "sudo is required to install the archives, update apt, and install Nala"
+
+sudo apt-get install /tmp/${archive} /tmp/${keyring} -y
+sudo apt-get update
+sudo apt-get install nala -y
+
+```
+
 ## TensorRT安装
 https://zhuanlan.zhihu.com/p/159591904
 1. 直接去Nidia的TensorRT官网下载tar压缩包
