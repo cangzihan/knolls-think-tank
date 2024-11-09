@@ -33,6 +33,28 @@ ROS_DISTRO=humble
 ros2 topic list
 ```
 
+## 查看Topic发布的信息
+```shell
+ros2 topic echo <topic_name>
+```
+
+## 查看自定义信息
+### 查看所有自定义信息
+```shell
+ros2 interface list
+```
+
+### 查看特定的自定义信息
+```shell
+ros2 interface list | grep <package_name>
+ros2 interface list | grep geometry_msgs
+```
+
+### 查看具体消息定义
+```shell
+ros2 interface show geometry_msgs/msg/Vector3
+```
+
 ## Python
 默认是有关Python3的内容
 
