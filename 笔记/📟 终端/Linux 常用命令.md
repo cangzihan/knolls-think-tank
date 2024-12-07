@@ -75,3 +75,45 @@ gcc main.c -o main
 # 运行
 ./main
 ```
+
+## 开机自启动
+### 使用 systemd 配置自启动服务
+`systemd` 是目前主流的服务管理工具，可以通过配置文件模拟一个完整的终端环境。
+
+#### 1. 创建一个 systemd 服务文件
+使用以下命令创建服务文件：
+```shell
+sudo vim /etc/systemd/system/my_service.service
+```
+内容示例：
+```text
+[Unit]
+Description=My Service
+After=network.target
+
+[Service]
+User=你的用户名
+WorkingDirectory=/path/to/your/project
+ExecStart=/bin/bash -c "source /home/你的用户名/.bashrc && source /opt/ros/humble/setup.bash && python3 your_script.py"
+Environment="RID=01"
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+- User: 替换为你运行程序的用户名。
+- WorkingDirectory: 替换为脚本所在目录。
+- ExecStart: 使用 /bin/bash -c 运行一个终端命令，加载完整的 shell 环境。
+- Environment: 设置必要的环境变量。
+
+#### 2. 启用并启动服务
+```shell
+sudo systemctl daemon-reload
+sudo systemctl enable my_service.service
+sudo systemctl start my_service.service
+```
+
+#### 3. 检查服务状态
+```shell
+sudo systemctl status my_service.service
+```

@@ -332,6 +332,52 @@ sudo make -j10
 sudo make install
 ```
 
+## Linux添加一个自定义环境变量
+在 Linux 系统中，你可以通过编辑用户的 shell 配置文件来添加自定义环境变量。以下是具体步骤：
+
+1. 确定你的 Shell：
+
+首先，你需要知道你当前使用的 Shell 是哪一个。常见的 Shell 有 `bash`、`zsh`、`fish` 等。
+
+2. 编辑配置文件：
+
+根据你使用的 Shell，编辑相应的配置文件。以下是一些常见 Shell 的配置文件：
+  - Bash：`~/.bashrc` 或 `~/.bash_profile`
+  - Zsh：`~/.zshrc`
+  - Fish：`~/.config/fish/config.fish`
+
+3. 添加环境变量：
+
+打开配置文件后，在文件的末尾添加你的自定义环境变量。例如，如果你想添加一个名为 `MY_VARIABLE` 的环境变量，并将其值设置为 `my_value`，你可以这样写：
+
+```bash
+export MY_VARIABLE=my_value
+```
+
+4. 保存并关闭文件：
+保存对配置文件的修改并关闭编辑器。
+
+5. 使更改生效：
+如果你编辑的是`~/.bashrc`或`~/.zshrc`，你需要重新加载该文件以使更改立即生效。你可以通过运行以下命令来实现：
+
+```bash
+source ~/.bashrc
+```
+或
+
+```bash
+source ~/.zshrc
+```
+如果你编辑的是 `~/.config/fish/config.fish`，你可以通过重新启动 Fish Shell 来使更改生效。
+
+验证环境变量：
+最后，你可以通过运行以下命令来验证环境变量是否已经成功添加：
+
+```bash
+echo $MY_VARIABLE
+```
+如果输出 `my_value`，则说明环境变量已经正确添加。
+
 ## 问题汇总
 - e: 无法修正错误,因为您要求某些软件包保持现状,就是它们破坏了软件包间的依赖关系。
 
