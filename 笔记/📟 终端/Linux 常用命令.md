@@ -41,6 +41,16 @@ sudo apt install v4l-utils
 v4l2-ctl --list-devices
 ```
 
+## Vim
+### 删除
+- 删除1行：`dd`
+- 删除多行：`5dd`,`10dd`,`100dd`
+- 删除列：
+  - 按下“Ctrl + v”进入块操作模式。
+  - 使用上下键选中你想要批量删除的列文本内容。
+  - 在Esc模式下，输入小写的“d”删除选中的列文本。
+- 删除行范围：`:[start],[end]d`，如`:3,5d`
+
 ## 自动输入密码
 ```shell
 echo 123456 | sudo -S /path/to/my_script.sh
@@ -58,6 +68,17 @@ CUDA_VISIBLE_DEVICES=0,1 XXX
 
 ## SSH
 SSH是Secure Shell（安全外壳）的简称，是一种在不安全的网络环境中，通过加密机制和认证机制，实现安全的远程访问以及其他网络服务的安全协议。
+
+## 安装deb包
+```shell
+sudo dpkg -i QQ_3.2.15_241210_amd64_01.deb
+```
+
+卸载
+```shell
+sudo dpkg -r qq
+```
+
 
 ## gcc
 ### 基本命令
@@ -111,6 +132,11 @@ WantedBy=multi-user.target
 sudo systemctl daemon-reload
 sudo systemctl enable my_service.service
 sudo systemctl start my_service.service
+```
+
+例如启动[ToDesk](https://www.todesk.com/linux.html)
+```shell
+sudo systemctl start todeskd.service
 ```
 
 #### 3. 检查服务状态
