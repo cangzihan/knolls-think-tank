@@ -150,6 +150,20 @@ pip install torch==2.3.0+cu121 torchvision==0.18.0+cu121 torchaudio==2.3.0+cu121
 nvidia-smi
 ```
 
+检查 NVIDIA GPU 硬件是否被识别
+
+运行以下命令查看系统是否检测到 NVIDIA GPU：
+```shell
+lspci | grep -i nvidia
+```
+
+检查驱动模块是否加载
+
+验证 NVIDIA 驱动的核心模块是否加载：
+```shell
+lsmod | grep nvidia
+```
+
 #### 常见问题
 【报错】Failed to initialize NVML: Driver/library version mismatch
   NVML library version: 535.86

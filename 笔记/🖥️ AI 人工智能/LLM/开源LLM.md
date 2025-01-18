@@ -486,6 +486,7 @@ Qwen2.5: Qwen2.5 language models, including pretrained and instruction-tuned mod
 - [Qwen2.5-72B](https://huggingface.co/Qwen/Qwen2.5-72B) | [Qwen2.5-72B-Instruct](https://huggingface.co/Qwen/Qwen2.5-72B-Instruct)
 
 Qwen2.5-Coder: Code-specific model series based on Qwen2.5
+- Demo: [ModelScope](https://www.modelscope.cn/studios/Qwen/Qwen2.5-Coder-demo)
 - [Qwen2.5-Coder-1.5B](https://huggingface.co/Qwen/Qwen2.5-Coder-1.5B) | [Qwen2.5-Coder-1.5B-Instruct](https://huggingface.co/Qwen/Qwen2.5-Coder-1.5B-Instruct)
 - [Qwen2.5-Coder-7B](https://huggingface.co/Qwen/Qwen2.5-Coder-7B) | [Qwen2.5-Coder-7B-Instruct](https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct)
 
