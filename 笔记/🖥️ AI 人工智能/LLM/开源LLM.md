@@ -80,6 +80,11 @@ File "/home/XXX/.conda/envs/py310_really_python_3_10/lib/python3.10/site-package
 @app.post("/v1/completions", dependencies=[Depends(check_api_key)])
 ```
 
+客户端：
+```shell
+pip install openai
+```
+
 #### 部署LLM
 需要同时开启多个终端
 ```shell
@@ -92,6 +97,8 @@ CUDA_VISIBLE_DEVICES=0 python3 -m fastchat.serve.model_worker --model-path lmsys
 CUDA_VISIBLE_DEVICES=1 python3 -m fastchat.serve.model_worker --model-path lmsys/fastchat-t5-3b-v1.0 --controller http://localhost:21001 --port 31001 --worker http://localhost:31001
 # 双卡方案命令（控制两个GPU各占一半显存）
 CUDA_VISIBLE_DEVICES=0,1 python3 -m fastchat.serve.model_worker --model-path cyberagent/calm3-22b-chat --controller http://localhost:21001 --port 31000 --worker http://localhost:31000 --num-gpus=2 --max-gpu-memory 26GiB
+# 显存不够，部署量化版本
+python -m fastchat.serve.model_worker --model-path Qwen/Qwen2.5-7B-Instruct --controller http://localhost:21001 --port 31000 --worker http://localhost:31000 --load-8bit
 
 # Web UI
 python3 -m fastchat.serve.gradio_web_server
@@ -103,8 +110,12 @@ https://rudeigerc.dev/posts/llm-inference-with-fastchat/
 
 ## 基本环境搭建
 
-很多LLM需要的环境都是类似的，这里默认在说电脑/服务器端、假设已经装好了GPU驱动、Cuda、Torch。
+很多LLM需要的环境都是类似的，这里默认在说电脑/服务器端、假设已经装好了GPU驱动、Cuda等基本环境。
 ```shell
+# 安装Torch
+pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
+
+pip install accelerate
 pip install transformers
 ```
 
@@ -770,6 +781,10 @@ python3 -m fastchat.serve.controller
 CUDA_VISIBLE_DEVICES=0 python3 -m fastchat.serve.model_worker --model-path Qwen1.5-32B-Chat --controller http://localhost:21001 --port 31000 --worker http://localhost:31000
 # 双卡
 CUDA_VISIBLE_DEVICES=0,1 python3 -m fastchat.serve.model_worker --model-path Qwen1.5-32B-Chat --controller http://localhost:21001 --port 31000 --worker http://localhost:31000 --num-gpus=2 --max-gpu-memory 35GiB
+# Qwen2.5
+python -m fastchat.serve.model_worker --model-path Qwen/Qwen2.5-3B-Instruct --controller http://localhost:21001 --port 31000 --worker http://localhost:31000
+# 显存不够，部署量化版本
+python -m fastchat.serve.model_worker --model-path Qwen/Qwen2.5-7B-Instruct --controller http://localhost:21001 --port 31000 --worker http://localhost:31000 --load-8bit
 
 # 第三个终端
 ## Gradio Web
@@ -878,6 +893,24 @@ class FastChatAPI:
  【报错】 流式API问题
 
 [参考安装FastChat](#fastchat)
+
+#### 3. LLM Farm部署
+LLM Farm支持将大模型部署到iPhone和iPad等设备上，可通过下载GGUF文件，并传送到设备文件存储中来导入模型。
+
+[Qwen2.5-Coder-3B](https://www.modelscope.cn/models/Qwen/Qwen2.5-Coder-3B-Instruct-GGUF)
+
+配置基本可以遵循自带的`Phi3`的模板
+
+设定Prompt Format为：
+```text
+<|user|>
+{{prompt}}<|end|>
+<|assistant|>
+```
+
+Reverse prompts: `<|end|>`
+
+Skip tokens: `<|assistant|>,<|user|>`
 
 ## Qwen-VL
 
