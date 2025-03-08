@@ -106,8 +106,25 @@ python3 -m fastchat.serve.gradio_web_server
 
 https://rudeigerc.dev/posts/llm-inference-with-fastchat/
 
+### Unsloth
+Unsloth是一个用于微调大模型的工具
 
+[官网](https://unsloth.ai/) | [文档](https://docs.unsloth.ai/)
 
+### Ollama
+[官网](https://ollama.com/) | [Github](https://github.com/ollama/ollama)
+
+#### 常用命令
+查看模型列表
+```shell
+ollama list
+```
+
+运行模型
+```shell
+ollama run 【模型名】
+```
+nishi
 ## 基本环境搭建
 
 很多LLM需要的环境都是类似的，这里默认在说电脑/服务器端、假设已经装好了GPU驱动、Cuda等基本环境。

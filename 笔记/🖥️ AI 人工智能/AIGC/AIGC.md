@@ -146,10 +146,13 @@ CUDA_VISIBLE_DEVICES=0 python3 launch.py --listen --enable-insecure-extension-ac
 ```
 
 ### 版本
-#### SD 3
-[Paper](https://arxiv.org/pdf/2403.03206)
+#### SD 3.5
+[model](https://huggingface.co/stabilityai/stable-diffusion-3.5-medium)
 
-combines a [diffusion transformer](https://arxiv.org/abs/2212.09748) architecture and [flow matching](https://arxiv.org/abs/2210.02747). T5 是一个seq-to-seq模型。
+#### SD 3
+[Paper](https://arxiv.org/pdf/2403.03206) | [model](https://huggingface.co/stabilityai/stable-diffusion-3-medium/tree/main) | [HF版](https://huggingface.co/stabilityai/stable-diffusion-3-medium-diffusers)
+
+combines a [diffusion transformer](https://arxiv.org/abs/2212.09748) architecture and [flow matching](https://arxiv.org/abs/2210.02747). [T5](https://huggingface.co/google/t5-v1_1-xxl) 是一个seq-to-seq模型。
 
 #### SDXL-Lightning
 [HuggingFace](https://huggingface.co/ByteDance/SDXL-Lightning) | [Paper](https://arxiv.org/abs/2402.13929) （2024.2）
@@ -384,7 +387,7 @@ a代表祖先采样器，(迭代噪声)不收敛
 
 #### 新采样器
 - UniPC (2023)
-统一预测校正器，兼容性很好收敛，10步左右就能生成可用画面。
+统一预测校正器，兼容性很好收敛，10步左右就能生成可用画面。[Project](https://unipc.ivg-research.xyz/) | [Code](https://github.com/wl-zhao/UniPC) | [Paper](https://arxiv.org/abs/2302.04867)
 
 - Restart(WebUI1.6 新增)
 每步渲染长些，但只需很少的采样步数
@@ -600,6 +603,7 @@ https://zhuanlan.zhihu.com/p/627500143
 git clone https://github.com/Akegarasu/lora-scripts.git
 ```
 
+- Windows直接训练
 修改`train.ps1`中的内容（代码注释已经很清楚了）
 
 | 变量                  | 说明   |
@@ -614,6 +618,10 @@ git clone https://github.com/Akegarasu/lora-scripts.git
 # chmod a+x train.ps1
 ./train.ps1
 ```
+
+- 使用电脑中的Python环境
+直接运行`gui.py`
+安装xFormers要注意`pip install xformers --index-url=https://download.pytorch.org/whl/cu124`
 
 ### LCM
 [Project](https://latent-consistency-models.github.io/) | [Paper](https://arxiv.org/abs/2310.04378) | [Code](https://github.com/luosiallen/latent-consistency-model) | [Model](https://huggingface.co/SimianLuo/LCM_Dreamshaper_v7)
@@ -727,6 +735,11 @@ if __name__ == "__main__":
 
 #### WebUI
 这里以1.9.4版本为准
+
+- 共享路径设置
+个人习惯将模型路径设定为一个统一的路径，使任何平台的WebUI和ComfyUI都用同一路径下的模型，节省空间。
+  - 大模型路径：`modules/sd_models.py`中修改全局变量`model_path`
+  - LoRA路径：`extensions/sd-webui-additional-networks/scripts/model_util.py`中修改全局变量`lora_models_dir`
 
 UI部分在`modules/ui.py`
 - create_ui()
@@ -1422,6 +1435,9 @@ HF版的`FluxPipeline`类中可以看到初始化时一共包含如下参数：
 - tokenizer_2 (T5TokenizerFast) — Second Tokenizer of class T5TokenizerFast.
 
 这对应了模型load时的7个组件。
+
+一些学习文档：
+- https://zhouyifan.net/2024/09/03/20240809-flux1/
 
 ### HF版程序
 HF版说明文档: https://huggingface.co/docs/diffusers/api/pipelines/flux

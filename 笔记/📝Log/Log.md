@@ -111,7 +111,7 @@ pip install torch==2.0.1+cu118 --extra-index-url https://download.pytorch.org/wh
 pip install torchvision==0.15.2+cu118 --extra-index-url https://download.pytorch.org/whl/cu118
 pip install xformers==0.0.20
 
-# Cloning Stable Diffusion into /mnt/yuchen/stable-diffusion-webui_1_8/repositories/stable-diffusion-stability-ai...错误
+# Cloning Stable Diffusion into /mnt/user/stable-diffusion-webui_1_8/repositories/stable-diffusion-stability-ai...错误
 # 收到来自GFW的假结束符，CNMD中共，使用代理手动下载仓库
 cd repositories/
 unzip stablediffusion.zip

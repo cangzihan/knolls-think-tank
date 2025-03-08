@@ -408,3 +408,99 @@ window.addEventListener('mousemove', (event) => {
 });
 ```
 :::
+
+### 分块图片制作
+
+::: code-group
+```html [main.html]
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Comparison Slider</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="comparison-container">
+    <img src="image1.jpg" id="image1" alt="Before">
+    <img src="image2.jpg" id="image2" alt="After">
+    <div class="slider" id="slider"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
+
+```
+
+```css [style.css]
+.comparison-container {
+  position: relative;
+  width: 100%;
+  max-width: 2000px;
+  height: 3000px; /* 确保容器有固定高度 */
+  margin: auto;
+  overflow: hidden;
+}
+
+#image1, #image2 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* 让图片填满容器，不变形 */
+  user-select: none; /* 禁止用户选中 */
+  pointer-events: none; /* 禁止鼠标事件，避免拖动时误选 */
+}
+
+
+#image2 {
+  clip-path: inset(0 50% 0 0); /* 初始显示左半部分 */
+}
+
+.slider {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 5px;
+  height: 100%;
+  background-color: white;
+  cursor: ew-resize;
+  transform: translateX(-50%);
+}
+
+```
+
+```js [script.js]
+const slider = document.getElementById('slider');
+const image2 = document.getElementById('image2');
+const container = document.querySelector('.comparison-container');
+
+let isSliding = false;
+
+slider.addEventListener('mousedown', () => {
+  isSliding = true;
+});
+
+window.addEventListener('mouseup', () => {
+  isSliding = false;
+});
+
+window.addEventListener('mousemove', (event) => {
+  if (isSliding) {
+    let rect = container.getBoundingClientRect();
+    let position = event.clientX - rect.left;
+
+    position = Math.max(0, Math.min(position, rect.width));
+
+    // 更新滑块位置
+    slider.style.left = position + 'px';
+
+    // 使用 clip-path 控制 image2 的可见区域
+    image2.style.clipPath = `inset(0 ${rect.width - position}px 0 0)`;
+  }
+});
+```
+:::
