@@ -60,6 +60,19 @@ https://mdnice.com/writing/a40f4bcd3b3e40d8931512186982b711
 
 https://www.cnblogs.com/SunshineKimi/p/12053914.html
 
+## AI比赛
+[Kaggle](https://www.kaggle.com/)
+
+[阿里天池](https://tianchi.aliyun.com/?lang=zh-cn)
+
+[百度AI Studio](https://aistudio.baidu.com/competition)
+
+其他汇总：https://github.com/HuangCongQing/AI_competitions
+### AIGC类
+[可灵](https://klingai.kuaishou.com/activity-zone)
+
+
+
 ## NLP
 SentenceTransformers Documentation https://www.sbert.net/ (pip install -U sentence-transformers)
 

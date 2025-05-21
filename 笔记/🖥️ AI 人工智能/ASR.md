@@ -3,7 +3,7 @@
 
 ## whisper
 
-支持中文，低配置可以处理长音频
+支持中文/日文，低配置可以处理长音频
 
 [Demo](https://huggingface.co/spaces/openai/whisper) | [Paper](https://arxiv.org/abs/2212.04356)
 
