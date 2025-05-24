@@ -206,7 +206,7 @@ pnpm docs:build
 构建完成后，渲染出来的 HTML 和各种资源将会被存储在 `.vitepress/dist` 目录下面，你可以通过上传 `.vitepress/dist` 目录来完成 Nólëbase 知识库的部署。
 
 
-## Ubuntu 22.04 LTS本地部署
+## Ubuntu 22 / 24 LTS本地部署
 ```shell
 # Nodejs
 # 直接apt安装版本太旧，下载最新版https://nodejs.org/en/download/
@@ -214,7 +214,11 @@ sudo tar -xJf node-v20.11.0-linux-x64.tar.xz -C /usr/local
 export PATH=$PATH:/usr/local/node-v20.11.0-linux-x64/bin
 echo 'export PATH=$PATH:/usr/local/node-v20.11.0-linux-x64/bin' >> ~/.bashrc
 source ~/.bashrc
-node --version
+node --version # 注意版本是不是刚安装的版本
+
+# 版本不对
+# sudo rm /usr/bin/node
+# sudo ln -s /usr/local/node-v2x.xx.x-linux-x64/bin/node /usr/bin/node
 
 # npm
 sudo nala install npm # or you can use apt
@@ -232,3 +236,9 @@ pnpm install
 # 如果路径超出限制：echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 pnpm docs:dev
 ```
+- 一打开页面就报错`Missing "./client/style.css" specifier in "@nolebase/vitepress-plugin-git-changelog" package`
+  尝试回退到更稳定的版本：
+  ```shell
+  pnpm add @nolebase/vitepress-plugin-git-changelog@1.20.0
+  ```
+

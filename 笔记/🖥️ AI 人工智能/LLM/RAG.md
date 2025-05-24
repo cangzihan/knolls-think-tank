@@ -80,12 +80,17 @@ LangChain 是一个用于开发由语言模型驱动的应用程序的框架。�
 git clone https://github.com/netease-youdao/QAnything.git
 cd QAnything
 # 使用GPU4
+git checkout remotes/origin/master # 新版本弃用了很多命令导致有问题
 sudo bash ./run.sh -c local -i 4 -b default
+
+# 报错：Error response from daemon: could not select device driver "nvidia" with capabilities: [[gpu]]
+sudo nala install -y nvidia-container-toolkit
+sudo systemctl restart docker
 ```
 
 - `-i`控制device_id
 - `-c`设定`llm_api`
-- `-b`为`default`时，且`llm_api`不为`cloud`时，使用7B模型。（`-b`默认为`default`）
+- `-b`为`default`时，且`llm_api`不为`cloud`时，使用7B模型。（`-b`默认为`default`，显存不够可以选`hf`）
 
 网页端：http://[ip地址]:8777/qanything/#/home
 

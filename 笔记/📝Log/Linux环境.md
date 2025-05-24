@@ -141,6 +141,7 @@ onnxruntime
 #pip install torch==1.12.0+cu116 torchvision==0.13.0+cu116 torchaudio==0.12.0 --extra-index-url https://download.pytorch.org/whl/cu116
 pip install torch==2.3.0+cu118 torchvision==0.18.0+cu118 torchaudio==2.3.0+cu118 --extra-index-url https://download.pytorch.org/whl/cu118
 pip install torch==2.3.0+cu121 torchvision==0.18.0+cu121 torchaudio==2.3.0+cu121 --extra-index-url https://download.pytorch.org/whl/cu121
+pip install torch==2.6.0+cu126 --extra-index-url https://download.pytorch.org/whl/cu126
 ```
 
 ## 显卡（N卡）
@@ -200,6 +201,7 @@ sudo apt-get autoclean
 2. 安装另一版本驱动
 ```shell
 sudo nala install nvidia-driver-550-server-open
+sudo nala install nvidia-driver-560
 ```
 3. 重启
 ```shell
@@ -212,11 +214,20 @@ sudo reboot
 nvcc -V
 ```
 
+#### 命令行安装
+https://zenn.dev/pon_pokapoka/articles/nvidia_cuda_install
+
+在12.6新版本中可以通过如下方式更方便安装cuda工具箱
 ```shell
-vim ~/.bashrc
+wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-keyring_1.1-1_all.deb
+sudo dpkg -i cuda-keyring_1.1-1_all.deb
+sudo apt-get update
+sudo nala install cuda-toolkit-12-6
 ```
 
-虚拟环境装Cuda: https://anaconda.org/nvidia/cuda
+
+#### 虚拟环境装Cuda
+https://anaconda.org/nvidia/cuda
 ```shell
 conda install nvidia/label/cuda-12.4.0::cuda
 conda install anaconda::cudnn # https://anaconda.org/conda-forge/cudnn
@@ -226,12 +237,19 @@ pip install torch==2.4.0+cu124 --extra-index-url https://download.pytorch.org/wh
 ### CUDNN
 安装直接查看官网教程即可
 ```shell
+# 只需要指定一次
 wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-keyring_1.1-1_all.deb
 sudo dpkg -i cuda-keyring_1.1-1_all.deb
 sudo apt-get update
-sudo apt-get -y install cudnn
 
-sudo apt-get -y install cudnn-cuda-12
+#sudo apt-get -y install cudnn
+#sudo apt-get -y install cudnn-cuda-12
+
+sudo aptitude install cudnn9-cuda-12-6 # 可能要选两次n，直到显示要安装的版本
+```
+
+```shell
+vim ~/.bashrc
 ```
 
 ```text
