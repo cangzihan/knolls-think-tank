@@ -141,7 +141,7 @@ onnxruntime
 #pip install torch==1.12.0+cu116 torchvision==0.13.0+cu116 torchaudio==0.12.0 --extra-index-url https://download.pytorch.org/whl/cu116
 pip install torch==2.3.0+cu118 torchvision==0.18.0+cu118 torchaudio==2.3.0+cu118 --extra-index-url https://download.pytorch.org/whl/cu118
 pip install torch==2.3.0+cu121 torchvision==0.18.0+cu121 torchaudio==2.3.0+cu121 --extra-index-url https://download.pytorch.org/whl/cu121
-pip install torch==2.6.0+cu126 --extra-index-url https://download.pytorch.org/whl/cu126
+pip install torch==2.6.0+cu126 torchvision==1.21.0+cu126 --extra-index-url https://download.pytorch.org/whl/cu126
 ```
 
 ## 显卡（N卡）
@@ -436,4 +436,11 @@ pip install opencv-python
 ```shell
 sudo apt update
 sudo apt upgrade
+```
+
+### 挂载设备管理器不能直接打开的硬盘
+```shell
+sudo nala install ntfs-3g
+# 以目标磁盘为/dev/nvme0n1p4为例
+sudo mount -t ntfs-3g /dev/nvme0n1p4 /mnt
 ```

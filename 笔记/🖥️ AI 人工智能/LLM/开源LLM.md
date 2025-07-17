@@ -114,6 +114,12 @@ Unsloth是一个用于微调大模型的工具
 ### Ollama
 [官网](https://ollama.com/) | [Github](https://github.com/ollama/ollama)
 
+#### Install
+```shell
+# Linux
+curl -fsSL https://ollama.com/install.sh | sh
+```
+
 #### 常用命令
 查看模型列表
 ```shell
@@ -123,8 +129,12 @@ ollama list
 运行模型
 ```shell
 ollama run 【模型名】
+
+ollama run qwen3:4b
+ollama run qwen2.5:3b
 ```
 nishi
+
 ## 基本环境搭建
 
 很多LLM需要的环境都是类似的，这里默认在说电脑/服务器端、假设已经装好了GPU驱动、Cuda等基本环境。

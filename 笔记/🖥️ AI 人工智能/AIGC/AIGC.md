@@ -145,6 +145,10 @@ CUDA_VISIBLE_DEVICES=0 python3 launch.py --listen --enable-insecure-extension-ac
 
 ```
 
+#### ComfyUI Linux
+
+运行`main.py`
+
 ### 版本
 #### SD 3.5
 [model](https://huggingface.co/stabilityai/stable-diffusion-3.5-medium)

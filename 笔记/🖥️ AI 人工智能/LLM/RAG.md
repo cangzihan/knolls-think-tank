@@ -76,17 +76,37 @@ LangChain 是一个用于开发由语言模型驱动的应用程序的框架。�
 ### 安装
 
 #### Quick start
-```shell
+::: code-group
+```shell [QAnything v1]
 git clone https://github.com/netease-youdao/QAnything.git
 cd QAnything
 # 使用GPU4
-git checkout remotes/origin/master # 新版本弃用了很多命令导致有问题
+git checkout master # 新版本弃用了很多命令导致有问题
 sudo bash ./run.sh -c local -i 4 -b default
+# 中等显存运行这个命令
+sudo bash ./run.sh -c local -i 0 -b hf -m MiniChat-2-3B -t minichat
 
 # 报错：Error response from daemon: could not select device driver "nvidia" with capabilities: [[gpu]]
 sudo nala install -y nvidia-container-toolkit
 sudo systemctl restart docker
 ```
+```shell [QAnything v2]
+git clone https://github.com/netease-youdao/QAnything.git
+
+cd QAnything
+docker compose -f docker-compose-linux.yaml up
+
+curl -fsSL https://ollama.com/install.sh | sh
+docker run -d --gpus=all -v ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama
+
+# 以Qwen2.5-3B 为例
+ollama show --modelfile qwen2.5:3b > Modelfile
+vim Modelfile # FROM下面那行添加一行: PARAMETER num_ctx 32000
+ollama create -f Modelfile qwen2.5:3b_ctx32k
+
+#总Token数量32k，输出8192，分片大小：512
+```
+:::
 
 - `-i`控制device_id
 - `-c`设定`llm_api`
@@ -398,6 +418,28 @@ def search_content(question, verbose=True):
     except Exception as e:
         print(f"请求发送失败: {e}")
 ```
+
+#### 前端
+在`docker-compose-linux.yaml`可以看到，前端的`8777`页面是`qanything_local`上部署的。
+
+修改端口号的方法：
+```yaml
+  qanything_local:
+    container_name: qanything-container-local
+    image: freeren/qanything:v1.2.2
+    # ......
+    ports:
+      - "8777:8777" # [!code --]
+      - "5100:8777" # [!code ++]
+```
+
+前端使用的是Python实现的，用[sanic](https://github.com/sanic-org/sanic)框架。位置在`qanything_kernel/qanything_server`
+
+修改logo的方法，直接替换本地的对应png文件即可，docker内部和本地文件是互通的，网页是热更新的。
+
+修改文字的方法，直接从`assets`里的`js`文件里搜索
+
+修改页面标题`index.html`文件，网页是热更新的。
 
 ### OCR
 在项目的**Acknowledgments**部分可知，他们主要使用了百度飞桨的OCR，这里为了省事儿想直接用这个OCR，恰好这个工程也提供了接口。
