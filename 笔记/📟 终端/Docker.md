@@ -111,6 +111,20 @@ sudo docker logs qanything-container-local
 ### 删除镜像
 `docker rmi <image_id>`
 
+## 单阶段构建镜像
+在基底镜像下构建开发镜像。常见基地镜像：
+- Node环境：`docker pull node:22.19.0`
+- Python环境：`docker pull python:3.11.13`
+
+## Dockerfile编写
+1. 创建一个空目录
+2. 在空目录中`vim Dockerfile`
+3. 写具体内容
+4. `docker build -t [镜像名]:v1.0 .`，`.`代表使用当前路径下`Dockerfile`制作镜像
+5. `docker image ls`可看到新构建的镜像，至此构建完成
+6. `docker run`这个镜像
+7. `docker ps a`
+
 ## Docker for Ultralytics YOLO
 
 ### Setting Up

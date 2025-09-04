@@ -22,10 +22,15 @@ FFmpeg 和 OpenCV 都是用于处理图像和视频的流行工具，但它们�
 总的来说，如果您主要进行音视频处理任务，如视频压缩、格式转换等，建议使用 FFmpeg。而如果您需要进行图像处理或计算机视觉任务，如图像处理、对象检测等，建议使用 OpenCV。在某些情况下，两者也可以结合使用，以充分发挥各自的优势。
 
 ## Install
+验证`ffmpeg -version`
+### Linux
 对于x86的系统
 ```shell
 sudo nala install ffmpeg
 ```
+
+### Windows
+将下载的压缩文件解压，将`bin`文件夹添加到环境变量中
 
 ## Uninstall
 - 对于 Ubuntu/Debian：
@@ -112,6 +117,11 @@ ffmpeg \
 [v8][v9][v10][v11]hstack=inputs=4[bottom]; \
 [top][middle][bottom]vstack=inputs=3[output]" \
 -map "[output]" -c:v libx264 output2.mp4
+```
+
+长宽缩放一半合并两个视频，保留第二个视频音频
+```
+ffmpeg -i origin.mp4 -i CN.mp4 -filter_complex "[0:v]scale=iw/2:ih/2[v0];[1:v]scale=iw/2:ih/2[v1];[v0][v1]hstack=inputs=2[outv]" -map "[outv]" -map 1:a -c:v libx264 -c:a aac -shortest output_half_audio2.mp4
 ```
 
 ### 图片拼接成视频
