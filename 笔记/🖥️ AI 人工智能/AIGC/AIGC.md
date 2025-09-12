@@ -1119,6 +1119,70 @@ if "--xformers" not in "".join(sys.argv):
 
 至于为什么要这么判断，我想应该是这两个代码不属于同一个仓库，但是需要一个方法共享相同的信息，直接这样最方便
 
+API版本
+
+WebUI本身有FastAPI，并且在gradio界面启动时，默认会一同启动WebUI。
+
+启动后可查看API文档：http://127.0.0.1:7860/docs
+
+一个测试程序
+```python
+import requests
+import base64
+from datetime import datetime
+import os
+
+# Define the URL and the payload to send.
+url = "http://127.0.0.1:7860"
+
+payload = {
+    "prompt": "toy rabbit",
+    "width": 512,
+    "height": 512,
+    "sampler_name": "UniPC",
+    "steps": 15
+}
+
+# Send said payload to said URL through the API.
+response = requests.post(url=f'{url}/sdapi/v1/txt2img', json=payload)
+r = response.json()
+
+now_str = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+if "output" not in os.listdir():
+    os.makedirs("output")
+
+# Decode and save the image.
+with open(f"output/{now_str}.png", 'wb') as f:
+    f.write(base64.b64decode(r['images'][0]))
+
+```
+
+配置模型：
+
+`sdapi/v1/txt2img`会使用当前已加载的模型进行生图，如果想改变这个默认模型。那么可以遵循以下步骤：
+1. `GET /sdapi/v1/sd-models`获取模型列表，找到期望的`model_name`
+2. `GET /sdapi/v1/options`查看配制，查看当前的`sd_model_checkpoint`
+3. `POST /sdapi/v1/options`改变配制，发送期望的`sd_model_checkpoint`的json
+
+设定API允许跨域（可以用HTML文件调试）,在`modules\initialize_util.py`中
+```python
+def configure_cors_middleware(app):
+    from starlette.middleware.cors import CORSMiddleware
+    from modules.shared_cmd_options import cmd_opts
+
+    cors_options = {
+        "allow_origins": ["*"],  # 允许所有来源 # [!code ++]
+        "allow_methods": ["*"],
+        "allow_headers": ["*"],
+        "allow_credentials": True,
+    }
+    if cmd_opts.cors_allow_origins:
+        cors_options["allow_origins"] = cmd_opts.cors_allow_origins.split(',')
+    if cmd_opts.cors_allow_origins_regex:
+        cors_options["allow_origin_regex"] = cmd_opts.cors_allow_origins_regex
+    app.add_middleware(CORSMiddleware, **cors_options)
+
+```
 
 ## SD & 3D Model
 

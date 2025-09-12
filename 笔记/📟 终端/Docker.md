@@ -111,6 +111,9 @@ sudo docker logs qanything-container-local
 ### 删除镜像
 `docker rmi <image_id>`
 
+### 启动一个已经关闭的容器
+`docker start <container_id>`或`docker start <container_name>`
+
 ## 单阶段构建镜像
 在基底镜像下构建开发镜像。常见基地镜像：
 - Node环境：`docker pull node:22.19.0`
