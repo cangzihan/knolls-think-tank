@@ -114,6 +114,9 @@ sudo docker logs qanything-container-local
 ### 启动一个已经关闭的容器
 `docker start <container_id>`或`docker start <container_name>`
 
+### 进入容器内部
+`docker exec -it <container_name> sh`或`docker exec -it <container_name> bash`
+
 ## 单阶段构建镜像
 在基底镜像下构建开发镜像。常见基地镜像：
 - Node环境：`docker pull node:22.19.0`
