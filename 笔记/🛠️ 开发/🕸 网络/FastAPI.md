@@ -3,6 +3,8 @@
 FastAPI is a modern, fast (high-performance), web framework for building APIs with Python based on standard Python type hints.
 - Documentation: https://fastapi.tiangolo.com
 - Source Code: https://github.com/fastapi/fastapi
+- 官方模板: https://github.com/fastapi/full-stack-fastapi-template
+- FastAPI Radar(一个三方可视化面板): https://github.com/doganarif/fastapi-radar
 
 ## Install
 ```
