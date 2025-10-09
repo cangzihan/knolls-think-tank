@@ -73,6 +73,13 @@ WebSocket 是一种全双工通信协议，允许客户端和服务器之间建�
 - WebSocket 适用于需要实时、低延迟的双向通信场景，例如在线聊天、实时更新的游戏或股票行情等。
 - [HTTP POST](#http-post) 适用于一次性的数据提交和响应处理，例如表单提交、文件上传和调用 RESTful API 等。
 
+| 技术                           | 是否可在 Flask 实现 | 所需库                             | 通信方向        | 典型用途     |
+| ---------------------------- | ------------- | ------------------------------- | ----------- | -------- |
+| **WebSocket**                | ✅             | `flask_sock` / `flask-socketio` | 双向          | 聊天室、协作编辑 |
+| **Server-Sent Events (SSE)** | ✅             | 无需库（原生支持）                       | 单向（服务端→客户端） | 实时日志、通知  |
+| **HTTP Long Polling**        | ✅             | 无需库                             | 单向          | 伪实时消息    |
+| **gRPC Stream**              | ⚙️ 外部实现       | `grpcio`                        | 双向          | 微服务通信    |
+| **MQTT**                     | ⚙️ 外部实现       | `paho-mqtt`                     | 双向          | IoT、消息推送 |
 
 
 
@@ -297,6 +304,42 @@ public class UnityMainThreadDispatcher : MonoBehaviour
    4. 为按钮添加点击事件，将 `WebSocketClient` 的 `OnSendButtonClick` 方法绑定到按钮的点击事件中。
 
 5. 运行项目
+
+## Server-Sent Events (SSE)
+Flask 原生就可以支持，不需要额外库。
+因为 SSE 基于 HTTP 的持续响应流，Flask 只要返回一个“生成器 (generator)”即可。
+
+::: code-group
+
+```python [服务器(Flask)]
+from flask import Flask, Response
+import time
+
+app = Flask(__name__)
+
+@app.route('/stream')
+def stream():
+    def event_stream():
+        while True:
+            time.sleep(1)
+            yield f"data: The time is {time.ctime()}\n\n"
+    return Response(event_stream(), mimetype="text/event-stream")
+
+if __name__ == '__main__':
+    app.run(debug=True, threaded=True)
+
+```
+
+```html [客户端]
+<script>
+const evtSource = new EventSource("/stream");
+evtSource.onmessage = (e) => {
+  console.log("New message:", e.data);
+};
+</script>
+
+```
+:::
 
 ## 跨域请求
 在 Flask 服务器中添加 CORS 头信息，允许来自不同来源的请求。
