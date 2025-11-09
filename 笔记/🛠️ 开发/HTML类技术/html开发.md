@@ -268,6 +268,308 @@ document.getElementById('volumeSlider').addEventListener('input', function() {
 ```
 :::
 
+## CSS
+
+### 选择器
+它告诉浏览器你想要将样式应用到哪个（些） HTML 元素上。选择器“选择”了你想要应用样式的元素。
+
+#### 基础选择器
+分为元素选择器、类选择器、ID选择器和通用选择器
+
+```html
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      h4 {
+        color: red;
+      }
+
+      .classSelector {
+        color: green;
+      }
+
+      .idSelector {
+        color: blue;
+      }
+    </style>  
+  </head>
+  <body>
+    <h4>元素选择器</h4>
+    <p class="classSelector">类选择器</p>
+    <p id="idSelector">ID选择器</p>
+  </body>
+```
+
+#### 组合器选择器 (Combinator Selectors)
+组合器允许你基于元素之间的关系来选择元素。
+
+```css
+/* 后代选择器 (Descendant Combinator) */
+div p {
+  color: green;
+}
+/* 将所有位于 <div> 元素 内部 的 <p> 元素的文本颜色设置为绿色 */
+
+/* 子选择器 (Child Combinator) */
+ul > li {
+  list-style-type: square;
+}
+/* 这会将所有直接位于 <ul> (无序列表) 下的 <li> (列表项) 的符号设置为方块，但不会影响嵌套在 <li> 内部的 <ul> 中的 <li>。 */
+
+/* 相邻兄弟选择器 (Adjacent Sibling Combinator) */
+h1 + p {
+  font-style: italic;
+}
+/* 将紧跟在 <h1> 元素 后面 的第一个 <p> 元素的字体设置为斜体。 */
+
+/* 通用兄弟选择器 (General Sibling Combinator) */
+h1 ~ p {
+  font-weight: bold;
+}
+/* 将所有位于 <h1> 元素 后面 的 <p> 兄弟元素的字体设置为粗体。 */
+```
+
+#### 伪类选择器 (Pseudo-classes)
+
+伪类用于选择元素的特定状态。
+
+*   **`:hover`**
+    *   当用户将鼠标悬停在元素上时。
+    *   例子：
+        ```css
+        button:hover {
+          background-color: lightgray;
+        }
+        ```
+        当鼠标悬停在按钮上时，背景色变为浅灰色。
+
+*   **`:active`**
+    *   当元素被激活（如鼠标点击时）时。
+
+*   **`:focus`**
+    *   当元素获得焦点时（如通过 Tab 键或点击输入框）。
+
+*   **`:visited`, `:link`**
+    *   分别用于已访问和未访问的链接。
+
+*   **`:first-child`, `:last-child`, `:nth-child(n)`**
+    *   选择父元素的第一个、最后一个或第 n 个子元素。
+    *   例子：
+        ```css
+        li:first-child {
+          font-weight: bold;
+        }
+        ```
+        将列表中的第一个 `<li>` 项设置为粗体。
+
+*   **`:not(selector)`**
+    *   选择不符合括号内选择器条件的元素。
+    *   例子：
+        ```css
+        p:not(.special) {
+          color: red;
+        }
+        ```
+        将所有 *不* 具有 `class="special"` 的 `<p>` 元素的文本颜色设置为红色。
+
+#### 伪元素选择器 (Pseudo-elements)
+
+伪元素用于选择元素的特定部分（如首字母、之前或之后的内容）。
+
+*   **`::before`**
+    *   在元素内容 *之前* 插入内容。
+
+*   **`::after`**
+    *   在元素内容 *之后* 插入内容。
+
+*   **`::first-letter`**
+    *   选择元素内容的第一个字母。
+
+*   **`::first-line`**
+    *   选择元素内容的第一行。
+
+*   **`::selection`**
+    *   选择用户选中的部分。
+
+#### 属性选择器 (Attribute Selectors)
+
+根据元素的属性及其值来选择元素。
+
+*   **`[attribute]`**
+    *   选择具有指定属性的元素。
+    *   例子：`[title]` 选择所有有 `title` 属性的元素。
+
+*   **`[attribute="value"]`**
+    *   选择具有指定属性和值的元素。
+    *   例子：`[type="text"]` 选择所有 `type` 属性值为 "text" 的元素。
+
+*   **`[attribute~="value"]`**
+    *   选择属性值包含指定单词（以空格分隔）的元素。
+    *   例子：`[class~="highlight"]` 会选择 `<div class="main highlight">`，但不会选择 `<div class="highlighted">`。
+
+*   **`[attribute|="value"]`**
+    *   选择属性值以指定值开头，且后面紧跟连字符 `-` 的元素（常用于语言代码）。
+
+*   **`[attribute^="value"]`**
+    *   选择属性值以指定值 *开头* 的元素。
+    *   例子：`[href^="https://"]` 选择所有 `href` 以 "https://" 开头的链接。
+
+*   **`[attribute$="value"]`**
+    *   选择属性值以指定值 *结尾* 的元素。
+    *   例子：`[href$=".pdf"]` 选择所有 `href` 以 ".pdf" 结尾的链接。
+
+*   **`[attribute*="value"]`**
+    *   选择属性值 *包含* 指定值的元素。
+    *   例子：`[title*="warning"]` 选择所有 `title` 属性中包含 "warning" 字符串的元素。
+
+#### 选择器优先级 (Specificity)
+
+当多个 CSS 规则应用于同一个元素时，浏览器需要决定应用哪个规则。这由选择器的优先级决定。优先级从高到低通常为：
+
+1.  **内联样式** (直接写在 HTML 元素的 `style` 属性上) - 最高优先级
+2.  **ID 选择器** (`#id`)
+3.  **类选择器、属性选择器、伪类选择器** (`.class`, `[type="text"]`, `:hover`)
+4.  **元素选择器、伪元素选择器** (`div`, `::before`)
+5.  **通用选择器** (`*`) - 最低优先级
+
+如果两个规则具有相同的选择器优先级，则后定义的规则会覆盖前面的规则。`!important` 可以覆盖所有优先级规则，但应谨慎使用。
+
+### 文本
+#### 字体
+```css
+p {
+  font-family: Arial, sans-serif; /* 优先使用 Arial，如果不可用则使用系统默认的无衬线字体 */
+
+  /* 设置字体的大小*/
+  font-size: 2em; /* 相对于父元素字体大小的2倍 */
+  /* font-size: 16px; /* 绝对像素值 */
+  /* font-size: 1.2rem; /* 相对于根元素 (html) 字体大小 */
+
+  /* 设置字体的粗细程度*/
+  font-weight: bold; /* 或者 font-weight: 700; */
+
+  font-style: italic; /* normal, italic, oblique */
+}
+```
+
+简写属性
+```css
+p {
+  font: italic bold 16px/1.4 Arial, sans-serif; /* 样式 粗细 大小/行高 字体族 */
+}
+```
+
+#### 文本外观
+```css
+a:link {
+  color: blue;
+}
+
+a:visited {
+  text-decoration: underline line-through; /* 同时有下划线和删除线 */
+}
+
+h1 {
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* 水平偏移2px，垂直偏移2px，模糊半径4px，半透明黑色阴影 */
+}
+```
+
+#### 文本布局
+
+这些属性控制文本在行和块中的排列方式。
+
+*   **`text-align`**
+    *   **作用**: 设置行内内容（如文本）在其包含块中的水平对齐方式。
+    *   **值**: `left`, `right`, `center`, `justify` (两端对齐)。
+    *   **示例**:
+        ```css
+        p {
+          text-align: justify; /* 使文本左右两端都对齐 */
+        }
+        ```
+
+*   **`text-indent`**
+    *   **作用**: 设置块级元素（如段落）第一行的缩进。
+    *   **示例**:
+        ```css
+        p {
+          text-indent: 2em; /* 第一行缩进两个字符的宽度 */
+        }
+        ```
+
+*   **`line-height`**
+    *   **作用**: 设置行与行之间的距离（行高）。
+    *   **示例**:
+        ```css
+        p {
+          line-height: 1.6; /* 设置为字体大小的1.6倍 */
+        }
+        ```
+
+*   **`letter-spacing`**
+    *   **作用**: 设置字符（字母、数字、符号等）之间的间距。
+    *   **示例**:
+        ```css
+        .spaced-out {
+          letter-spacing: 2px; /* 每个字符之间增加2px间距 */
+        }
+        ```
+
+*   **`word-spacing`**
+    *   **作用**: 设置单词之间的间距。
+    *   **示例**:
+        ```css
+        .wide-words {
+          word-spacing: 10px; /* 单词之间增加10px间距 */
+        }
+        ```
+
+*   **`vertical-align`**
+    *   **作用**: 控制行内元素（如图片、`<span>`）或表格单元格内容的垂直对齐方式。*（注意：它对块级元素的对齐无效）*
+    *   **值**: `baseline`, `top`, `middle`, `bottom`, `text-top`, `text-bottom`, `<length>`, `<percentage>`。
+    *   **示例**:
+        ```css
+        img {
+          vertical-align: middle; /* 使图片与文本基线对齐 */
+        }
+        ```
+
+#### 文本溢出 (Text Overflow) 属性
+
+这些属性控制当文本内容超出容器边界时的处理方式。
+
+*   **`text-overflow`**
+    *   **作用**: 指定当文本溢出其包含块时如何显示（例如，显示省略号 `...`）。
+    *   **值**: `clip` (裁剪), `ellipsis` (显示省略号)。
+    *   **注意**: 通常需要配合 `white-space: nowrap` 和 `overflow: hidden` 使用。
+    *   **示例**:
+        ```css
+        .truncate {
+          width: 200px; /* 限制容器宽度 */
+          overflow: hidden; /* 隐藏溢出内容 */
+          white-space: nowrap; /* 防止文本换行 */
+          text-overflow: ellipsis; /* 溢出时显示省略号 */
+        }
+        ```
+
+#### 白色空间 (Whitespace) 属性
+
+*   **`white-space`**
+    *   **作用**: 指定如何处理元素内的空白字符（空格、换行符、制表符等）。
+    *   **值**:
+        *   `normal`: 合并空白字符和换行符，必要时换行。
+        *   `nowrap`: 合并空白字符，但不换行。
+        *   `pre`: 保留空白字符和换行符，不自动换行（类似 `<pre>` 标签）。
+        *   `pre-wrap`: 保留空白字符和换行符，但必要时换行。
+        *   `pre-line`: 合并空白字符，但保留换行符，必要时换行。
+    *   **示例**:
+        ```css
+        .preformatted {
+          white-space: pre-wrap; /* 保留代码或文本的格式 */
+        }
+        ```
+
 ## 在markdown中插入html
 在Markdown中插入HTML代码是相对直接的。Markdown的设计初衷是易于阅读和编写的纯文本格式，但它支持内嵌HTML代码，这为Markdown文档提供了额外的灵活性和功能性。
 
