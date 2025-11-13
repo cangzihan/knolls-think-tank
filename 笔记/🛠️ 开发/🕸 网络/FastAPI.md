@@ -49,6 +49,67 @@ https://fastapi.tiangolo.com/zh/tutorial/testing/
 pip install pytest
 ```
 
+### 组件
+#### BackgroundTasks
+BackgroundTasks 是 FastAPI 提供的一个工具，用于在 HTTP 响应发送给客户端后，在后台执行一些耗时的任务。这样可以快速响应客户端，同时在后台处理不需要立即返回给用户的操作。
+
+```python
+from fastapi import FastAPI, BackgroundTasks
+import time
+
+app = FastAPI()
+
+# 模拟耗时操作的函数
+def send_email(email: str, message: str):
+    """模拟发送邮件"""
+    print(f"Sending email to {email}: {message}")
+    time.sleep(2)  # 模拟发送邮件的耗时
+    print(f"Email sent to {email}")
+
+def update_user_stats(user_id: str):
+    """模拟更新用户统计"""
+    print(f"Updating stats for user {user_id}")
+    time.sleep(1)  # 模拟更新操作
+    print(f"Stats updated for {user_id}")
+
+def log_activity(user_id: str, action: str):
+    """模拟记录活动"""
+    print(f"Logging activity: {user_id} - {action}")
+    time.sleep(0.5)  # 模拟记录操作
+    print(f"Activity logged: {action}")
+
+@app.get("/fast-operation")
+async def fast_operation(background_tasks: BackgroundTasks):
+    # 立即返回响应
+    response = {"message": "Operation started", "status": "success"}
+    
+    # 在后台执行耗时操作
+    background_tasks.add_task(send_email, "user@example.com", "Welcome!")
+    background_tasks.add_task(update_user_stats, "user123")
+    background_tasks.add_task(log_activity, "user123", "visited_page")
+    
+    return response  # 用户立即收到响应，后台任务继续执行
+
+```
+
+#### UploadFile
+UploadFile 是 FastAPI 提供的专门用于处理文件上传的类。它提供了一个异步友好的接口来处理上传的文件，支持流式处理，避免将整个文件加载到内存中。
+```python
+from fastapi import FastAPI, File, UploadFile
+import shutil
+
+app = FastAPI()
+
+@app.post("/uploadfile/")
+async def create_upload_file(file: UploadFile = File(...)):
+    return {
+        "filename": file.filename,
+        "content_type": file.content_type,
+        "file_size": len(await file.read())  # 注意：读取后文件指针会移动到末尾
+    }
+
+```
+
 ### 测试脚本编写
 文件夹结构
 ```
