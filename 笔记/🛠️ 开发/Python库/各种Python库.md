@@ -204,3 +204,32 @@ if __name__ == "__main__":
     main()
 
 ```
+
+## multiprocessing
+```python
+from multiprocessing import Process
+import time
+
+
+def run(word):
+    while True:
+        print(word)
+        time.sleep(2)
+
+if __name__ == "__main__":
+    # 创建第一个进程，目标函数是 run，参数是 ("XX",)
+    # 注意：args=("XX",) 中的逗号很重要，这样 ("XX",) 才是一个元组，而不是字符串
+    p1 = Process(target=run, args=("XX",))
+    p1.start()    # 启动第一个进程
+    
+    # 创建第二个进程，目标函数是 run，参数是 ("OO",)
+    p2 = Process(target=run, args=("OO",))
+    p2.start()    # 启动第二个进程
+
+    # 主进程的无限循环，防止主程序退出
+    # 如果没有这个循环，主程序会立即结束，子进程也会被终止
+    while True:
+        # 主进程每秒检查一次，确保子进程继续运行
+        time.sleep(1)
+
+```
