@@ -223,7 +223,7 @@ Pydantic 的作用就是：
 
     “把外部输入的 JSON、Dict 等原始数据 → 转换成带类型的 Python 对象，并自动验证格式。”
 
-#### 示例
+#### Basemodel
 ```python
 from pydantic import BaseModel
 
@@ -248,6 +248,112 @@ def create_user(user: User):  # 自动验证 JSON
 - 自动验证类型（`int`, `str`, `float` 等）；
 - 自动生成文档；
 - 自动提示错误。
+
+#### Field
+Field() 用来在 模型字段上声明额外信息：
+- 默认值
+- 描述（description）
+- 标题（title）
+- 校验规则（gt/ge/lt/le/regex等）
+- 元数据（json_schema_extra）
+- 别名（alias）
+- 是否必须字段
+- 示例（examples）
+
+相当于：给字段添加约束 + 文档信息 + 默认值等定义
+```python
+from pydantic import BaseModel, Field
+
+class User(BaseModel):
+    name: str = Field(..., description="用户名", min_length=1, max_length=10)
+    age: int = Field(18, ge=0, le=120, description="年龄")
+
+```
+解释：
+- `name` 是必填字段（...）
+- `age` 默认值 18
+- 限制：0 ≤ `age` ≤ 120
+- 文档描述会被 FastAPI 读取展示
+
+#### field_serializer
+它用于序列化字段时进行处理，也就是 对象 → dict/json 时生效
+
+⚠️ 注意：不是解析（validation）时，而是输出时！
+
+常见用途：
+- 输出时格式化日期
+- 隐藏敏感信息
+- 输出时把某字段变成字符串
+- 输出时修改字段结构
+- 输出时自动拼接 UR
+
+```python
+from pydantic import BaseModel, field_serializer
+from datetime import datetime
+
+class User(BaseModel):
+    name: str
+    created_at: datetime
+
+    @field_serializer("created_at")
+    def serialize_created_at(self, created_at, info):
+        return created_at.strftime("%Y-%m-%d %H:%M:%S")
+
+u = User(name="Tom", created_at=datetime.now())
+print(u.model_dump())
+
+```
+
+输出
+```text
+{
+    "name": "Tom",
+    "created_at": "2025-11-17 22:15:00"
+}
+```
+
+隐藏敏感数据
+```python
+class User(BaseModel):
+    username: str
+    password: str
+
+    @field_serializer("password")
+    def hide_password(self, value, info):
+        return "********"
+
+```
+
+#### model_validator
+它是 Pydantic v2 中用于对 整个模型级别 进行校验的装饰器。区别于`field_validator`校验某个字段。
+
+```python
+class ImageRequest(BaseModel):
+    prompt: str
+
+    @model_validator(mode="before")
+    def add_suffix(cls, data):
+        data["prompt"] += ", Chinese"
+        return data
+
+```
+
+```pyhon
+from datetime import datetime
+from pydantic import BaseModel, model_validator, ValidationError
+
+class Person(BaseModel):
+    name: str
+    age: int
+    birth_year: int
+
+    @model_validator(mode="after")
+    def check_logic(self):
+        current_year = datetime.now().year
+        if current_year - self.birth_year != self.age:
+            raise ValueError("年龄和出生年份不匹配")
+        return self
+```
 
 ### SQLModel
 SQLModel 是由 FastAPI 作者 Sebastián Ramírez 自己开发的库，

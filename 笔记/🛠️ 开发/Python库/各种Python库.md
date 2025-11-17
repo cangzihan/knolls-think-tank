@@ -205,6 +205,102 @@ if __name__ == "__main__":
 
 ```
 
+## LangGraph
+LangGraph 是一个用于构建状态化、多步骤 AI 应用的框架，特别适合需要对话、记忆、复杂工作流的应用。
+
+### Graph
+Graph 是 LangGraph 的核心概念，用来定义 AI 应用的工作流程。
+
+想象一下：你正在画一个流程图，描述任务的执行步骤。
+```python
+from langgraph.graph import StateGraph
+
+# 定义状态结构
+class State(TypedDict):
+    messages: Annotated[list, add_messages]
+    current_task: str
+    task_history: list
+
+# 创建图
+workflow = StateGraph(State)
+
+# 添加节点（步骤）
+def analyze_input(state):
+    # 分析用户输入
+    return {"current_task": "analyze"}
+
+def process_data(state):
+    # 处理数据
+    return {"current_task": "process"}
+
+def generate_response(state):
+    # 生成回复
+    return {"current_task": "respond"}
+
+# 添加节点到图
+workflow.add_node("analyze", analyze_input)
+workflow.add_node("process", process_data)
+workflow.add_node("respond", generate_response)
+
+# 定义执行顺序
+workflow.set_entry_point("analyze")
+workflow.add_edge("analyze", "process")
+workflow.add_edge("process", "respond")
+workflow.add_edge("respond", "__end__")
+
+# 编译图
+app = workflow.compile()
+
+```
+
+Graph 的特点
+- 状态管理：记住之前的对话和操作
+- 条件分支：根据条件选择不同路径
+- 循环执行：可以重复执行某些步骤
+
+### Create React Agent（创建 ReAct 代理）
+Prebuilt 是 LangGraph 提供的预构建好的图结构，可以直接使用，无需从零开始构建。
+
+ReAct = Reasoning（推理）+ Act（行动）
+- 推理：分析问题，思考解决方案
+- 行动：执行工具，获取信息
+- 重复：根据结果继续推理和行动
+
+```python
+from langgraph.prebuilt import create_react_agent
+from langchain_openai import ChatOpenAI
+from langchain.tools import tool
+
+# 定义工具
+@tool
+def search_web(query: str) -> str:
+    """搜索网页获取信息"""
+    # 模拟搜索结果
+    return f"搜索结果：{query}"
+
+@tool
+def calculate(expression: str) -> str:
+    """计算数学表达式"""
+    # 安全的计算实现
+    return str(eval(expression))
+
+# 创建 LLM
+llm = ChatOpenAI(model="gpt-3.5-turbo")
+
+# 创建 ReAct 代理
+agent = create_react_agent(
+    llm=llm,
+    tools=[search_web, calculate]
+)
+
+# 使用代理
+for chunk in agent.stream({
+    "messages": [("user", "北京到上海的距离是多少公里？")]
+}):
+    print(chunk)
+
+```
+
 ## multiprocessing
 ```python
 from multiprocessing import Process

@@ -122,6 +122,67 @@ sudo docker logs qanything-container-local
 - Node环境：`docker pull node:22.19.0`
 - Python环境：`docker pull python:3.11.13`
 
+## docker-compose编写
+Docker Compose 是一个用于定义和运行多容器 Docker 应用程序的工具。通过一个 YAML 文件来配置应用程序的服务，然后使用一个命令即可创建并启动所有服务。
+
+### 常用参数
+- `depends_on`: 用于定义服务之间的依赖关系，确保某些服务在其他服务之前启动。
+- `entrypoint` = echo （要执行的程序）
+- `command` = "hello world" （程序的参数）
+```yml
+services:
+  app:
+    depends_on:
+      - database
+      - redis
+      - cache
+    image: myapp:latest
+    entrypoint: ["/app/startup.sh"]  # 启动脚本
+    command: ["--port", "3000"]      # 脚本参数
+
+```
+
+
+### Windows版示例
+
+docker-compose.yml
+```yml
+# version: "3.9" # 可以删
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    # 环境变量
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass   # root 用户密码
+      MYSQL_DATABASE: appdb           # 初始数据库
+      MYSQL_USER: appuser             # 普通用户
+      MYSQL_PASSWORD: AppPass!        # 普通用户密码
+    ports:
+      - "3306:3306"
+    volumes:
+      # Windows 路径要用绝对路径，并且建议用 / 而不是 \
+      - "C:/docker/mysql-data:/var/lib/mysql"
+      - "C:/docker/mysql-init:/docker-entrypoint-initdb.d"
+    networks:
+      - dbnet
+
+# 网络定义
+networks:
+  dbnet:
+    driver: bridge
+
+```
+
+需要先创建以下目录
+```text
+mkdir C:\docker\mysql-data
+mkdir C:\docker\mysql-ini
+```
+
+运行`docker-compose up -d`
+
 ## Dockerfile编写
 1. 创建一个空目录
 2. 在空目录中`vim Dockerfile`

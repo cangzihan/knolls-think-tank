@@ -106,6 +106,106 @@ python3 -m fastchat.serve.gradio_web_server
 
 https://rudeigerc.dev/posts/llm-inference-with-fastchat/
 
+### openai库
+####  AsyncOpenAI
+`AsyncOpenAI` 是 OpenAI Python 库中用于异步编程的客户端类。它让你可以异步地调用 OpenAI API，不会阻塞程序执行。
+
+同步方式（阻塞）
+```python
+from openai import OpenAI
+
+client = OpenAI()
+
+# 这个调用会"等待"直到收到回复，期间程序不能做其他事
+response = client.chat.completions.create(
+    model="gpt-3.5-turbo",
+    messages=[{"role": "user", "content": "Hello!"}]
+)
+print(response.choices[0].message.content)
+
+```
+
+异步方式（非阻塞）
+```python
+import asyncio
+from openai import AsyncOpenAI
+
+# 创建异步客户端
+async_client = AsyncOpenAI()
+
+async def main():
+    # 这个调用不会阻塞，程序可以继续执行其他任务
+    response = await async_client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": "Hello!"}]
+    )
+    print(response.choices[0].message.content)
+
+# 运行异步函数
+asyncio.run(main())
+
+```
+
+异步方式 - 并行执行：
+```python
+import asyncio
+import time
+from openai import AsyncOpenAI
+
+async def make_request(client, i):
+    response = await client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": f"Request {i}"}]
+    )
+    print(f"Async {i}: {response.choices[0].message.content}")
+
+async def async_requests():
+    start_time = time.time()
+    async_client = AsyncOpenAI()
+    
+    # 这3个请求会同时发送，总共约2秒
+    tasks = [make_request(async_client, i) for i in range(3)]
+    await asyncio.gather(*tasks)
+    
+    print(f"异步总耗时: {time.time() - start_time:.2f}秒")
+
+asyncio.run(async_requests())
+
+```
+
+异步 Web API
+```python
+from fastapi import FastAPI
+from openai import AsyncOpenAI
+import asyncio
+
+app = FastAPI()
+client = AsyncOpenAI()
+
+@app.post("/chat")
+async def chat(message: str):
+    response = await client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": message}]
+    )
+    return {"response": response.choices[0].message.content}
+
+@app.get("/batch")
+async def batch_process():
+    queries = ["问题1", "问题2", "问题3"]
+    
+    async def ask(query):
+        resp = await client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": query}]
+        )
+        return resp.choices[0].message.content
+    
+    results = await asyncio.gather(*[ask(q) for q in queries])
+    return {"results": results}
+
+```
+
 ### Unsloth
 Unsloth是一个用于微调大模型的工具
 
