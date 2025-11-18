@@ -10,7 +10,7 @@ https://github.com/microsoft/autogen
 
 ## Install
 ```shell
-pip install pyautogen
+pip install ag2
 ```
 
 ## TaskWeaver与AutoGen的比较
