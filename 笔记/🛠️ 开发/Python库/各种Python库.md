@@ -329,3 +329,8 @@ if __name__ == "__main__":
         time.sleep(1)
 
 ```
+
+## uv
+uv是一个由 Astral（Ruff 团队）开发的超快 Python 包安装器和解析器。
+
+`--system` 表示：将包安装到当前 Python 环境的全局 site-packages 目录中（即“系统 Python 环境”），而不是虚拟环境。

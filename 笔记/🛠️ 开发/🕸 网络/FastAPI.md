@@ -41,16 +41,8 @@ Interactive API docs: http://127.0.0.1:8000/docs
 
 Alternative API docs: http://127.0.0.1:8000/redoc
 
-## 测试
-https://fastapi.tiangolo.com/zh/tutorial/testing/
-
-### 安装pytest
-```shell
-pip install pytest
-```
-
-### 组件
-#### BackgroundTasks
+## 组件
+### BackgroundTasks
 BackgroundTasks 是 FastAPI 提供的一个工具，用于在 HTTP 响应发送给客户端后，在后台执行一些耗时的任务。这样可以快速响应客户端，同时在后台处理不需要立即返回给用户的操作。
 
 ```python
@@ -92,7 +84,14 @@ async def fast_operation(background_tasks: BackgroundTasks):
 
 ```
 
-#### UploadFile
+### Depends
+`fastapi.Depends` 是 FastAPI 中实现依赖注入（Dependency Injection）的核心机制。它用于声明一个“依赖项”（dependency），FastAPI 会在处理请求前自动解析并注入这个依赖，常用于：
+- 用户认证（如获取当前用户）
+- 数据库会话管理
+- 权限校验
+- 共享逻辑复用（避免重复代码）
+
+### UploadFile
 UploadFile 是 FastAPI 提供的专门用于处理文件上传的类。它提供了一个异步友好的接口来处理上传的文件，支持流式处理，避免将整个文件加载到内存中。
 ```python
 from fastapi import FastAPI, File, UploadFile
@@ -108,6 +107,14 @@ async def create_upload_file(file: UploadFile = File(...)):
         "file_size": len(await file.read())  # 注意：读取后文件指针会移动到末尾
     }
 
+```
+
+## 测试
+https://fastapi.tiangolo.com/zh/tutorial/testing/
+
+### 安装pytest
+```shell
+pip install pytest
 ```
 
 ### 测试脚本编写
@@ -338,7 +345,7 @@ class ImageRequest(BaseModel):
 
 ```
 
-```pyhon
+```python
 from datetime import datetime
 from pydantic import BaseModel, model_validator, ValidationError
 
@@ -405,6 +412,28 @@ with Session(engine) as session:
 | Pydantic 兼容 | 自动数据验证                   |
 | 类型注解友好      | 完全使用 Python typing       |
 | 异步支持        | 可与 `async SQLAlchemy` 结合 |
+
+
+### typing
+#### Annotated
+`typing.Annotated`是一个元数据标注工具，它允许你在类型注解中附加额外的“注释”（metadata），而不改变类型本身。
+```python
+from typing import Annotated
+from fastapi import FastAPI, Depends, Query
+
+app = FastAPI()
+
+def get_user(token: str) -> dict:
+    return {"token": token}
+
+@app.get("/items/")
+def read_items(
+    user: Annotated[dict, Depends(get_user)],
+    q: Annotated[str | None, Query()] = None,
+):
+    return {"user": user, "q": q}
+
+```
 
 ### Uvicorn
 FastAPI 不是一个“独立运行的服务器”，它只是一个 ASGI 应用。

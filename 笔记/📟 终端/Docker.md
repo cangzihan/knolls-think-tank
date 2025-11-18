@@ -117,6 +117,8 @@ sudo docker logs qanything-container-local
 ### 进入容器内部
 `docker exec -it <container_name> sh`或`docker exec -it <container_name> bash`
 
+运行一个临时容器`docker run -it --rm python:3.12.10-bookworm python`
+
 ## 单阶段构建镜像
 在基底镜像下构建开发镜像。常见基地镜像：
 - Node环境：`docker pull node:22.19.0`
@@ -141,7 +143,38 @@ services:
     command: ["--port", "3000"]      # 脚本参数
 
 ```
+- `build`: 表示该服务的镜像不是直接拉取现成的镜像（如 image: nginx），而是从源码构建。
+```yml
+version: '3.8'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+```
+- `context` 是 Docker 构建时能访问的文件范围。所有`COPY`或`ADD`指令的源路径，都必须在 context 目录内。
 
+### 构建
+```shell
+# 以 “detached mode”（后台模式） 启动容器。
+docker-compose up -d
+
+#  强制重新构建服务中定义了 build: 的镜像，然后再启动容器。
+docker-compose up --build
+```
+
+#### 文件命名
+从 Docker Compose V2（2021 年后逐渐成为默认） 开始，官方推荐使用更简洁的文件名：
+- ✅ `compose.yaml`
+- ✅ `compose.yml`
+
+并且`docker-compose`命令（或`docker compose`）会自动查找以下文件（按优先级顺序）：
+1. `compose.yaml`
+2. `compose.yml`
+3. `docker-compose.yaml`
+4. `docker-compose.yml`
 
 ### Windows版示例
 
@@ -160,7 +193,7 @@ services:
       MYSQL_USER: appuser             # 普通用户
       MYSQL_PASSWORD: AppPass!        # 普通用户密码
     ports:
-      - "3306:3306"
+      - "3306:3306"   # ports: - "外部端口:容器内部端口"
     volumes:
       # Windows 路径要用绝对路径，并且建议用 / 而不是 \
       - "C:/docker/mysql-data:/var/lib/mysql"
@@ -182,6 +215,11 @@ mkdir C:\docker\mysql-ini
 ```
 
 运行`docker-compose up -d`
+
+进入数据库
+```shell
+docker exec -it mysql mysql -uroot -prootpass
+```
 
 ## Dockerfile编写
 1. 创建一个空目录
