@@ -97,6 +97,11 @@ gcc main.c -o main
 ./main
 ```
 
+## 后台运行
+```shell
+nohup sh -c 'python3 service.py' > output.log 2>&1 &
+```
+
 ## 开机自启动
 ### 使用 systemd 配置自启动服务
 `systemd` 是目前主流的服务管理工具，可以通过配置文件模拟一个完整的终端环境。
