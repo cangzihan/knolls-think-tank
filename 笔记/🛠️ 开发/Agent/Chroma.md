@@ -21,3 +21,7 @@ Chroma 是一个开源的向量数据库，专为 AI 应用程序设计，特别
     - 丰富的元数据存储
     - 支持过滤和分面搜索
     - 结构化数据关联
+
+相关工具：
+- https://github.com/msteele3/chromagraphic
+- https://github.com/AYOUYI/chromadb_GUI_tool

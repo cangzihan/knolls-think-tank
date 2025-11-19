@@ -42,6 +42,34 @@ Interactive API docs: http://127.0.0.1:8000/docs
 Alternative API docs: http://127.0.0.1:8000/redoc
 
 ## 组件
+### APIRouter
+`APIRouter`是一个用于组织和模块化路由（即 API 路径操作）的核心组件。它允许你将相关的路由逻辑分组到不同的模块或文件中，然后再将这些模块集成到主 FastAPI 应用中，从而提高代码的可维护性和可读性。
+```python
+# users.py
+from fastapi import APIRouter
+
+router = APIRouter(prefix="/users", tags=["Users"])
+
+@router.get("/")
+def read_users():
+    return [{"name": "Alice"}, {"name": "Bob"}]
+
+@router.get("/{user_id}")
+def read_user(user_id: int):
+    return {"user_id": user_id, "name": "Alice"}
+
+```
+```python
+# main.py
+from fastapi import FastAPI
+from users import router as user_router
+
+app = FastAPI()
+
+app.include_router(user_router)
+
+```
+
 ### BackgroundTasks
 BackgroundTasks 是 FastAPI 提供的一个工具，用于在 HTTP 响应发送给客户端后，在后台执行一些耗时的任务。这样可以快速响应客户端，同时在后台处理不需要立即返回给用户的操作。
 
@@ -106,6 +134,46 @@ async def create_upload_file(file: UploadFile = File(...)):
         "content_type": file.content_type,
         "file_size": len(await file.read())  # 注意：读取后文件指针会移动到末尾
     }
+
+```
+
+### security
+#### OAuth2PasswordBearer
+`fastapi.security.OAuth2PasswordBearer`是 FastAPI 中用于处理 基于 OAuth2 密码模式（Password Flow） 的认证组件。它本身 不实现认证逻辑，而是提供一个依赖项（Dependency），用于：
+- 从请求头中自动提取 Bearer Token（即 JWT 或其他格式的访问令牌）；
+- 集成到 OpenAPI 文档（Swagger UI / ReDoc），让你可以直接在 UI 中输入 token 进行测试；
+- 作为依赖项注入到路径操作函数中，便于后续自定义认证逻辑。
+
+⚠️ 注意事项
+- `OAuth2PasswordBearer` **仅负责提取 token**，**不负责验证用户名/密码或生成 token**。
+- 生成 token 的逻辑需要你自己实现（通常在 `/token` 路径中）。
+
+```python
+from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+
+app = FastAPI()
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+# 模拟验证用户
+def fake_hash_password(password: str):
+    return "fakehashed" + password
+
+fake_users_db = {
+    "alice": {"username": "alice", "hashed_password": "fakehashedsecret"}
+}
+
+@app.post("/token")
+def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    user = fake_users_db.get(form_data.username)
+    if not user or not user["hashed_password"] == fake_hash_password(form_data.password):
+        raise HTTPException(status_code=400, detail="Incorrect username or password")
+    return {"access_token": user["username"], "token_type": "bearer"}
+
+@app.get("/users/me")
+async def read_users_me(token: str = Depends(oauth2_scheme)):
+    return {"token": token}
 
 ```
 
@@ -413,6 +481,249 @@ with Session(engine) as session:
 | 类型注解友好      | 完全使用 Python typing       |
 | 异步支持        | 可与 `async SQLAlchemy` 结合 |
 
+
+#### Relationship
+`sqlmodel.Relationship`是 SQLModel 中用于定义 模型之间关联关系（如一对多、多对一、一对一） 的核心组件。它底层基于 SQLAlchemy 的 relationship()，但做了 Pydantic/SQLModel 友好的封装，让你能像处理普通属性一样操作关联对象。
+
+基本语法
+```python
+from sqlmodel import SQLModel, Field, Relationship
+from typing import List, Optional
+
+class Team(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    name: str
+
+    # 一对多：一个 Team 有多个 Hero
+    heroes: List["Hero"] = Relationship(back_populates="team")
+
+class Hero(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    name: str
+    team_id: Optional[int] = Field(default=None, foreign_key="team.id")  # ← 外键
+
+    # 多对一：一个 Hero 属于一个 Team
+    team: Optional[Team] = Relationship(back_populates="heroes")
+```
+
+---
+
+1. `back_populates`
+    - **必须成对出现**：两边都要写，且值互指对方的字段名
+    - 作用：告诉 SQLModel 如何**双向同步关系**
+        - 当你设置 `hero.team = some_team`，`some_team.heroes` 会自动包含这个 hero
+        - 当你往 `team.heroes.append(hero)`，`hero.team` 会自动指向该 team
+
+2. 外键字段 (`foreign_key`)
+    - `team_id: Optional[int] = Field(foreign_key="team.id")`
+    - 这才是**真正创建数据库外键约束**的地方
+    - `Relationship` 本身不创建外键，只提供对象访问层
+
+3. 类型提示
+    - 一对多：`List["Hero"]`（注意用字符串避免循环导入）
+    - 多对一：`Optional[Team]`
+    - 一对一：`Optional[Profile]`（两边都用 `Optional`）
+
+### sse-starlette
+sse-starlette 是一个轻量级的库，用于在 Starlette（以及基于 Starlette 的框架，如 FastAPI）中实现 SSE（Server-Sent Events，服务器发送事件） 功能。
+
+#### 什么是 SSE（Server-Sent Events）？
+SSE 是一种 服务器向客户端推送实时数据 的 Web 技术，基于 HTTP 长连接，具有以下特点：
+
+| 特性 | 说明 |
+|------|------|
+| **单向通信** | 服务器 → 客户端（客户端不能通过 SSE 发消息给服务器） |
+| **基于 HTTP/HTTPS** | 不需要 WebSocket 那样的特殊协议 |
+| **自动重连** | 浏览器断开后会自动尝试重连 |
+| **文本数据** | 只支持字符串（但可传 JSON） |
+| **简单轻量** | 比 WebSocket 更容易实现和调试 |
+#### Install
+```shell
+pip install sse-starlette
+```
+
+常见使用场景：
+1. **AI 聊天机器人流式输出**（如 LLM 逐 token 返回）
+2. **实时日志查看**
+3. **股票价格/传感器数据更新**
+4. **进度通知**（如文件处理进度）
+
+#### FastAPI流式接口实现
+```python
+from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
+from sse_starlette.sse import EventSourceResponse
+import asyncio
+from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # 开发环境可设为 "*"
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+TENG_WANG_GE_SHI = [
+    "滕王高阁临江渚，佩玉鸣鸾罢歌舞。",
+    "画栋朝飞南浦云，珠帘暮卷西山雨。",
+    "闲云潭影日悠悠，物换星移几度秋。",
+    "阁中帝子今何在？槛外长江空自流。"
+]
+
+@app.get("/poem/stream")
+async def stream_poem():
+    async def poem_generator():
+        for line in TENG_WANG_GE_SHI[:-1]:
+            yield line
+            await asyncio.sleep(2)
+        yield TENG_WANG_GE_SHI[-1]
+        yield "[DONE]"
+    return EventSourceResponse(poem_generator())
+
+# 新增：返回前端页面
+@app.get("/", response_class=HTMLResponse)
+async def get_frontend():
+    with open("index.html", "r", encoding="utf-8") as f:
+        return f.read()
+```
+
+```html
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>流式输出</title>
+    <style>
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 18px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        #poem-output {
+            width: 100%;
+            min-height: 200px;
+            padding: 16px;
+            font-size: 18px;
+            line-height: 1.6;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background-color: white;
+            white-space: pre-wrap; /* 保留换行和空格 */
+            overflow-wrap: break-word;
+        }
+    </style>
+</head>
+    <body>
+        <h1> 流式吟诵</h1>
+        <div class="container">
+            <button id="start-btn">开始接收</button>
+            <div id="poem-output"></div>
+        </div>
+        <script>
+            const startBtn = document.getElementById('start-btn');
+            const output = document.getElementById('poem-output');
+
+            let eventSource = null;
+            let linesQueue = [];      // 待显示的句子队列
+            let isTyping = false;     // 是否正在打字
+            let currentLine = '';     // 当前正在打的句子
+            let charIndex = 0;        // 当前句子已打到第几个字符
+
+            // 打字机：逐字显示当前行
+            function typeNextChar() {
+                if (charIndex < currentLine.length) {
+                output.textContent += currentLine[charIndex];
+                charIndex++;
+                setTimeout(typeNextChar, 100); // 每100ms打一个字
+                } else {
+                // 本行打完，换行
+                output.textContent += '\n';
+                isTyping = false;
+                processQueue(); // 尝试处理下一行
+                }
+            }
+
+            // 处理队列中的下一行
+            function processQueue() {
+                if (isTyping || linesQueue.length === 0) return;
+                
+                currentLine = linesQueue.shift();
+                charIndex = 0;
+                isTyping = true;
+                typeNextChar();
+            }
+
+            startBtn.addEventListener('click', () => {
+                if (eventSource) return;
+
+                // 重置状态
+                linesQueue = [];
+                isTyping = false;
+                output.textContent = '';
+                startBtn.disabled = true;
+                startBtn.textContent = '吟诵中...';
+
+                eventSource = new EventSource('http://localhost:8000/poem/stream');
+
+                eventSource.onmessage = (event) => {
+                if (event.data === "[DONE]") {
+                    eventSource.close();
+                    eventSource = null;
+                    startBtn.disabled = false;
+                    startBtn.textContent = '重新开始';
+                    return;
+                }
+
+                // 收到新句子，加入队列
+                linesQueue.push(event.data);
+                processQueue(); // 尝试开始打字
+                };
+
+                eventSource.onerror = () => {
+                if (eventSource) {
+                    eventSource.close();
+                    eventSource = null;
+                }
+                startBtn.disabled = false;
+                startBtn.textContent = '重新开始';
+                };
+            });
+        </script>
+    </body>
+</html>
+
+```
 
 ### typing
 #### Annotated
