@@ -208,6 +208,8 @@ if __name__ == "__main__":
 ## LangGraph
 LangGraph 是一个用于构建状态化、多步骤 AI 应用的框架，特别适合需要对话、记忆、复杂工作流的应用。
 
+Doc: https://docs.langchain.com/oss/python/langgraph/quickstart
+
 ### Graph
 Graph 是 LangGraph 的核心概念，用来定义 AI 应用的工作流程。
 

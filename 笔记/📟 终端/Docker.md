@@ -119,6 +119,9 @@ sudo docker logs qanything-container-local
 
 运行一个临时容器`docker run -it --rm python:3.12.10-bookworm python`
 
+### 将容器内部的文件或目录拷贝到本地主机
+`docker cp <容器名或ID>:<容器内文件路径> <本地目标路径>`
+
 ## 单阶段构建镜像
 在基底镜像下构建开发镜像。常见基地镜像：
 - Node环境：`docker pull node:22.19.0`

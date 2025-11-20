@@ -5,6 +5,7 @@ tags:
   - Python
 ---
 # Gradio
+[Doc](https://www.gradio.app/docs)
 
 ## 综合案例
 ```python
@@ -307,5 +308,68 @@ with gr.Blocks(theme="Soft", title="Meta") as demo:
     demo.queue()
     # demo.launch()
     demo.launch(server_name="0.0.0.0")
+
+```
+
+```python
+def fake_gan2():
+    images = os.listdir(database_image_path)
+    images.sort()
+    images = [os.path.join(database_image_path, f) for f in images]
+    images = [(f, ''.join(os.path.basename(f).split('.')[:-1])) for f in images]
+
+    return images
+
+
+def account_model():
+    model_type = len(os.listdir(database_image_path))
+    model_mesh = len(os.listdir(mesh_path))
+    model_GS = len(os.listdir(GS_path))
+
+    return ("## 模型库统计\n\n数量: %d\n\n模型种类: %d\n\n高斯模型数量: %d\n\nMesh模型数量: %d" %
+            (model_mesh+model_GS, model_type, model_GS, model_mesh))
+
+
+def down_load_all():
+    gs_fname = "高斯模型.zip"
+    mesh_fname = "Mesh模型.zip"
+
+    md_show = "开始打包...\n\n"
+    md_show += "正在打包高斯模型 "
+    yield md_show, None
+
+    os.system("zip -r -j %s %s" % (gs_fname, GS_path))
+    md_show += "完成\n\n正在打包Mesh模型 "
+    yield md_show, gs_fname
+
+    os.system("zip -r -j %s %s" % (mesh_fname, mesh_path))
+    md_show += "完成\n\n全部完成\n\n请在下方【文件下载】处下载模型包\n\n"
+    yield md_show + account_model(), [gs_fname, mesh_fname]
+
+
+with gr.Blocks(theme="Soft", title="AI Model Gallery") as demo:
+    gallery = gr.Gallery(
+        label="原图（使用的图片）",
+        value=fake_gan2(), elem_id="gallery",
+        columns=[4], object_fit="contain", height="auto")
+    with gr.Row():
+        btn = gr.Button("查看模型", scale=0)
+        btn_dl = gr.Button("一键打包下载", scale=0)
+    with gr.Row():
+        logs = gr.Markdown("(点击任意按钮刷新)\n\n" + account_model())
+        with gr.Column(scale=3):
+            with gr.Row():
+                preview_gs = gr.Video(label="高斯预览（点击【查看模型】预览）")
+                preview_mesh = gr.Model3D(label="Mesh预览")
+            # file
+            output_file = gr.File(label="文件下载")
+
+    btn.click(fake_gan, logs, [logs, output_file, preview_gs, preview_mesh])
+    btn_dl.click(down_load_all, None, [logs, output_file])
+    gallery.select(on_select, None, logs)
+
+
+if __name__ == "__main__":
+    demo.launch(server_name="0.0.0.0", server_port=configs["port"])
 
 ```

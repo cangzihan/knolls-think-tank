@@ -473,6 +473,42 @@ with Session(engine) as session:
 
 ```
 
+读数据
+```python
+from sqlmodel import SQLModel, Field, create_engine, Session, select
+from typing import Optional
+
+# 1. 定义模型
+class User(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    name: str
+    email: Optional[str] = None
+
+# 2. 连接数据库（替换成你的密码）
+DATABASE_URL = "mysql+pymysql://root:123456@localhost:3306/mydb"
+engine = create_engine(DATABASE_URL, echo=False)
+
+# 3. 查询数据
+def main():
+    ascending=True
+    with Session(engine) as session:
+        # 构建查询语句
+        statement = select(Event)
+        
+        if ascending:
+            statement = statement.order_by(Event.time)      # 升序：最早 → 最晚
+        else:
+            statement = statement.order_by(Event.time.desc())  # 降序：最晚 → 最早
+        
+        events = session.exec(statement).all()
+        for u in events:
+            print(f"ID: {u.id}, Name: {u.name}, Email: {u.email}")
+
+if __name__ == "__main__":
+    main()
+
+```
+
 特点
 | 功能          | 说明                       |
 | ----------- | ------------------------ |
