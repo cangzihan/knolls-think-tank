@@ -13,6 +13,16 @@ tags:
 uname -r
 ```
 
+查看操作系统发行版信息
+```shell
+cat /etc/os-release
+```
+
+查看CPU架构
+```shell
+uname -m
+```
+
 ## 查看内存
 ```shell
 free -m

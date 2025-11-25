@@ -5,6 +5,17 @@ tags:
 
 # git
 
+## 分支操作
+### 查看当前 Git 仓库位于哪个分支
+```shell
+git branch
+```
+
+### 切换分支
+```shell
+git checkout <分支名>
+```
+
 ## Git配置Clash代理
 ```shell
 git config --global http.proxy http://127.0.0.1:7890
