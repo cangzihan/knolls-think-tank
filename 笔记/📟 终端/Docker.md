@@ -117,6 +117,12 @@ sudo docker logs qanything-container-local
 ### 进入容器内部
 `docker exec -it <container_name> sh`或`docker exec -it <container_name> bash`
 
+例如:
+```shell
+docker run -it --rm python:3.12.10-bookworm bash
+
+```
+
 运行一个临时容器`docker run -it --rm python:3.12.10-bookworm python`
 
 ### 将容器内部的文件或目录拷贝到本地主机
@@ -232,6 +238,37 @@ docker exec -it mysql mysql -uroot -prootpass
 5. `docker image ls`可看到新构建的镜像，至此构建完成
 6. `docker run`这个镜像
 7. `docker ps a`
+
+### 常用指令集
+| 命令 | 作用 | 示例 |
+| :---: | :--- |  :--- |
+| `FROM` | 指定基础镜像 | `FROM python:3.12-slim` |
+| `MAINTAINER` | 维护者 | `LABEL maintainer="nico"` |
+| `RUN` | 命令 | `RUN apt-get update && apt-get install -y curl` |
+| `COPY` | 文件复制 | `COPY requirements.txt /app/` |
+| `ADD` | 文件复制，自动解压 | `ADD app.tar.gz /opt/` |
+| `WORKDIR` | 设置工作目录 | `WORKDIR /app` |
+| `EXPOSE` | 给容器砸个端口 | `EXPOSE 8080` |
+| `CMD` | 容器启动后要干的事情 | `CMD ["python", "app.py"]` |
+
+💡 补充说明：
+- `MAINTAINER` 自 Docker 1.13 起已**废弃**，官方推荐使用 `LABEL maintainer=...`。
+- `EXPOSE` **不会**自动将端口映射到宿主机，需配合 `docker run -p` 使用。
+- `CMD` 有三种格式，**推荐使用 exec 格式**（如 `["cmd", "arg"]`），避免 shell 解析问题。
+
+### 环境变量
+在 Dockerfile 中设置环境变量，可以使用`ENV`指令。
+```text
+FROM python:3.12.10-bookworm
+
+# 设置 pip 镜像源 + 受信任主机（可选）
+ENV PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple
+ENV PIP_TRUSTED_HOST=pypi.tuna.tsinghua.edu.cn
+
+# 安装包（无需再加 -i 或 --trusted-host）
+RUN pip install numpy
+
+```
 
 ## Docker for Ultralytics YOLO
 
@@ -410,3 +447,7 @@ apt search nvidia-driver
 ```shell
 apt install nvidia-driver-<version>
 ```
+
+## FAQ
+- 目录里是有这个文件的，但是DockerFile就是构建时`COPY`命令提示找不到文件
+  - 检查工程目录是否有一个`.dockerignore`文件，就是它导致了文件被排除。
