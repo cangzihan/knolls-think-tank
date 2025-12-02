@@ -26,7 +26,10 @@ uname -m
 ## 查看内存
 ```shell
 free -m
+# 详细占用情况
+top
 ```
+Docker容器有专门的查看内存占用指令。
 
 ## 查看存储空间
 ```shell

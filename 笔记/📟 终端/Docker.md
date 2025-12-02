@@ -105,6 +105,21 @@ To view the logs of the `qanything-container-local` container:
 sudo docker logs qanything-container-local
 ```
 
+### 查看容器资源占用
+基本语法`docker stats [OPTIONS] [CONTAINER...]`
+
+```shell
+# 监控所有运行中的容器（实时）
+docker stats
+
+# 只获取一次快照（用于脚本或日志）
+docker stats --no-stream
+
+# 只监控特定容器
+docker stats nginx_container
+
+```
+
 ### 删除容器
 `docker rm <container_id>`
 
