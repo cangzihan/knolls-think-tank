@@ -200,6 +200,16 @@ docker-compose up --build
 3. `docker-compose.yaml`
 4. `docker-compose.yml`
 
+#### 📝 操作流程总结
+
+| 场景 | 命令 |
+|------|------|
+| 首次部署 | `sudo docker-compose up --build -d` |
+| 更新代码后重新部署 | `sudo docker-compose up --build -d` |
+| 临时停服务 | `sudo docker-compose down` |
+| 查看运行状态 | `sudo docker-compose ps` |
+| 查看日志 | `sudo docker-compose logs -f` |
+
 ### Windows版示例
 
 docker-compose.yml
