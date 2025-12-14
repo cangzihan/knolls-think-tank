@@ -1570,6 +1570,10 @@ https://huggingface.co/black-forest-labs/FLUX.1-dev/discussions/196
 
 https://www.reddit.com/r/StableDiffusion/comments/1etszmo/finetuning_flux1dev_lora_on_yourself_lessons/
 
+## Z-Image
+
+Github: https://github.com/Tongyi-MAI/Z-Image
+
 ## 平面设计
 [ArchiGAN](https://developer.nvidia.com/blog/archigan-generative-stack-apartment-building-design/?linkId=70968833)
 

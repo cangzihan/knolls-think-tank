@@ -517,6 +517,29 @@ if __name__ == "__main__":
 | 类型注解友好      | 完全使用 Python typing       |
 | 异步支持        | 可与 `async SQLAlchemy` 结合 |
 
+#### 查
+在使用 SQLModel 时，你可以通过`select`+`where`的方式来筛选某一字段等于某个值的记录。SQLModel 基于 SQLAlchemy 的核心，因此语法与 SQLAlchemy 类似。
+```python
+engine = create_engine("sqlite:///database.db")
+
+with Session(engine) as session:
+    statement = select(Hero).where(Hero.name == "Deadpond")
+    results = session.exec(statement).all()
+    for hero in results:
+        print(hero)
+```
+其他常见筛选示例：
+```python
+select(Hero).where(Hero.age == 30)
+select(Hero).where(Hero.name.in_(["Deadpond", "Spider-Boy"]))
+select(Hero).where(Hero.age.is_(None))
+select(Hero).where(Hero.age.is_not(None))
+
+# 复杂条件（如 AND / OR）
+statement = select(Hero).where(
+    and_(Hero.age >= 25, Hero.name == "Deadpond")
+)
+```
 
 #### Relationship
 `sqlmodel.Relationship`是 SQLModel 中用于定义 模型之间关联关系（如一对多、多对一、一对一） 的核心组件。它底层基于 SQLAlchemy 的 relationship()，但做了 Pydantic/SQLModel 友好的封装，让你能像处理普通属性一样操作关联对象。

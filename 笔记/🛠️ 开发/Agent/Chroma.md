@@ -188,6 +188,15 @@ print(results["documents"])
 ```
 
 ### 增删改查
+#### 删
+在 Chroma 中，删除 Collection 中的某一条（或多条）数据非常直接，使用`collection.delete()`方法，并传入要删除的`ids`即可。
+```python
+collection.delete(ids=["id1", "id2", ...])
+```
+注意事项
+- 只能按 ID 删除: Chroma 不支持按`document`内容、`metadata`条件或`embedding`直接删除（不像SQL的`WHERE`）。
+- ID 必须完全匹配: ID 是字符串，区分大小写，必须与 add() 时传入的一致。
+
 #### 改
 1. 对于修改metadata的情况：
 
