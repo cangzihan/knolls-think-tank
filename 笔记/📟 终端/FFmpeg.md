@@ -82,6 +82,425 @@ ffmpeg -i input.mp4 -vf "crop=in_w:in_h-100:0:0" -c:a copy output.mp4
 ffmpeg -i input.mp4 -vf "crop=in_w-100:in_h:100:0" -c:a copy output.mp4
 ```
 
+四周裁剪，附带辅助计算参数的html
+::: code-group
+```shell [video_crop.bat]
+@echo off
+chcp 65001 >nul
+setlocal enabledelayedexpansion
+
+:: =============== 配置 ===============
+set "INPUT=ビデオ_2025.mov"
+set TOP=60
+set BOTTOM=40
+set LEFT=30
+set RIGHT=50
+:: ===================================
+
+if not exist "%INPUT%" (
+    echo ❌ ファイルが存在しません: %INPUT%
+    pause
+    exit /b 1
+)
+
+:: === 安全获取宽高（使用临时文件）===
+set "WIDTH="
+set "HEIGHT="
+
+ffprobe -v error -select_streams v:0 -show_entries stream=width  -of default=nw=1:nk=1 "%INPUT%" >"%temp%\probe_w.txt" 2>nul
+ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=nw=1:nk=1 "%INPUT%" >"%temp%\probe_h.txt" 2>nul
+
+for /f "usebackq delims=" %%a in ("%temp%\probe_w.txt") do set "WIDTH=%%a"
+for /f "usebackq delims=" %%a in ("%temp%\probe_h.txt") do set "HEIGHT=%%a"
+
+:: 清理临时文件
+del "%temp%\probe_w.txt" "%temp%\probe_h.txt" >nul 2>&1
+
+:: 验证
+if "%WIDTH%"=="" (
+    echo ❌ width を取得できませんでした。
+    pause
+    exit /b 1
+)
+if "%HEIGHT%"=="" (
+    echo ❌ height を取得できませんでした。
+    pause
+    exit /b 1
+)
+
+:: 验证是否为数字
+for /f "delims=0123456789" %%i in ("%WIDTH%") do (
+    echo ❌ width が数字ではありません: '%WIDTH%'
+    pause
+    exit /b 1
+)
+for /f "delims=0123456789" %%i in ("%HEIGHT%") do (
+    echo ❌ height が数字ではありません: '%HEIGHT%'
+    pause
+    exit /b 1
+)
+
+:: 计算裁剪
+for %%F in ("%INPUT%") do set "OUTPUT=%%~nF_中央.mp4"
+set /a CROP_W=%WIDTH% - %LEFT% - %RIGHT%
+set /a CROP_H=%HEIGHT% - %TOP% - %BOTTOM%
+
+if %CROP_W% LEQ 0 (
+    echo ❌ 幅が不足 (現在: %CROP_W%)
+    pause
+    exit /b 1
+)
+if %CROP_H% LEQ 0 (
+    echo ❌ 高さが不足 (現在: %CROP_H%)
+    pause
+    exit /b 1
+)
+
+ffmpeg -y -i "%INPUT%" -vf "crop=%CROP_W%:%CROP_H%:%LEFT%:%TOP%" -c:a copy "%OUTPUT%"
+
+if %errorlevel% equ 0 (
+    echo ✅ 完了: %OUTPUT%
+) else (
+    echo ❌ ffmpeg エラー
+)
+pause
+```
+
+```html [video_cropper.html]
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>视频裁剪参数提取器</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f0f0f0;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    #drop_zone {
+      border: 3px dashed #ccc;
+      border-radius: 10px;
+      padding: 40px;
+      text-align: center;
+      margin: 20px 0;
+      background: white;
+      cursor: pointer;
+    }
+    #drop_zone.dragover {
+      border-color: #4CAF50;
+      background: #f9f9f9;
+    }
+    #video_container {
+      position: relative;
+      margin: 20px auto;
+      /* 关键：不设背景色，避免黑边 */
+      max-width: 1000px;
+      overflow: visible;
+    }
+    #canvas {
+      display: block;
+      max-width: 100%;
+      max-height: 700px; /* 限制最大高度 */
+      /* 不设 height: auto，让浏览器自动等比缩放 */
+    }
+    #vertical_line, #horizontal_line {
+      position: absolute;
+      background: red;
+      opacity: 0.8;
+      z-index: 10;
+      pointer-events: none;
+    }
+    #vertical_line {
+      width: 2px;
+      top: 0;
+      bottom: 0;
+    }
+    #horizontal_line {
+      height: 2px;
+      left: 0;
+      right: 0;
+    }
+    .controls {
+      text-align: center;
+      margin: 15px 0;
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+    }
+    input[type="number"] {
+      width: 80px;
+      padding: 5px;
+      margin: 0 10px;
+    }
+    button {
+      padding: 8px 16px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    #crop_params {
+      background: #e8f5e9;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+      display: none;
+    }
+    .param-row {
+      display: flex;
+      justify-content: space-around;
+      margin: 8px 0;
+      font-weight: bold;
+    }
+    .param-value {
+      background: white;
+      padding: 5px 10px;
+      border: 1px solid #4CAF50;
+      border-radius: 4px;
+      min-width: 60px;
+      text-align: center;
+    }
+    .copy-btn {
+      margin-top: 10px;
+      padding: 6px 12px;
+      font-size: 14px;
+      background: #81C784;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>视频裁剪参数提取器</h1>
+    
+    <div id="drop_zone">
+      <p>📁 将视频文件拖到此处</p>
+      <p>或点击选择文件</p>
+      <input type="file" id="file_input" accept="video/*" style="display:none;">
+    </div>
+
+    <div class="controls">
+      <label>帧号: </label>
+      <input type="number" id="frame_input" min="1" value="300">
+      <button id="extract_btn">提取帧</button>
+    </div>
+
+    <div id="video_container" style="display:none;">
+      <canvas id="canvas"></canvas>
+      <div id="vertical_line"></div>
+      <div id="horizontal_line"></div>
+    </div>
+
+    <div id="crop_params">
+      <h3>裁剪参数（原始像素值）</h3>
+      <div class="param-row">
+        <div>LEFT (左): <span id="left_val" class="param-value">0</span> px</div>
+        <div>RIGHT (右): <span id="right_val" class="param-value">0</span> px</div>
+      </div>
+      <div class="param-row">
+        <div>TOP (上): <span id="top_val" class="param-value">0</span> px</div>
+        <div>BOTTOM (下): <span id="bottom_val" class="param-value">0</span> px</div>
+      </div>
+      <div style="text-align:center;">
+        <button class="copy-btn" onclick="copyCropParams()">📋 复制参数到剪贴板</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const dropZone = document.getElementById('drop_zone');
+    const fileInput = document.getElementById('file_input');
+    const frameInput = document.getElementById('frame_input');
+    const extractBtn = document.getElementById('extract_btn');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const videoContainer = document.getElementById('video_container');
+    const vLine = document.getElementById('vertical_line');
+    const hLine = document.getElementById('horizontal_line');
+    const cropParams = document.getElementById('crop_params');
+    
+    const leftVal = document.getElementById('left_val');
+    const rightVal = document.getElementById('right_val');
+    const topVal = document.getElementById('top_val');
+    const bottomVal = document.getElementById('bottom_val');
+
+    let videoFile = null;
+    let originalWidth = 0;
+    let originalHeight = 0;
+
+    // 拖拽 & 文件选择
+    dropZone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length) {
+        videoFile = e.target.files[0];
+        document.querySelector('#drop_zone p').textContent = `已加载: ${videoFile.name}`;
+      }
+    });
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      });
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'));
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'));
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      const files = e.dataTransfer.files;
+      if (files.length && files[0].type.startsWith('video/')) {
+        videoFile = files[0];
+        document.querySelector('#drop_zone p').textContent = `已加载: ${videoFile.name}`;
+      }
+    });
+
+    // ✅ 完整 extractFrame 函数（重点！）
+    extractBtn.addEventListener('click', extractFrame);
+
+    function extractFrame() {
+      if (!videoFile) {
+        alert('请先选择视频文件！');
+        return;
+      }
+
+      const frameNumber = parseInt(frameInput.value) || 300;
+      if (frameNumber < 1) {
+        alert('帧号必须 ≥ 1');
+        return;
+      }
+
+      const video = document.createElement('video');
+      const url = URL.createObjectURL(videoFile);
+      video.preload = 'metadata';
+      video.src = url;
+
+      video.onloadedmetadata = () => {
+        const fps = 30;
+        const time = (frameNumber - 1) / fps;
+        if (time >= video.duration) {
+          alert(`视频太短，无法提取第 ${frameNumber} 帧`);
+          URL.revokeObjectURL(url);
+          return;
+        }
+
+        video.currentTime = time;
+
+        video.onseeked = () => {
+          // 保存原始分辨率
+          originalWidth = video.videoWidth;
+          originalHeight = video.videoHeight;
+
+          // 设置 canvas 为原始尺寸（内容不缩放）
+          canvas.width = originalWidth;
+          canvas.height = originalHeight;
+          ctx.drawImage(video, 0, 0, originalWidth, originalHeight);
+
+          // 显示容器
+          videoContainer.style.display = 'block';
+
+          // 初始化辅助线到中心
+          updateLines(originalWidth / 2, originalHeight / 2);
+
+          video.remove();
+          URL.revokeObjectURL(url);
+          cropParams.style.display = 'block';
+        };
+      };
+
+      video.onerror = () => {
+        alert('无法加载视频，请检查格式');
+        URL.revokeObjectURL(url);
+      };
+    }
+
+    // 鼠标拖动事件
+    let isDragging = false;
+
+    videoContainer.addEventListener('mousedown', () => {
+      isDragging = true;
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging || !originalWidth) return;
+      
+      const canvasRect = canvas.getBoundingClientRect();
+      const containerRect = videoContainer.getBoundingClientRect();
+
+      // 计算鼠标在 canvas 内的原始坐标
+      const x = (e.clientX - canvasRect.left) * (originalWidth / canvasRect.width);
+      const y = (e.clientY - canvasRect.top) * (originalHeight / canvasRect.height);
+
+      // 限制在原始尺寸内
+      const clampedX = Math.max(0, Math.min(x, originalWidth));
+      const clampedY = Math.max(0, Math.min(y, originalHeight));
+
+      updateLines(clampedX, clampedY);
+    });
+
+    document.addEventListener('mouseup', () => {
+      isDragging = false;
+    });
+
+    // ✅ 更新辅助线位置（关键！）
+    function updateLines(x, y) {
+      const canvasRect = canvas.getBoundingClientRect();
+      const containerRect = videoContainer.getBoundingClientRect();
+
+      // 计算辅助线在容器中的显示位置
+      const displayX = canvasRect.left - containerRect.left + (x * canvasRect.width / originalWidth);
+      const displayY = canvasRect.top - containerRect.top + (y * canvasRect.height / originalHeight);
+
+      vLine.style.left = displayX + 'px';
+      hLine.style.top = displayY + 'px';
+
+      // 更新裁剪参数（原始像素值）
+      const left = Math.round(x);
+      const right = Math.round(originalWidth - x);
+      const top = Math.round(y);
+      const bottom = Math.round(originalHeight - y);
+
+      leftVal.textContent = left;
+      rightVal.textContent = right;
+      topVal.textContent = top;
+      bottomVal.textContent = bottom;
+    }
+
+    function copyCropParams() {
+      const text = `TOP=${topVal.textContent}\nBOTTOM=${bottomVal.textContent}\nLEFT=${leftVal.textContent}\nRIGHT=${rightVal.textContent}`;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('✅ 参数已复制！');
+      }).catch(() => {
+        alert('请手动复制下方数值');
+      });
+    }
+  </script>
+</body>
+</html>
+```
+:::
+
 ### 缩放
 ```shell
 ffmpeg -i input_4k_video.mp4 -vf scale=1920:1080 -c:a copy output_1080p_video.mp4
@@ -133,6 +552,45 @@ ffmpeg -framerate 3 -i "path/to/images/%d.png" -c:v libx264 -crf 0 -preset verys
 如果文件夹结构形如`01.jpg`, `02.jpg` ...
 ```shell
 ffmpeg -framerate 3 -i "path/to/images/%02d.jpg" -c:v libx264 -crf 0 -preset veryslow ori.mp4
+```
+
+## 时间轴
+### 裁剪视频脚本
+给定剪切时长和起始时间：
+```shell
+ffmpeg -i input.mp4 -ss 00:00:00 -t 100 -c copy part1.mp4
+```
+
+`cut_video_manual.bat`
+```shell
+@echo off
+chcp 65001 >nul
+setlocal enabledelayedexpansion
+
+:: ================== 配置区（只需改这4行）==================
+set "INPUT=ビデオ2025_報告.mp4"
+set "OUTPUT=切り抜き_セグメント1.mp4"
+set "START=00:01:30"
+set "END=00:03:45"
+:: =========================================================
+
+echo.
+echo 切分视频：
+echo   入力ファイル: %INPUT%
+echo   出力ファイル: %OUTPUT%
+echo   時間範囲: %START% ～ %END%
+echo.
+
+:: 执行 ffmpeg（-ss 放在 -i 前以加速，-c copy 不重新编码）
+ffmpeg -y -ss %START% -i "%INPUT%" -to %END% -c copy "%OUTPUT%"
+
+if %errorlevel% equ 0 (
+    echo ✅ 切り抜き完了！
+) else (
+    echo ❌ エラーが発生しました。ファイル名や ffmpeg のインストールを確認してください。
+)
+
+pause
 ```
 
 ## 常见问题

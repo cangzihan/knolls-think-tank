@@ -444,6 +444,12 @@ SQLModel 是由 FastAPI 作者 Sebastián Ramírez 自己开发的库，
 pip install sqlmodel
 ```
 
+#### 连接数据库
+```python
+# 支持传输emoji的写法 😊👨‍💻🎉
+DATABASE_URL = "mysql+pymysql://user:password@host:3306/dbname?charset=utf8mb4"
+```
+
 #### 示例
 ```python
 from sqlmodel import SQLModel, Field, create_engine, Session

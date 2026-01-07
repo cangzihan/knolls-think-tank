@@ -140,6 +140,15 @@ docker run -it --rm python:3.12.10-bookworm bash
 
 运行一个临时容器`docker run -it --rm python:3.12.10-bookworm python`
 
+运行一个临时容器并把当前文件夹文件拷贝进去
+```shell
+docker run -it --rm \
+  -v "$(pwd)":/workspace \
+  -w /workspace \
+  python:3.12.10-bookworm \
+  bash
+```
+
 ### 将容器内部的文件或目录拷贝到本地主机
 `docker cp <容器名或ID>:<容器内文件路径> <本地目标路径>`
 
@@ -293,6 +302,20 @@ ENV PIP_TRUSTED_HOST=pypi.tuna.tsinghua.edu.cn
 # 安装包（无需再加 -i 或 --trusted-host）
 RUN pip install numpy
 
+```
+
+## Image打包
+```shell
+# 导出为 tar 文件（保留完整镜像层）
+docker save redis:7.2.5 -o redis-7.2.5.tar
+
+# 导出多个镜像到一个 tar 包
+docker save redis:7.2.5 nginx:alpine -o my-apps.tar
+```
+
+导入镜像
+```shell
+docker load -i redis-7.2.5.tar
 ```
 
 ## Docker for Ultralytics YOLO

@@ -161,3 +161,9 @@ sudo systemctl start todeskd.service
 ```shell
 sudo systemctl status my_service.service
 ```
+
+## 修改环境变量
+### 临时修改环境变量
+```shell
+export PIP_TRUSTED_HOST="pypi.example.com"
+```
