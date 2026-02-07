@@ -446,6 +446,12 @@ pip install sqlmodel
 
 #### 连接数据库
 ```python
+# MySQL 连接 URL 格式：
+# mysql+pymysql://<user>:<password>@<host>:<port>/<database>
+
+# 连接本地 MySQL
+DATABASE_URL = "mysql+pymysql://root:your_password@localhost:3306/mydb"
+
 # 支持传输emoji的写法 😊👨‍💻🎉
 DATABASE_URL = "mysql+pymysql://user:password@host:3306/dbname?charset=utf8mb4"
 ```
@@ -545,6 +551,26 @@ select(Hero).where(Hero.age.is_not(None))
 statement = select(Hero).where(
     and_(Hero.age >= 25, Hero.name == "Deadpond")
 )
+```
+
+排序
+```python
+from sqlmodel import select, Session
+from datetime import datetime
+
+def get_events_sorted_by_time(engine, ascending=True):
+    with Session(engine) as session:
+        # 构建查询语句
+        statement = select(Event)
+        
+        if ascending:
+            statement = statement.order_by(Event.time)      # 升序：最早 → 最晚
+        else:
+            statement = statement.order_by(Event.time.desc())  # 降序：最晚 → 最早
+        
+        events = session.exec(statement).all()
+        return events
+
 ```
 
 #### Relationship

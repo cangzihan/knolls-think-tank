@@ -178,7 +178,7 @@ services:
 ```
 - `build`: 表示该服务的镜像不是直接拉取现成的镜像（如 image: nginx），而是从源码构建。
 ```yml
-version: '3.8'
+#version: '3.8' 不再需要
 services:
   app:
     build:
@@ -213,11 +213,11 @@ docker-compose up --build
 
 | 场景 | 命令 |
 |------|------|
-| 首次部署 | `sudo docker-compose up --build -d` |
-| 更新代码后重新部署 | `sudo docker-compose up --build -d` |
-| 临时停服务 | `sudo docker-compose down` |
-| 查看运行状态 | `sudo docker-compose ps` |
-| 查看日志 | `sudo docker-compose logs -f` |
+| 首次部署 | `sudo docker compose up --build -d` |
+| 更新代码后重新部署 | `sudo docker compose up --build -d` |
+| 临时停服务 | `sudo docker compose down` |
+| 查看运行状态 | `sudo docker compose ps` |
+| 查看日志 | `sudo docker compose logs -f` |
 
 ### Windows版示例
 
@@ -292,7 +292,7 @@ docker exec -it mysql mysql -uroot -prootpass
 
 ### 环境变量
 在 Dockerfile 中设置环境变量，可以使用`ENV`指令。
-```text
+```dockerfile
 FROM python:3.12.10-bookworm
 
 # 设置 pip 镜像源 + 受信任主机（可选）
@@ -302,6 +302,12 @@ ENV PIP_TRUSTED_HOST=pypi.tuna.tsinghua.edu.cn
 # 安装包（无需再加 -i 或 --trusted-host）
 RUN pip install numpy
 
+```
+
+运行`CUDA_VISIBLE_DEVICES=3 fastapi run app.py --host 0.0.0.0`可写为：
+```dockerfile
+ENV CUDA_VISIBLE_DEVICES=3
+CMD ["fastapi", "run", "app.py", "--host", "0.0.0.0"]
 ```
 
 ## Image打包

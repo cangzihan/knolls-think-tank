@@ -1,5 +1,62 @@
 # 各种Python库
 
+## logging
+### 添加时间信息
+```python
+import logging
+
+logger = logging.getLogger("reranker")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S"  # 可选：自定义时间格式
+)
+```
+
+## requests
+### SSL验证
+跳过SSL验证
+```python
+import requests
+
+response = requests.get('https://example.com', verify=False)
+
+```
+
+```python
+import requests
+from requests.exceptions import SSLError, RequestException
+
+def safe_requests(method, url, **kwargs):
+    """
+    自动处理 SSL 证书错误的 requests 封装
+    首次尝试 verify=True（默认），若 SSL 失败则重试 verify=False
+    """
+    try:
+        # 第一次尝试：启用 SSL 验证（安全默认）
+        return requests.request(method, url, **kwargs)
+    except SSLError as e:
+        print(f"SSL 验证失败，正在重试（verify=False）: {e}")
+        # 第二次尝试：关闭 SSL 验证（⚠️ 不安全）
+        kwargs.setdefault('verify', False)
+        try:
+            return requests.request(method, url, **kwargs)
+        except Exception as retry_e:
+            raise retry_e from e  # 保留原始异常链
+    except RequestException:
+        # 其他网络错误（如连接超时）直接抛出
+        raise
+
+# 使用示例
+try:
+    response = safe_requests('GET', 'https://example.com/api/data', timeout=10)
+    response.raise_for_status()
+    print(response.json())
+except Exception as e:
+    print(f"请求失败: {e}")
+
+```
+
 ## aiohttp
 [Project](https://docs.aiohttp.org/en/stable/)
 
@@ -232,6 +289,35 @@ if __name__ == "__main__":
         # 主进程每秒检查一次，确保子进程继续运行
         time.sleep(1)
 
+```
+
+## torch
+torch验证gpu是否可用并且如果可用列出全部GPU的信息
+```python
+import torch
+
+# 检查是否有可用的 CUDA 设备
+if torch.cuda.is_available():
+    print("✅ CUDA 可用！")
+    print(f"PyTorch 版本: {torch.__version__}")
+    print(f"CUDA 版本: {torch.version.cuda}")
+    print(f"cuDNN 版本: {torch.backends.cudnn.version()}")
+    print("-" * 50)
+    
+    # 获取 GPU 数量
+    num_gpus = torch.cuda.device_count()
+    print(f"检测到 {num_gpus} 个 GPU:")
+    
+    # 遍历每个 GPU 并打印详细信息
+    for i in range(num_gpus):
+        print(f"\nGPU {i}:")
+        print(f"  名称: {torch.cuda.get_device_name(i)}")
+        print(f"  计算能力: {torch.cuda.get_device_capability(i)}")
+        print(f"  当前分配内存: {torch.cuda.memory_allocated(i) / 1024**3:.2f} GB")
+        print(f"  已缓存内存: {torch.cuda.memory_reserved(i) / 1024**3:.2f} GB")
+        print(f"  总显存: {torch.cuda.get_device_properties(i).total_memory / 1024**3:.2f} GB")
+else:
+    print("❌ CUDA 不可用。当前使用 CPU。")
 ```
 
 ## uv

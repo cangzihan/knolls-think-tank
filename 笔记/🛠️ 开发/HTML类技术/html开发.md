@@ -236,6 +236,12 @@ HTML5是HTML的最新版本，它引入了更多的语义化标签，比如 `<ar
 </html>
 ```
 
+#### MD版简写方法
+```markdown
+- <label><input type="checkbox"> 买牛奶</label>
+- <label><input type="checkbox" checked> 洗衣服</label>
+```
+
 ### Slider
 ::: code-group
 ```html [main.html]
