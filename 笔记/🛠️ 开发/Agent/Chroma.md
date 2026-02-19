@@ -32,9 +32,11 @@ Chroma 是一个开源的向量数据库，专为 AI 应用程序设计，特别
 ### Docker部署
 使用`chromadb/chroma`镜像 https://hub.docker.com/r/chromadb/chroma
 
+（不需要GPU）
+
 `docker-compose.yml`
 ```yml
-version: '3.8'
+#version: '3.8'
 
 services:
   chroma:

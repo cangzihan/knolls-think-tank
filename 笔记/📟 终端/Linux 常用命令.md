@@ -33,7 +33,11 @@ Docker容器有专门的查看内存占用指令。
 
 ## 查看存储空间
 ```shell
+# 查看整体磁盘使用情况
 df -h
+
+# 定位大文件/目录（从根目录开始）
+sudo du -sh /* 2>/dev/null | sort -hr
 ```
 
 ## 安Python

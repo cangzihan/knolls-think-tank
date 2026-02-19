@@ -149,6 +149,8 @@ docker run -it --rm \
   bash
 ```
 
+如果要使用GPU，那么加一项 `--gpus all`
+
 ### 将容器内部的文件或目录拷贝到本地主机
 `docker cp <容器名或ID>:<容器内文件路径> <本地目标路径>`
 
@@ -218,6 +220,25 @@ docker-compose up --build
 | 临时停服务 | `sudo docker compose down` |
 | 查看运行状态 | `sudo docker compose ps` |
 | 查看日志 | `sudo docker compose logs -f` |
+
+#### 清缓存
+`docker builder prune -af --keep-storage 1GB`是一条 清理 Docker 构建缓存（Build Cache） 的命令，它的含义如下：
+
+| 部分 | 作用 |
+|------|------|
+| `docker builder prune` | 清理 Docker BuildKit 的构建缓存 |
+| `-a` 或 `--all` | 删除**所有**未被使用的构建缓存（包括正在被引用的中间层） |
+| `-f` 或 `--force` | 跳过确认提示，**强制删除** |
+| `--keep-storage 1GB` | **保留最多 1GB 的缓存空间**，超出部分按“最近最少使用”策略自动清理 |
+
+对比其他清理命令
+
+| 命令 | 清理内容 |
+|------|----------|
+| `docker builder prune` | 未使用的构建缓存 | 
+| `docker builder prune -a` | 所有构建缓存 | 
+| `docker builder prune -af --keep-storage 1GB` | 所有构建缓存 | 
+| `docker system prune` | 容器、网络、镜像、构建缓存 | 
 
 ### Windows版示例
 
@@ -500,6 +521,26 @@ apt search nvidia-driver
 安装
 ```shell
 apt install nvidia-driver-<version>
+```
+
+### Compose文件示例
+```yml
+services:
+  app:
+    image: my_imageL v1.0
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # [可选]runtime: nvidia 或下面这段绝对不报错的device映射
+    devices:
+      - "/dev/nvidia3: /dev/nvidia3" # GPU3
+      - "/dev/nvidiactl: /dev/nvidiactl"
+      - "/dev/nvidia-uvm: /dev/nvidia-uvm"
+    environment:
+      - CUDA_VISIBLE_DEVICES=3
+    ports:
+      - 5100:5100 
+
 ```
 
 ## FAQ
