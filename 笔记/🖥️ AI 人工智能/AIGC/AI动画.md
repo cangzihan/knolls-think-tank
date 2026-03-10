@@ -6,6 +6,7 @@ tags:
 ---
 
 # AI动画
+- LTX-2.3(2026): 开源、高质量的音视频生成基础大模型(Audio-Video Foundation Model) https://huggingface.co/Lightricks/LTX-2.3
 - Gen-1(2023): Runway 公司的Video to Video的AI产品。https://arxiv.org/abs/2302.03011
 - Gen-2(2023): Runway 公司的Text/Image to Video的AI产品。  [Paper Coming Soon](https://research.runwayml.com/gen2)
 - Animate Diff: [open source](https://github.com/guoyww/AnimateDiff/), 结合Stable Diffusion的开源视频生成模型。 需要12G显存）https://arxiv.org/abs/2307.04725

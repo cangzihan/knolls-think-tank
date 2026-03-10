@@ -620,6 +620,9 @@ CUDA_VISIBLE_DEVICES=0 python3 -m fastchat.serve.model_worker --model-path Llama
 
 - [Qwen3.5-4B](https://huggingface.co/Qwen/Qwen3.5-4B)
 - [Qwen3.5-9B](https://huggingface.co/Qwen/Qwen3.5-9B)
+- [QuantTrio/Qwen3.5-397B-A17B-AWQ](https://huggingface.co/QuantTrio/Qwen3.5-397B-A17B-AWQ) （228G）
+- [QuantTrio/Qwen3.5-122B-A10B-AWQ](https://huggingface.co/QuantTrio/Qwen3.5-122B-A10B-AWQ) (77G)
+- [QuantTrio/Qwen3.5-35B-A3B-AWQ](https://huggingface.co/QuantTrio/Qwen3.5-35B-A3B-AWQ) (25G)
 - [QuantTrio/Qwen3.5-27B-AWQ](https://huggingface.co/QuantTrio/Qwen3.5-27B-AWQ) （21G）
 - [QuantTrio/Qwen3.5-9B-AWQ](https://huggingface.co/QuantTrio/Qwen3.5-9B-AWQ) (12G)
 - [QuantTrio/Qwen3.5-4B-AWQ](https://huggingface.co/QuantTrio/Qwen3.5-4B-AWQ) (5.7G)
@@ -1053,6 +1056,7 @@ Reverse prompts: `<|end|>`
 Skip tokens: `<|assistant|>,<|user|>`
 
 ## Qwen-VL
+[Model list](https://huggingface.co/collections/Qwen/qwen3-vl)
 
 Qwen-VL-Max [Demo🤖](https://huggingface.co/spaces/Qwen/Qwen-VL-Max) | [Qwen-VL-Chat](https://huggingface.co/Qwen/Qwen-VL-Chat) | [Qwen-VL-Chat-Int4](https://huggingface.co/Qwen/Qwen-VL-Chat-Int4)
 | [Paper](https://arxiv.org/abs/2308.12966)
@@ -1502,6 +1506,15 @@ if __name__ == '__main__':
 ```shell
 pip install transformers==4.36.0
 ```
+
+### GLM-4.x Series
+- [GLM-4.6](https://huggingface.co/zai-org/GLM-4.6) (355B-A32B)
+- [GLM-4.7](https://huggingface.co/zai-org/GLM-4.7) (参数量大概和4.5一致)
+
+## GLM5
+[Model list](https://huggingface.co/collections/zai-org/glm-5)
+
+[GLM-5](https://huggingface.co/zai-org/GLM-5) (744B-A40B)
 
 ### FastChat版
 目前还不兼容
