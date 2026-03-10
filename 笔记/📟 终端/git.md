@@ -42,4 +42,8 @@ git reset --hard <commit_hash>
 - `<commit_hash>`是目标提交的哈希值（可以是前几位，确保唯一即可），在GitKraken中，可以直接点击具体的版本后查看。
 - `--hard`表示强制回退，工作目录和暂存区的更改都会被丢弃。
 
-![img](assets/git_commit.png)
+## 跳过SSL验证 
+```shell
+# --system 参数会修改 /etc/gitconfig，对所有用户生效
+sudo git config --system http.sslVerify false
+```

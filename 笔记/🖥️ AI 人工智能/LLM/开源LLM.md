@@ -246,6 +246,10 @@ pip install accelerate
 pip install transformers
 ```
 
+## 模型种类
+### AWQ
+简单来说，AWQ (Activation-aware Weight Quantization) 是一种针对大语言模型（LLM）的低比特量化技术。它的核心目标是在大幅压缩模型体积（通常从 16-bit 压到 4-bit）的同时，尽可能不损失模型精度。
+
 ## Baichuan
 Baichuan 2 是百川智能推出的开源LLM，所有版本不仅对学术研究完全开放，开发者也仅需邮件申请并获得官方商用许可后，即可以免费商用。
 
@@ -613,6 +617,12 @@ CUDA_VISIBLE_DEVICES=0 python3 -m fastchat.serve.model_worker --model-path Llama
 ### 相关模型
 #### Qwen3.5 series
 [Model List](https://huggingface.co/collections/Qwen/qwen35)
+
+- [Qwen3.5-4B](https://huggingface.co/Qwen/Qwen3.5-4B)
+- [Qwen3.5-9B](https://huggingface.co/Qwen/Qwen3.5-9B)
+- [QuantTrio/Qwen3.5-27B-AWQ](https://huggingface.co/QuantTrio/Qwen3.5-27B-AWQ) （21G）
+- [QuantTrio/Qwen3.5-9B-AWQ](https://huggingface.co/QuantTrio/Qwen3.5-9B-AWQ) (12G)
+- [QuantTrio/Qwen3.5-4B-AWQ](https://huggingface.co/QuantTrio/Qwen3.5-4B-AWQ) (5.7G)
 
 #### Qwen2.5 series
 [Demo魔塔社区](https://www.modelscope.cn/studios/qwen/Qwen2.5)

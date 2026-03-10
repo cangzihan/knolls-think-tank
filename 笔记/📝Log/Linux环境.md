@@ -41,8 +41,16 @@ sudo nala install v4l-utils
 ```
 
 #### Python环境创建
+使用conda
 ```shell
 conda create -n py310_cv python=3.10
+```
+使用uv
+```shell
+sudo nala install python3-pipx
+pipx ensurepath
+source ~/.bashrc
+pipx install uv
 ```
 
 #### Python音频
@@ -365,6 +373,7 @@ sudo make install
 ```
 
 ## Linux添加一个自定义环境变量
+### 当前用户
 在 Linux 系统中，你可以通过编辑用户的 shell 配置文件来添加自定义环境变量。以下是具体步骤：
 
 1. 确定你的 Shell：
@@ -409,6 +418,26 @@ source ~/.zshrc
 echo $MY_VARIABLE
 ```
 如果输出 `my_value`，则说明环境变量已经正确添加。
+
+### 所有用户
+推荐方法，如给Linux所有用户指定环境变量`GIT_SSL_NO_VERIFY=1`
+```shell
+sudo bash -c 'cat > /etc/profile.d/git_ssl_no_verify.sh <<EOF
+export GIT_SSL_NO_VERIFY=1
+EOF'
+source /etc/profile.d/git_ssl_no_verify.sh
+```
+
+## 代理配置
+### apt/nala
+`sudo vim /etc/apt/apt.conf.d/proxy.conf`
+
+写入代理配置：
+假设你的本地代理软件（比如 Clash、V2Ray 等）提供的 HTTP 代理端口是 7890，请在文件里写入以下两行：
+```text
+Acquire::http::Proxy "http://127.0.0.1:7890/";
+Acquire::https::Proxy "http://127.0.0.1:7890/";
+```
 
 ## 问题汇总
 - e: 无法修正错误,因为您要求某些软件包保持现状,就是它们破坏了软件包间的依赖关系。

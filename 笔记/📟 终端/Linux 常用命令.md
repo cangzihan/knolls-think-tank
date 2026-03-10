@@ -68,6 +68,17 @@ v4l2-ctl --list-devices
   - 在Esc模式下，输入小写的“d”删除选中的列文本。
 - 删除行范围：`:[start],[end]d`，如`:3,5d`
 
+### 查询
+使用正斜杠<kbd>/</kbd>或<kbd>?</kbd>进行查询。
+
+找到第一个匹配项后，你不需要重新输入关键词，可以使用以下快捷键继续寻找：
+1. 基础跳转
+- <kbd>n</kbd>(Next)：寻找下一个匹配项（向下跳转）。
+- `N` (<kbd>Shift + n</kbd>)：寻找上一个匹配项（反向跳转）。
+2. 改变搜索方向
+- 如果用<kbd>/</kbd>搜索：<kbd>n</kbd>是向下，<kbd>N</kbd>是向上。
+- 如果用<kbd>?</kbd>搜索：<kbd>n</kbd>是向上，<kbd>N</kbd>是向下。
+
 ## 自动输入密码
 ```shell
 echo 123456 | sudo -S /path/to/my_script.sh
@@ -85,6 +96,9 @@ CUDA_VISIBLE_DEVICES=0,1 XXX
 
 ## SSH
 SSH是Secure Shell（安全外壳）的简称，是一种在不安全的网络环境中，通过加密机制和认证机制，实现安全的远程访问以及其他网络服务的安全协议。
+
+## curl
+- 跳过SSH验证：`curl -k https://example.com/api/data`
 
 ## 安装deb包
 ```shell

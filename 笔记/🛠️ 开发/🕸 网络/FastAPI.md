@@ -851,3 +851,24 @@ uvicorn main:app --reload
 - main → Python 文件名（main.py）
 - app → FastAPI 实例名
 - --reload → 热重载（开发时自动重启）
+
+## 问题汇总
+### 前段接受不到Header，但Doc页面返回结果和浏览器网络返回信息里面有
+出于安全考虑，浏览器默认只会把6个最基础的响应头（比如 Content-Type）暴露给前端的 JavaScript。对于像 Content-Disposition 这种用来指示文件下载的“自定义/扩展头”，即使后端真的发过来了，并且你在 F12 的网络面板里也清清楚楚地看到了它，浏览器也会在底层把它拦截掉。
+这就导致你的 Axios/Fetch 拿到`res.headers` 时，里面根本没有`content-disposition`这个字段。
+解决方法
+```python
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # 允许的域
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["Content-Disposition"]  # 👈 关键就是加这一行！
+)
+```
