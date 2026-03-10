@@ -611,8 +611,11 @@ CUDA_VISIBLE_DEVICES=0 python3 -m fastchat.serve.model_worker --model-path Llama
 
 
 ### 相关模型
+#### Qwen3.5 series
+[Model List](https://huggingface.co/collections/Qwen/qwen35)
+
 #### Qwen2.5 series
-[Demo](https://huggingface.co/spaces/Qwen/Qwen2.5) | [魔塔社区](https://www.modelscope.cn/studios/qwen/Qwen2.5)
+[Demo魔塔社区](https://www.modelscope.cn/studios/qwen/Qwen2.5)
 
 Qwen2.5: Qwen2.5 language models, including pretrained and instruction-tuned models of 7 sizes, including 0.5B, 1.5B, 3B, 7B, 14B, 32B, and 72B.
 - [Qwen2.5-0.5B](https://huggingface.co/Qwen/Qwen2.5-0.5B) | [Qwen2.5-0.5B-Instruct](https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct)
