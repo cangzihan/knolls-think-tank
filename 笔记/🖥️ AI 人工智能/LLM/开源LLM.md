@@ -273,6 +273,10 @@ https://huggingface.co/THUDM/chatglm3-6b
 参考【硬件】-【嵌入式】-【RK3588】中ChatGLM节
 
 
+## DeepSeek
+### DeepSeek-V3.2
+- [Model](https://huggingface.co/deepseek-ai/DeepSeek-V3.2)
+
 ## Llama
 
 ### Llama2
@@ -626,6 +630,15 @@ CUDA_VISIBLE_DEVICES=0 python3 -m fastchat.serve.model_worker --model-path Llama
 - [QuantTrio/Qwen3.5-27B-AWQ](https://huggingface.co/QuantTrio/Qwen3.5-27B-AWQ) （21G）
 - [QuantTrio/Qwen3.5-9B-AWQ](https://huggingface.co/QuantTrio/Qwen3.5-9B-AWQ) (12G)
 - [QuantTrio/Qwen3.5-4B-AWQ](https://huggingface.co/QuantTrio/Qwen3.5-4B-AWQ) (5.7G)
+
+#### Qwen3-Next
+[Model list](https://huggingface.co/collections/Qwen/qwen3-next)
+
+实测80B模型在思考过程中经常出现复读机现象（本地部署和API），导致模型无限循环。
+
+- [Qwen3-Next-80B-A3B-Instruct](https://huggingface.co/Qwen/Qwen3-Next-80B-A3B-Instruct)
+- []Qwen3-Next-80B-A3B-Thinking](https://huggingface.co/Qwen/Qwen3-Next-80B-A3B-Thinking)
+
 
 #### Qwen2.5 series
 [Demo魔塔社区](https://www.modelscope.cn/studios/qwen/Qwen2.5)
@@ -1508,16 +1521,18 @@ pip install transformers==4.36.0
 ```
 
 ### GLM-4.x Series
+[Paper](https://arxiv.org/abs/2508.06471)
+
 - [GLM-4.6](https://huggingface.co/zai-org/GLM-4.6) (355B-A32B)
 - [GLM-4.7](https://huggingface.co/zai-org/GLM-4.7) (参数量大概和4.5一致)
 
-## GLM5
-[Model list](https://huggingface.co/collections/zai-org/glm-5)
-
-[GLM-5](https://huggingface.co/zai-org/GLM-5) (744B-A40B)
-
 ### FastChat版
 目前还不兼容
+
+## GLM5
+[Model list](https://huggingface.co/collections/zai-org/glm-5) | [Paper](https://arxiv.org/abs/2602.15763)
+
+[GLM-5](https://huggingface.co/zai-org/GLM-5) (744B-A40B)
 
 ## EvoLLM-JP
 2024.3 SakanaAI发布EvoLLM-JP（大语言模型）、EvoVLM-JP(视觉语言模型)和EvoSDXL-JP(图像生成模型)。
