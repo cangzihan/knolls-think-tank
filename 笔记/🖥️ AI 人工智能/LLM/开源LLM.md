@@ -235,6 +235,13 @@ ollama run qwen2.5:3b
 ```
 nishi
 
+### vLLM
+```shell
+uv venv
+source .venv/bin/activate
+uv pip install vllm==0.17.0
+```
+
 ## 基本环境搭建
 
 很多LLM需要的环境都是类似的，这里默认在说电脑/服务器端、假设已经装好了GPU驱动、Cuda等基本环境。
@@ -1067,6 +1074,200 @@ LLM Farm支持将大模型部署到iPhone和iPad等设备上，可通过下载GG
 Reverse prompts: `<|end|>`
 
 Skip tokens: `<|assistant|>,<|user|>`
+
+#### 4. vLLM部署
+Qwen3.5可运行的环境：`vllm==0.17.0`
+```shell
+# 单卡，仅文本输入
+CUDA_VISIBLE_DEVICES=0 vllm serve Qwen/Qwen3.5-27B --port 8000 --tensor-parallel-size 1 --max-model-len 262144 --reasoning-parser qwen3 --language-model-only
+# 单卡，Standard Veision
+CUDA_VISIBLE_DEVICES=0 vllm serve Qwen/Qwen3.5-27B --port 8000 --tensor-parallel-size 1 --max-model-len 262144 --reasoning-parser qwen3
+
+# 2卡，仅文本输入，无nvlink的情况（检查：nvidia-smi topo -m）
+NCCL_P2P_DISABLE=1 CUDA_VISIBLE_DEVICES=0,1 vllm serve Qwen/Qwen3.5-27B --port 8000 --tensor-parallel-size 2 --max-model-len 262144 --reasoning-parser qwen3 --language-model-only --disable-custom-all-reduce
+# 2卡，Standard Version，无nvlink的情况
+NCCL_P2P_DISABLE=1 CUDA_VISIBLE_DEVICES=0,1 vllm serve Qwen/Qwen3.5-27B --port 8000 --tensor-parallel-size 2 --max-model-len 262144 --reasoning-parser qwen3 --disable-custom-all-reduce
+```
+
+客户端
+::: code-group
+```shell [CMD]
+curl http://localhost:8000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "Qwen/Qwen3.5-27B",
+    "messages": [
+      {"role": "system", "content": "你是一个严谨的AI助手。"},
+      {"role": "user", "content": "请用一句话介绍一下单片机的作用。"}
+    ],
+    "max_tokens": 100
+  }'
+
+```
+
+```python [非流式(Text)]
+from openai import OpenAI
+# Configured by environment variables
+client = OpenAI()
+
+messages = [
+    {"role": "user", "content": "Type \"I love Qwen3.5\" backwards"},
+]
+
+chat_response = client.chat.completions.create(
+    model="Qwen/Qwen3.5-27B",
+    messages=messages,
+    max_tokens=6666,
+    temperature=1.0,
+    top_p=0.95,
+    presence_penalty=1.5,
+    extra_body={
+        "top_k": 20,
+    }, 
+)
+print("Chat response:", chat_response)
+
+```
+
+```python [流式(Text)]
+import os
+from openai import OpenAI
+
+# 1. 斩断全局代理，防止请求被 Cntlm 拦截
+os.environ["no_proxy"] = "localhost,127.0.0.1,::1"
+
+# 2. 连接本地大模型服务器
+client = OpenAI(
+    base_url="http://localhost:8000/v1",
+    api_key="EMPTY"
+)
+
+messages = [
+    {"role": "user", "content": "千叶有什么好吃的"}
+]
+
+print("🤖 Qwen3.5-27B 正在疯狂打字中...\n")
+print("-" * 40)
+
+# 3. 复刻官方参数 + 开启流式
+stream_response = client.chat.completions.create(
+    model="Qwen/Qwen3.5-27B", # 模型的保存路径（和服务端一致）
+    messages=messages,
+    stream=True,
+    max_tokens=6666,
+    temperature=1.0,
+    top_p=0.95,
+    presence_penalty=1.5,
+    extra_body={
+        "top_k": 20,
+    }, 
+)
+
+# 4. 实时截获并打印数据流
+for chunk in stream_response:
+    # 提取每次吐出来的碎片内容
+    delta = chunk.choices[0].delta
+    
+    # 兼容深度思考模型：如果有 reasoning（思考过程），先打印它
+    reasoning = getattr(delta, 'reasoning', None)
+    if reasoning:
+        print(reasoning, end="", flush=True)
+        continue
+
+    # 打印正常的文字回复内容
+    content = getattr(delta, 'content', None)
+    if content:
+        print(content, end="", flush=True)
+    else:
+        print(chunk)
+
+print("\n\n" + "-" * 40)
+print("✅ 流式生成完毕！")
+
+```
+
+```python [流式多模态]
+import os
+import base64
+from openai import OpenAI
+
+# ==========================================
+# 辅助函数：将本地图片转换为 Base64 编码格式
+# ==========================================
+def encode_image(image_path):
+    # 以二进制读取模式打开图片
+    with open(image_path, "rb") as image_file:
+        # 读取、编码并转换为 UTF-8 字符串
+        return base64.b64encode(image_file.read()).decode('utf-8')
+
+# 1. 斩断全局代理
+os.environ["no_proxy"] = "localhost,127.0.0.1,::1"
+
+# 2. 获取本地图片的 Base64 字符串
+image_path = "test_image.png"
+base64_image = encode_image(image_path)
+
+# 3. 连接本地大模型服务器
+client = OpenAI(
+    base_url="http://localhost:8000/v1",
+    api_key="EMPTY"
+)
+
+# 4. 组装多模态消息体（使用 Base64 数据协议）
+messages = [
+    {
+        "role": "user",
+        "content": [
+            {
+                "type": "image_url",
+                "image_url": {
+                    # ✨ 核心魔法：使用 data URI scheme，告诉模型这是一张经过 base64 编码的 png 图片
+                    "url": f"data:image/png;base64,{base64_image}"
+                }
+            },
+            {
+                "type": "text",
+                "text": "请详细描述一下这张图片里有什么内容？如果有文字请提取出来。"
+            }
+        ]
+    }
+]
+
+print(f"🤖 正在把本地图片 [{image_path}] 转换成代码喂给 Qwen3.5-27B...\n")
+print("-" * 40)
+
+# 5. 发起流式请求
+stream_response = client.chat.completions.create(
+    model="Qwen/Qwen3.5-27B", 
+    messages=messages,
+    stream=True,         
+    max_tokens=6666,     
+    temperature=0.7,     # 描述图片时温度可以稍微调低一点，让回答更客观
+)
+
+# 6. 实时截获并打印数据流
+for chunk in stream_response:
+    delta = chunk.choices[0].delta
+    
+    # 抓取思考过程
+    reasoning = getattr(delta, 'reasoning', None)
+    if reasoning:
+        print(reasoning, end="", flush=True)
+        continue
+        
+    # 抓取最终回复
+    content = getattr(delta, 'content', None)
+    if content:
+        print(content, end="", flush=True)
+    else:
+        print(chunk)
+
+print("\n\n" + "-" * 40)
+print("✅ 本地图像分析与流式解答完毕！")
+
+```
+
+:::
 
 ## Qwen-VL
 [Model list](https://huggingface.co/collections/Qwen/qwen3-vl)

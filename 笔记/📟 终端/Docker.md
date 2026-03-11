@@ -468,6 +468,8 @@ save_image("nvidia/cuda:12.4.1-cudnn-devel-ubuntu20.04")
 docker load -i nvidia_cuda_12.4.1-cudnn-devel-ubuntu20.04.tar.gz
 ```
 
+方法3: 去github上寻找一些工具，使用一台能正常连接的电脑先下载tar文件 https://github.com/topcss/docker-pull-tar/releases/tag/v1.2.0
+
 #### 使用镜像
 [查看已经安装的镜像](#列出所有镜像)
 
