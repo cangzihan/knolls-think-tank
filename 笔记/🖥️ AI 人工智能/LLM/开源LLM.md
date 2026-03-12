@@ -638,6 +638,12 @@ CUDA_VISIBLE_DEVICES=0 python3 -m fastchat.serve.model_worker --model-path Llama
 - [QuantTrio/Qwen3.5-9B-AWQ](https://huggingface.co/QuantTrio/Qwen3.5-9B-AWQ) (12G)
 - [QuantTrio/Qwen3.5-4B-AWQ](https://huggingface.co/QuantTrio/Qwen3.5-4B-AWQ) (5.7G)
 
+::: warning 关于多模态坐标问题
+
+Qwen-3.5视觉的坐标在0-1024范围内（宽和高），如果输入图像非`(1024, 1024)`则最终LLM输出结果需要缩放回原来的尺度。
+
+:::
+
 #### Qwen3-Next
 [Model list](https://huggingface.co/collections/Qwen/qwen3-next)
 
@@ -1087,6 +1093,27 @@ CUDA_VISIBLE_DEVICES=0 vllm serve Qwen/Qwen3.5-27B --port 8000 --tensor-parallel
 NCCL_P2P_DISABLE=1 CUDA_VISIBLE_DEVICES=0,1 vllm serve Qwen/Qwen3.5-27B --port 8000 --tensor-parallel-size 2 --max-model-len 262144 --reasoning-parser qwen3 --language-model-only --disable-custom-all-reduce
 # 2卡，Standard Version，无nvlink的情况
 NCCL_P2P_DISABLE=1 CUDA_VISIBLE_DEVICES=0,1 vllm serve Qwen/Qwen3.5-27B --port 8000 --tensor-parallel-size 2 --max-model-len 262144 --reasoning-parser qwen3 --disable-custom-all-reduce
+```
+
+Docker部署
+```shell
+# 无nvlink版本
+sudo docker run -d --name vllm-qwen --gpus all \
+  -e CUDA_VISIBLE_DEVICES=0,1 \
+  -e NCCL_P2P_DISABLE=1 \
+  -v /home/knoll/models/Qwen3.5-27B:/app/models \
+  -p 8000:8000 \
+  --ipc=host \
+  vllm/vllm-openai:cu130-nightly \
+  --model /app/models \
+  --served-model-name "Qwen3.5-27B" \
+  --api-key "sk-knoll123456" \
+  --max-model-len 262144 \
+  --tensor-parallel-size 2 \
+  --reasoning-parser qwen3 \
+  --enable-prefix-caching \
+  --disable-custom-all-reduce
+
 ```
 
 客户端

@@ -582,7 +582,7 @@ echo   時間範囲: %START% ～ %END%
 echo.
 
 :: 执行 ffmpeg（-ss 放在 -i 前以加速，-c copy 不重新编码）
-ffmpeg -y -ss %START% -i "%INPUT%" -to %END% -c copy "%OUTPUT%"
+ffmpeg -y -ss %START% -to %END% -i "%INPUT%" -c copy "%OUTPUT%"
 
 if %errorlevel% equ 0 (
     echo ✅ 切り抜き完了！
