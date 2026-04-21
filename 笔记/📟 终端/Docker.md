@@ -345,6 +345,79 @@ docker save redis:7.2.5 nginx:alpine -o my-apps.tar
 docker load -i redis-7.2.5.tar
 ```
 
+## 使用Portainer管理容器
+
+### Image之间的关系
+简单来说，**Portainer-CE** 是“大脑”（管理面板），而 **Portainer Agent** 是“手脚”（远程连接器）。
+如果你只有一台服务器，你可能只需要 Portainer-CE；但如果你有多台服务器（比如一台跑 vLLM 的 V100，一台跑数据库的普通机器），你就需要 Agent 把它们串联起来。
+
+#### Portainer-CE (Community Edition)
+**它是核心服务器，也是你唯一需要通过浏览器打开的界面。**
+ * **身份**：管理控制台（Server）。
+ * **功能**：提供网页 UI，处理用户登录、保存配置、展示所有容器状态、管理镜像和网络。
+ * **部署位置**：通常安装在你的主管理服务器上。
+ * **如何工作**：它既可以直接连接本地的 Docker（通过挂载 docker.sock），也可以通过网络连接远端的“小助手”（Agent）。
+
+#### Portainer Agent
+**它是一个轻量级的辅助程序，专门安装在那些你想“顺便管理”的机器上。**
+ * **身份**：远程代理。
+ * **功能**：它在远程机器上待命，接收来自 Portainer-CE 的指令，并反馈该机器上的容器信息。
+ * **为什么需要它**：
+   * **安全**：直接暴露 Docker 的原始端口（2375）非常危险（容易被黑客用来挖矿）。Agent 提供了一个加密且安全的通信通道。
+   * **简单**：你不需要在远程机器上做复杂的配置，只需要跑一个 Agent 容器，它就能自动把那台机器的一切“上报”给大脑。
+   * **集群能力**：在 Docker Swarm 模式下，Agent 必须部署在每个节点上，这样你才能在面板里看到整个集群的资源分配。
+
+#### 它们是如何协同工作的？
+想象一下你有一个监控室（Portainer-CE），监控室就在你的主楼里，你可以直接看窗外（管理本地容器）。如果你还想看分公司（另一台服务器）的情况，你就在分公司安插一个保安（Portainer Agent），保安通过对讲机把情况报给你。
+| 维度 | Portainer-CE (Server) | Portainer Agent |
+|---|---|---|
+| **角色** | 总部 / 控制台 | 分部 / 执行者 |
+| **是否有网页界面** | **是**（访问 9000/9443 端口） | **否**（只在后台待命） |
+| **安装数量** | 整个局域网通常只装 **1 个** | 每一台需要管理的**其他机器**都装 1 个 |
+| **数据存储** | 存储所有用户数据和配置 | 本身不存储数据，随删随建 |
+
+### Install
+#### 1. 创建 compose.yml 文件
+在你的服务器上，找一个合适的目录（比如`~/portainer`），新建一个名为 compose.yml 的文件，并将以下内容复制进去：
+```yaml
+services:
+  portainer:
+    image: portainer/portainer-ce:2.39.1  # 你可以换成 latest 保持最新，这里用你之前提到的版本
+    container_name: portainer
+    restart: always                       # 确保开机自启或崩溃后自动重启
+    ports:
+      - "8000:8000"                       # 用于 Edge Agent 的通信（如果不组建集群可不映射）
+      - "9000:9000"                       # HTTP Web 访问端口
+      - "9443:9443"                       # HTTPS Web 访问端口（推荐）
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock  # 让 Portainer 接管宿主机的 Docker
+      - portainer_data:/data                       # 持久化 Portainer 的配置和数据
+
+volumes:
+  portainer_data:                                  # 声明数据卷
+
+```
+
+#### 2. 核心配置拆解说明
+- **volumes (挂载卷 - 最重要的一步)**：
+  - `/var/run/docker.sock:/var/run/docker.sock`：这是 Docker 的本地套接字文件。挂载它，相当于**把宿主机的 Docker 控制权交给了 Portainer 容器**。没有这一行，Portainer 就成了“瞎子”和“残废”，什么都看不到也管不了。
+  - `portainer_data:/data`：Portainer 自己的账号密码、界面设置、容器分组等数据都存在容器内部的 /data 里。挂载出来是为了防止你哪天不小心删了容器，导致密码和配置全丢了。
+- **ports (端口映射)**：
+  - `9000:9000` 是传统的 HTTP 访问端口。
+  - `9443:9443` 是 Portainer 默认启用的自签证书 HTTPS 端口（目前官方更推荐走这个安全端口）。
+
+#### 3. 如何启动？
+在你保存好 compose.yml 的同一个目录下，运行以下命令：
+```shell
+sudo docker compose up -d
+```
+
+#### 4. 访问与初始化
+ 1. 打开浏览器，访问 http://<你服务器的IP>:9000 或 https://<你服务器的IP>:9443。
+   *(如果使用 HTTPS，浏览器会提示“您的连接不是私密连接”，这是因为使用了自签证书，点击“高级” -> “继续访问”即可。)*
+ 2. 第一次进入时，系统会强制要求你**创建一个管理员账号和密码**（密码需要至少 12 位）。
+ 3. **注意安全机制**：如果你启动了 Portainer 但在 **5分钟内** 没有去网页上完成管理员账号的创建，Portainer 会出于安全考虑自动“锁死”界面。如果遇到这种情况，你需要重启一下容器：sudo docker restart portainer。
+
 ## Docker for Ultralytics YOLO
 
 ### Setting Up

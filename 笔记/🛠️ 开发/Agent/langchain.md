@@ -308,3 +308,125 @@ for chunk in agent.stream({
     print(chunk)
 
 ```
+
+## langfuse
+### Install
+最新版本的安装可以直接参考[官方仓库](https://github.com/langfuse/langfuse)的README。
+
+::: code-group
+```yaml [langfuse v2]
+services:
+  langfuse-server:
+    image: langfuse/langfuse:2  # 【关键】锁定 V2 版本，避开 V3 的重型依赖
+    container_name: langfuse-server
+    restart: always
+    depends_on:
+      - langfuse-db
+    ports:
+      - "3000:3000"
+    environment:
+      # 数据库连接串，必须与下方 postgres 的账号密码一致
+      - DATABASE_URL=postgresql://postgres:mysecretpassword@langfuse-db:5432/postgres
+      - NEXTAUTH_URL=http://<你服务器的局域网IP>:3000  # 【务必修改】改成你浏览器访问的IP
+      - NEXTAUTH_SECRET=change_this_to_a_random_long_string_for_security
+      - SALT=change_this_to_a_random_salt  # 随便输一个，例如"Knoll"
+      - TELEMETRY_ENABLED=false
+    networks:
+      - langfuse-network
+
+  langfuse-db:
+    image: postgres:15-alpine # 使用 alpine 轻量版，进一步节省空间
+    container_name: langfuse-db
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=mysecretpassword
+      - POSTGRES_DB=postgres
+    volumes:
+      - langfuse_db_data:/var/lib/postgresql/data
+    networks:
+      - langfuse-network
+
+networks:
+  langfuse-network:
+    driver: bridge
+
+volumes:
+  langfuse_db_data:
+
+```
+:::
+
+### Usage
+1. **打开浏览器**：访问 http://你的服务器IP:7410。
+2. **注册账号**：点击 **Sign Up**。由于是本地私有化部署，你是第一个注册的人，你就是这个系统的上帝（管理员）。
+3. 创建 Organization，起个名字
+4. **创建项目**：登录后，系统会让你创建一个项目（Project），建议起个霸气的名字，比如 Qwen-122B-Project。
+5. **获取 API Keys**：
+   - 点击左侧导航栏最下方的 **Settings**（设置）。
+   - 在 **API Keys** 栏目点击 **Create New API Keys**。
+   - **保存**：你会看到 Project ID、Public Key 和 Secret Key。
+
+
+#### Python
+`pip install langfuse openai`
+
+如果是v2版：`pip install "langfuse<3.0.0"`
+
+```python
+import os
+# 原本是 from openai import OpenAI
+from langfuse.openai import OpenAI 
+
+# 1. 配置 Langfuse 环境变量（填入你刚才在网页上生成的 Key）
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_HOST"] = "http://<你服务器IP>:3000"
+
+# 2. 初始化客户端（指向你的 vLLM 服务）
+client = OpenAI(
+    api_key="EMPTY", # vLLM 默认不需要鉴权，或者填你设置的 key
+    base_url="http://localhost:8000/v1", # 这是你 vLLM 的 API 地址
+)
+
+# 3. 正常调用大模型（完全不需要改原来的请求逻辑）
+response = client.chat.completions.create(
+  model="qwen-122b", # 你的大模型名字
+  messages=[
+      {"role": "system", "content": "你是一个有用的AI助手。"},
+      {"role": "user", "content": "如果在东京涩谷没有手机信号，应该怎么找路？"}
+  ],
+  name="tokyo-navigation-test", # 可选：在 Langfuse 里给这次对话起个名字，方便过滤
+  # user_id="user_567"
+  # session_id="session_567"
+)
+
+print(response.choices[0].message.content)
+
+```
+
+如果是v2版本或之后，流式接口需要这样改
+```python
+completion = client.chat.completions.create(
+    model="qwen-122b",
+    messages=[...],
+    stream=True,
+    stream_options={"include_usage": True}
+)
+
+for chunk in completion:
+    # 处理你的业务逻辑
+    content = chunk.choices[0].delta.content
+    if content:
+        print(content, end="")
+
+# 循环结束后，确保数据发给 Langfuse
+client.langfuse.flush()
+
+```
+
+## deepagents
+Deep Agents（或 deepagents）是 LangChain 官方在 2025 年末推出的一套高阶智能体脚手架（Agent Harness）。
+
+[Documentation](https://docs.langchain.com/oss/python/deepagents/overview)
+

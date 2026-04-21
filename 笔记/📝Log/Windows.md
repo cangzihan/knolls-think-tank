@@ -4,6 +4,25 @@ tags:
 ---
 
 # Windows
+## 开机自启动任务
+
+1. <kbd>Win</kbd> + <kbd>R</kbd>，输入`taskschd.msc` 
+2. 右侧点击"Create Task..."（不是"Create Basic Task"）
+3. General选项卡
+  - Name填一个
+  - 选择"Run whether user is logged on or not"
+  - 选择"Run with highest privileges"
+4. Triggers选项卡
+  - New -> 把"On a schedule"改为"At startup"
+5. Actions选项卡
+  - New -> Program/script：选择写好的可执行文件
+  - Start in：填写脚本所在的文件夹路径
+6. Settings
+  - 取消"Stop the task if it runs longer than"
+  - 勾选"If the task fails, restart every"
+
+启动：点击左边的"Task Scheduler Library"，然后在中间右键点击"Run"
+
 ## Dell经常蓝屏
 
 原因：https://learn.microsoft.com/zh-cn/troubleshoot/windows-server/performance/stop-code-driver-verifier-dma-violation
