@@ -335,6 +335,23 @@ WaylandEnable=false  # [!code ++]
 pip install jupyter
 ```
 
+#### 设定密码
+设置 Jupyter Notebook 的默认密码其实非常简单，不需要去手动修改那些复杂的哈希字符串。在 2026 年，最推荐的方法是使用自带的命令行工具。
+
+1.  打开你的终端（CMD、PowerShell 或 Terminal）。
+2.  输入以下命令：
+    ```bash
+    jupyter notebook password
+    ```
+    *(如果是 JupyterLab 或较新版本，也可以使用 `jupyter server password`)*
+3.  按回车后，系统会提示：`Enter password:`。
+4.  输入你想设置的密码（**注意：输入时屏幕不会显示任何字符，这是正常的**）。
+5.  再次输入密码确认。
+
+**结果：** 系统会提示密码已写入配置文件（通常是 `jupyter_server_config.json` 或 `jupyter_notebook_config.json`）。下次启动 Jupyter 时，直接输入这个密码即可，不再需要那个长长的 Token。
+
+---
+
 ## OpenCV GPU版
 OpenCV: https://github.com/opencv/opencv
 

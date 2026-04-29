@@ -7,6 +7,111 @@ tags:
 # Gradio
 [Doc](https://www.gradio.app/docs)
 
+## Examples组件
+
+### Examples自动触发函数但UI位于某些其他UI上方的情况
+Examples只能在定义UI时定义点击事件，这造成了一个问题，就是Examples必须位于所有输入输出UI之后。才能使其不为空。
+
+想到的一个解决方法是，定义一个新的中间函数，新定义不起眼的UI作为example的输出（一个随机数输出函数都可以）。然后那个UI只用于输出，因此用户无法修改。然后在最下面，添加这个UI的修改事件为原本的函数就好了`.change(generate_tts, input=,output=)`。
+```python
+import gradio as gr
+import random
+import time
+
+# 模拟配置文件
+configs = {
+    "page_title": "Qwen TTS Demo",
+    "guide_title": "🎙️ 智能语音合成演示"
+}
+
+def genius_function(text):
+    """
+    真正的业务逻辑函数。
+    注意：为了配合 State 桥接，这个函数需要返回两部分信息：
+    1. 给 State 的信号（可以是文本 ID，也可以是原始文本）
+    2. (可选) 如果直接想显示什么，也可以返回，但这里我们主要用 State 做触发器
+    """
+    print(f"正在处理任务：{text}")
+    time.sleep(1.5) # 模拟耗时
+    
+    task_id = f"任务已提交：ID{random.randint(0, 65535)}"
+    # 返回两个值：第一个给 State (用于触发事件)，第二个可以给 Markdown 显示状态（可选）
+    return task_id
+
+def finalize_output(task_signal):
+    """
+    桥接函数：当 State 变化时触发。
+    这里执行真正的‘展示’逻辑，或者再次调用生成逻辑（如果需要二次处理）。
+    在这个场景下，我们可以假设 genius_function 已经生成了音频文件路径，
+    但为了演示，我们假装从 task_signal 解析出结果，或者直接返回一个固定的音频占位符。
+    
+    *实际场景中*：通常 genius_function 会保存音频到磁盘并返回路径。
+    这里我们模拟：收到信号 -> 返回音频路径。
+    """
+    print(f"捕获到信号：{task_signal}，正在更新底部播放器...")
+    # 这里应该返回真正的音频路径。
+    # 为了演示，我们返回 None 或一个假路径，实际请替换为真实逻辑
+    return None 
+
+with gr.Blocks(title=configs["page_title"], theme="soft") as demo:
+    gr.Markdown(f"# {configs['guide_title']}")
+    
+    # 1. 输入框
+    input_text = gr.Textbox(label="输入文本", placeholder="请输入内容或点击下方示例...", lines=3)
+    
+    # ---------------------------------------------------------
+    # 2. 【关键】定义隐形 State 作为“傀儡”
+    #    它藏在内存里，用户看不见，但它能触发事件！
+    # ---------------------------------------------------------
+    hidden_trigger = gr.State(value="") 
+    
+    # 3. 状态展示 (可选，让用户知道例子点了)
+    status_md = gr.Markdown("")
+    
+    # 4. Examples 组件
+    #    输出指向：hidden_trigger (触发器) 和 status_md (给用户看的文字)
+    gr.Examples(
+        examples=[
+            ["你好，我是通义千问。"],
+            ["春眠不觉晓，处处闻啼鸟。"],
+            ["Python 是一门优雅的编程语言。"]
+        ],
+        inputs=input_text,
+        fn=genius_function,
+        outputs=hidden_trigger,
+        run_on_click=True
+    )
+    
+    # 5. 手动按钮
+    btn = gr.Button("🚀 手动生成", variant="primary")
+    
+    # 6. 真正的底部输出
+    audio_output = gr.Audio(label="最终合成结果", type="filepath")
+    
+    # ---------------------------------------------------------
+    # 7. 【魔法桥接】
+    #    监听 hidden_trigger 的变化。一旦 Examples 运行完更新了它，
+    #    就立即调用 finalize_output 更新底部的 audio_output。
+    # ---------------------------------------------------------
+    hidden_trigger.change(
+        fn=finalize_output,
+        inputs=hidden_trigger,
+        outputs=audio_output
+    )
+    
+    # 同时绑定手动按钮（手动按钮可以直接连到底部输出，也可以走同样的 State 流程）
+    # 这里为了统一，让手动按钮也更新 State，复用逻辑
+    btn.click(
+        fn=genius_function,
+        inputs=input_text,
+        outputs=[hidden_trigger, status_md]
+    )
+
+if __name__ == "__main__":
+    demo.launch()
+
+```
+
 ## 综合案例
 ```python
 # 创建 Gradio 界面

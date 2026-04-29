@@ -6,6 +6,7 @@
 
 ## 常用元件名称
 - 舵机: MOTOR-PWMSERVO
+- 蜂鸣器: BUZZER
 - 晶振: CRYSTAL
 - 滑动变阻器: POT-HG
 - 串口: COMPIM
